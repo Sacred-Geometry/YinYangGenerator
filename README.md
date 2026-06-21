@@ -152,3 +152,30 @@ You can also just double-click `index.html` to open it in any modern
 browser — no server, no internet connection, and no install required.
 Everything (rendering, color presets, PNG/SVG export) runs entirely in
 the page.
+
+---
+
+## Acknowledgements
+
+This tool was generated with the assistance of **Claude**, an AI assistant
+made by [Anthropic](https://www.anthropic.com). The interactive Yin Yang
+Generator — including the golden-ratio construction logic, measurement
+overlays, color presets, equation input, and PNG/SVG export — was built
+through a collaborative conversation with Claude, which handled the geometry,
+the code, and the documentation.
+
+### Special thanks to the Geometers
+
+The mathematical foundations this tool rests on were discovered and shared
+by dedicated geometers whose work makes projects like this possible.
+
+A particular debt of gratitude goes to **John Arioni** at *Cut The Knot*,
+whose rigorous and elegant exposition of the golden ratio relationships hidden
+inside the yin–yang symbol provided direct inspiration for the ratio presets
+and overlay constructions in this tool:
+
+> [The Golden Ratio in Yin Yang — Cut The Knot](https://www.cut-the-knot.org/do_you_know/GoldenRatioInYinYang.shtml)
+
+The tradition of geometers who discover, prove, and freely share this kind
+of foundational knowledge — often for no reason other than the beauty of it —
+is what allows tools like this to exist. Thank you.
