@@ -18,15 +18,12 @@ makes every ratio in the tool (and in this README) unambiguous.
 
 | Term | What it is | Radius |
 |---|---|---|
-| **Ear** | The outermost circle — the full boundary of the symbol | `R` (= 1) |
-| **Lobe** | The radius of the two large S-curve swirls (the black/white "comma" shapes) | `R / 2` |
-| **Eye** | The small circle of the *opposite* color nested inside each Lobe | variable, adjustable |
+| **Ears** | The outermost boundary of the symbol, the two semi-circle halves. | `R` (= 1) |
+| **Lobes** | The radii of the two S-curve swirls (the black/white "comma" shapes) | `R / 2` |
+| **Eyes** | The small circle nested at the center of each Lobe | variable, adjustable |
 
-A quick way to keep them straight: the **Ear** is the whole symbol's
-outer edge, the **Lobe** is the swirl, and the **Eye** is the dot inside
-the swirl. ("Lobe" is used here in the literal sense of a rounded
-projecting part, the way an earlobe is the rounded part of an ear — the
-Lobe sits inside the Ear, and the Eye sits inside the Lobe.)
+A quick way to keep them straight: the **Ear** halves form the whole symbol's
+outer edge, and the two **Lobes** swirl with **Eye** dots. 
 
 ### Fixed vs. variable
 
@@ -169,7 +166,7 @@ the code, and the documentation.
 The mathematical foundations this tool rests on were discovered and shared
 by dedicated geometers whose work makes projects like this possible.
 
-A particular debt of gratitude goes to **John Arioni** at *Cut The Knot*,
+A particular note of gratitude goes to **John Arioni** displayed on *Cut The Knot*,
 whose rigorous and elegant exposition of the golden ratio relationships hidden
 inside the yin–yang symbol provided direct inspiration for the ratio presets
 and overlay constructions in this tool:
@@ -177,5 +174,4 @@ and overlay constructions in this tool:
 > [The Golden Ratio in Yin Yang — Cut The Knot](https://www.cut-the-knot.org/do_you_know/GoldenRatioInYinYang.shtml)
 
 The tradition of geometers who discover, prove, and freely share this kind
-of foundational knowledge — often for no reason other than the beauty of it —
-is what allows tools like this to exist. Thank you.
+of foundational knowledge is what allows tools like this to exist. Golden-Section Calipers were also utilized in the co-creation of this work. Thank you.
