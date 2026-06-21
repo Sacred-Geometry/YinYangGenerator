@@ -53,7 +53,7 @@ size as "Eye : Lobe Radius" rather than an absolute size — it's always a
 fraction of the Lobe, so the symbol stays proportionally correct no
 matter what radius you're rendering it at.
 
-### Why φ and Φ often show up
+### Why φ and Φ are frequently expressed
 
 φ (phi, ≈ 0.618) and Φ (Phi, ≈ 1.618) are reciprocals of each other
 (Φ = 1/φ = φ + 1). Because the Ear radius is exactly twice the Lobe
