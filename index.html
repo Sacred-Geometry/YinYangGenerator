@@ -135,7 +135,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   <div class="canvas">
     <div id="svgwrap"></div>
     <div class="phifooter">
-      <div class="f1">Phi Key:&nbsp; Uppercase Φ (~1.618) &nbsp;·&nbsp; Lowercase φ (~0.618)</div>
+      <div class="f1">Phi Key:&nbsp; Uppercase Φ (~1.618) &nbsp;·&nbsp; Lowercase φ (~0.618) &nbsp;·&nbsp; e ≈ 2.718 &nbsp;·&nbsp; τ = 2π ≈ 6.283</div>
       <div class="f2" id="ftLabel">Eye Radius = Lobe Radius × φ³</div>
       <div class="f3" id="ftRatio">Eye∶Lobe Radii Ratio &nbsp;~&nbsp; 0.236067977 &nbsp;·&nbsp; ≈ frac</div>
       <div class="f4"><a href="https://github.com/Sacred-Geometry/YinYangGenerator" target="_blank" rel="noopener">github.com/Sacred-Geometry/YinYangGenerator</a></div>
@@ -158,7 +158,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
           <button onclick="applyEyeEquation()">Apply</button>
         </div>
         <div class="eqnote" id="eqnote"></div>
-        <div class="eyeph">Variables: <b>phi</b> (≈0.618), <b>Phi</b> (≈1.618), <b>Pi</b> (≈3.14159), <b>sqrt()</b>. Result sets r = R<sub>lobe</sub> × expression.</div>
+        <div class="eyeph">Variables: <b>phi</b> (≈0.618), <b>Phi</b> (≈1.618), <b>Pi</b> (≈3.14159), <b>e</b> (≈2.718), <b>tau</b> (≈6.283), <b>sqrt()</b>. Result sets r = R<sub>lobe</sub> × expression.</div>
       </div>
     </div>
     <hr class="div">
@@ -344,13 +344,13 @@ function applyEyeEquation(){
   const raw = document.getElementById('eyeEq').value.trim();
   if (!raw){ note.textContent=''; note.classList.remove('err'); return; }
   if (!/^[0-9+\-*/^().\s a-zA-Z]+$/.test(raw)){
-    note.textContent = 'Only numbers, + − * / ^ ( ) and phi/Phi/Pi/sqrt allowed.';
+    note.textContent = 'Only numbers, + − * / ^ ( ) and phi/Phi/Pi/e/tau/sqrt allowed.';
     note.classList.add('err'); return;
   }
   try {
     const expr = raw.replace(/\^/g, '**');
-    const fn = new Function('phi','Phi','Pi','sqrt', 'return (' + expr + ');');
-    let val = fn(LIT_phi, BIG_PHI, Math.PI, Math.sqrt);
+    const fn = new Function('phi','Phi','Pi','sqrt','e','tau', 'return (' + expr + ');');
+    let val = fn(LIT_phi, BIG_PHI, Math.PI, Math.sqrt, Math.E, 2*Math.PI);
     if (typeof val !== 'number' || !isFinite(val) || isNaN(val)) throw new Error('NaN');
     const clamped = Math.max(0.001, Math.min(0.995, val));
     setEyeRatio(clamped);
@@ -794,23 +794,20 @@ function buildSegmentOverlay() {
   if (Ept) o += lbl(Ept, 'E', 13, 4, cRed, 12);
   if (Fpt) o += lbl(Fpt, 'F', 13, 14, cRed, 12);
 
-  // Angle arc at A, between the line A→H and the equator: ∠ = tan⁻¹φ
+  // Angle arc at A, between the line A→H and the equator
+  // Note: this angle = atan(LR/R) = atan(1/2) ≈ 26.565° — geometry of the lobe construction,
+  // not directly tan⁻¹φ or tan⁻¹Φ. Labels removed to avoid misattribution.
   const arcR = 26;
   const angRad = angleH * Math.PI / 180;
   o += `<path d="M ${(A.x-arcR).toFixed(2)} ${A.y.toFixed(2)} A ${arcR} ${arcR} 0 0 0 ` +
        `${(A.x - arcR*Math.cos(angRad)).toFixed(2)} ${(A.y - arcR*Math.sin(angRad)).toFixed(2)}" ` +
        `fill="none" stroke="${cBlu}" stroke-width="1"/>`;
-  o += `<text x="${(A.x-arcR-14).toFixed(2)}" y="${(A.y-6).toFixed(2)}" font-size="13" fill="${cBlu}" font-family="${fam}" font-style="italic" text-anchor="end">tan⁻¹φ</text>`;
 
-  // Second angle arc at A, between the line A→H and the vertical tick drawn
-  // above: ∠ = tan⁻¹Φ. This is the SAME line A→H, just measured against
-  // the other (perpendicular) reference axis at A, so the two angles are
-  // complementary by construction (tan⁻¹φ + tan⁻¹Φ = 90°).
+  // Second angle arc at A, between the line A→H and the vertical tick
   const arcR2 = 18;
   o += `<path d="M ${A.x.toFixed(2)} ${(A.y-arcR2).toFixed(2)} A ${arcR2} ${arcR2} 0 0 1 ` +
        `${(A.x - arcR2*Math.cos(angRad)).toFixed(2)} ${(A.y - arcR2*Math.sin(angRad)).toFixed(2)}" ` +
        `fill="none" stroke="${cRed}" stroke-width="1"/>`;
-  o += `<text x="${(A.x-6).toFixed(2)}" y="${(A.y-vTk+2).toFixed(2)}" font-size="12" fill="${cRed}" font-family="${fam}" font-style="italic" text-anchor="end">tan⁻¹Φ</text>`;
 
   // Fixed-ratio segment labels (independent of eye size)
   const segLab = `font-size="13" fill="${cGld}" font-family="${fam}" font-style="italic"`;
@@ -826,8 +823,7 @@ function buildSegmentOverlay() {
        `1 = AO = R &nbsp;·&nbsp; AB = φ·R &nbsp;·&nbsp; AG = Φ·R</text>`;
   o += `<text x="${CX}" y="37" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">` +
        `AB ≈ ${(Bd/R).toFixed(4)}·R &nbsp;&nbsp;·&nbsp;&nbsp; AG ≈ ${(Gd/R).toFixed(4)}·R &nbsp;&nbsp;·&nbsp;&nbsp; AH ≈ ${(G.farT/R).toFixed(4)}·R</text>`;
-  o += `<text x="${CX}" y="53" font-size="11.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">` +
-       `Line A→H from equator = tan⁻¹φ ≈ ${angleH.toFixed(3)}° &nbsp;·&nbsp; from vertical = tan⁻¹Φ ≈ ${angleV.toFixed(3)}°</text>`;
+
 
   if (Ed != null) {
     o += `<text x="${CX}" y="${SZ-12}" font-size="12" fill="${cGld}" font-family="${fam}" font-style="italic" text-anchor="middle">` +
