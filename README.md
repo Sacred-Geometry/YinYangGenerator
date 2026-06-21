@@ -12,7 +12,7 @@ static page.
 
 ## Basic terms: Ear, Lobe, Eye
 
-The symbol is built from three concentric measurements, all defined
+The symbol is built from three circular measurements, all defined
 relative to the same center point. Using consistent names for each one
 makes every ratio in the tool (and in this README) unambiguous.
 
