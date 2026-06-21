@@ -22,9 +22,6 @@ makes every ratio in the tool (and in this README) unambiguous.
 | **Lobes** | The radii of the two S-curve swirls (the black/white "comma" shapes) | `R / 2` |
 | **Eyes** | The small circle nested at the center of each Lobe | variable, adjustable |
 
-A quick way to keep them straight: the **Ear** halves form the whole symbol's
-outer edge, and the two **Lobes** swirl with **Eye** dots. 
-
 ### Fixed vs. variable
 
 This distinction matters because it's the whole logic of the tool:
