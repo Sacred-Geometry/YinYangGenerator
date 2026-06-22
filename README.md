@@ -31,7 +31,7 @@ This distinction matters because it's the whole logic of the tool:
   - The S-curve that divides the two halves
   - Every point and ratio derived only from Ear + Lobe — for example, the
     segment construction in the "Other Segments" view (points A, B, C, G, H,
-    O) is **100% independent of eye size**. AB = φ·R and AG = Φ·R no
+    O) is **100% independent of eye size**. AB = φ·R (~.618) and AG = Φ·R (~1.618) no
     matter how large or small you make the eyes.
 
 - **Variable (you control this with the slider, presets, or equation
