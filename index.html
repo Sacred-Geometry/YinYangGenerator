@@ -624,9 +624,12 @@ function buildVerticalOverlay() {
   o += brkt(y4, y5, '2r ' + lenLbl(y4, y5));     // lower eye diameter
   o += brkt(y5, bY, lenLbl(y5, bY));             // bottom of lower eye → base
 
-  // 10 · Eye∶Lobe ratio footer note, inside the diagram column only
-  o += `<text x="${oCX}" y="${(bY+24).toFixed(2)}" font-size="11.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">` +
+  // 10 · Eye∶Lobe and Eye∶Ear ratio footer notes, inside the diagram column only
+  const eyeToEar = (oER / oR).toFixed(6);
+  o += `<text x="${oCX}" y="${(bY+22).toFixed(2)}" font-size="11.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">` +
        `Eye ∶ Lobe radius = ${ratio.toFixed(6)}</text>`;
+  o += `<text x="${oCX}" y="${(bY+38).toFixed(2)}" font-size="11.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">` +
+       `Eye ∶ Ear radius = ${eyeToEar}</text>`;
 
   return o;
 }
