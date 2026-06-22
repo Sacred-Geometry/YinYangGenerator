@@ -2,7 +2,7 @@
 
 A free, browser-based tool for constructing a yin–yang symbol from precise
 golden-ratio (φ / Φ) relationships, featuring adjustable eye sizing, color pickers with
-presets, two measurement overlays, and PNG/SVG export. No install, no
+presets, two measurement overlays, and PNG/JPG export. No install, no
 build step — it's a single HTML file you can open directly or host as a
 static page.
 
