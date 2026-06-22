@@ -13,7 +13,7 @@ static page.
 ## Basic terms: Ear, Lobe, Eye
 
 The symbol is built from three circular measurements, all defined
-relative to the same center point. Each Ear's radii initiates at (0,0), the Lobes are positioned at fixed offsets along the vertical axis (+/- 0.5), and the Eyes are then placed at those exact same points. Using consistent names for each aspect makes every ratio in the tool (and in this README) unambiguous.
+relative to the same center point. The Ear radii originates at (0,0), the Lobes are positioned at fixed offsets along the vertical axis ($\pm 0.5$ 0.5), and the Eyes are then placed at those exact same points. Using consistent names for each aspect makes every ratio in the tool (and in this README) unambiguous.
 
 | Term | What it is | Radius |
 |---|---|---|
