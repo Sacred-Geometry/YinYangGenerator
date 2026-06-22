@@ -50,10 +50,10 @@ matter what radius is rendered.
 radius, several distances in the symbol resolve to clean multiples of φ
 or Φ automatically — not because they were forced to, but because of
 the 2:1 Ear-to-Lobe ratio itself (a 1, ½, √5⁄2 right triangle is inherent
-of the construction). The **Eye Ratio Presets** panel offers several
-φ-power values (e.g. the default, φ³ ≈ 0.236) as well as plain fractions
-(⅓, ¼, 5⁄21,) and a free-form equation box if you want to explore
-your own ratio (supports `phi`, `Phi`, `Pi`,  e , tau ,`sqrt()`, and arithmetic).
+in the construction). The **Eye Ratio Presets** panel offers several
+φ/Φ derrived values (e.g. the default, φ³ ≈ 0.236) as well as plain fractions
+(⅓, ¼, 5⁄21,) and a free-form equation box to explore
+other ratios (supports `phi`, `Phi`, `Pi`,  e , tau ,`sqrt()`, and arithmetic).
 
 ### The two measurement overlays
 
@@ -66,6 +66,31 @@ your own ratio (supports `phi`, `Phi`, `Pi`,  e , tau ,`sqrt()`, and arithmetic)
   exact φ/Φ relationships that exist independent of eye size, plus the
   two live points (E, F) where that same line crosses the Eye's own
   boundary.
+
+---
+
+## Acknowledgements
+
+This tool was generated with the assistance of **Claude**, an AI assistant
+made by [Anthropic](https://www.anthropic.com). The interactive Yin Yang
+Generator — including the golden-ratio construction logic, measurement
+overlays, color presets, equation input, and PNG/SVG export — was built
+through a collaborative conversation with Claude, which handled the geometry,
+the code, and the documentation.
+
+### Special thanks to the Geometers
+
+The mathematical foundations this tool rests upon were discovered and shared
+by geometers whose work makes projects like this possible.
+
+A particular note of gratitude goes to **John Arioni**,
+whose elegant exposition of the golden-ratio relationships of
+the yin–yang symbol provided inspiration for the development of this Generator Tool. Image displayed at *Cut The Knot*:
+
+> [The Golden Ratio in Yin Yang — Cut The Knot](https://www.cut-the-knot.org/do_you_know/GoldenRatioInYinYang.shtml)
+
+The tradition of geometers who discover, prove, and freely share this kind
+of foundational knowledge is what allows tools like this to exist. Golden-Section Calipers were also utilized in the co-creation of this work. Thank you.
 
 ---
 
@@ -142,28 +167,3 @@ You can also just double-click `index.html` to open it in any modern
 browser — no server, no internet connection, and no install required.
 Everything (rendering, color presets, PNG/SVG export) runs entirely in
 the page.
-
----
-
-## Acknowledgements
-
-This tool was generated with the assistance of **Claude**, an AI assistant
-made by [Anthropic](https://www.anthropic.com). The interactive Yin Yang
-Generator — including the golden-ratio construction logic, measurement
-overlays, color presets, equation input, and PNG/SVG export — was built
-through a collaborative conversation with Claude, which handled the geometry,
-the code, and the documentation.
-
-### Special thanks to the Geometers
-
-The mathematical foundations this tool rests upon were discovered and shared
-by geometers whose work makes projects like this possible.
-
-A particular note of gratitude goes to **John Arioni**,
-whose elegant exposition of the golden-ratio relationships of
-the yin–yang symbol provided inspiration for the development of this Generator Tool. Image displayed at *Cut The Knot*:
-
-> [The Golden Ratio in Yin Yang — Cut The Knot](https://www.cut-the-knot.org/do_you_know/GoldenRatioInYinYang.shtml)
-
-The tradition of geometers who discover, prove, and freely share this kind
-of foundational knowledge is what allows tools like this to exist. Golden-Section Calipers were also utilized in the co-creation of this work. Thank you.
