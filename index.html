@@ -788,8 +788,10 @@ function buildSegmentOverlay() {
   const mid = (p, q) => ({ x: (p.x+q.x)/2, y: (p.y+q.y)/2 });
   const mAB = mid(A, Bpt);
   o += `<text x="${(mAB.x+10).toFixed(2)}" y="${(mAB.y-8).toFixed(2)}" ${segLab}>AB = φ·R</text>`;
-  const mAG = mid(A, Gpt);
-  o += `<text x="${(mAG.x+10).toFixed(2)}" y="${(mAG.y-8).toFixed(2)}" ${segLab}>AG = Φ·R</text>`;
+  // Place "AG = Φ·R" at the φ·R mark along the lower line (same distance from A as B is on the upper line),
+  // offset below the line so it mirrors where "AB = φ·R" sits above its line.
+  const phiMarkLower = pt(Bd);
+  o += `<text x="${(phiMarkLower.x+10).toFixed(2)}" y="${(phiMarkLower.y+20).toFixed(2)}" ${segLab}>AG = Φ·R</text>`;
 
   // Header info block (top strip) — three short lines, each safely
   // under the canvas width regardless of digit count.
