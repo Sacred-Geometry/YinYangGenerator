@@ -34,17 +34,15 @@ This distinction matters because it's the whole logic of the tool:
     O) is **100% independent of eye size**. AB = φ·R (~.618) and AG = Φ·R (~1.618) no
     matter how large or small you make the eyes.
 
-- **Variable (you control this with the slider, presets, or equation
-  input):**
-  - The **Eye** radius, expressed as a ratio of the Lobe radius
-    (`Eye ∶ Lobe`). This is the one true free parameter in the whole
-    symbol. Everything else in the diagram is computed from it.
-  - Colors (Ear A/B, Eye A/B, Background)
+- **Variable :**
+  - The **Eye** radius, is adjusted with the slider, presets, or equation
+  input, expressed as a ratio of the Lobe radius (`Eye ∶ Lobe`).
+  - Colors are adjusted with presets and color pickers, as well as style options. (Ear A/B, Eye A/B, Background)
 
-Because only one number (the eye ratio) is free, the tool frames eye
-size as "Eye : Lobe Radius" rather than an absolute size — it's always a
-fraction of the Lobe, so the symbol stays proportionally correct no
-matter what radius you're rendering it at.
+Because only one number (the eye ratio) is variable, the tool frames eye
+size as "Eye : Lobe Radius" rather than an absolute size — as it remains a
+fraction of the Lobe so the other portions of the symbol stay proportionally correct no
+matter what radius is rendered.
 
 ### Why φ and Φ are frequently expressed
 
@@ -52,16 +50,16 @@ matter what radius you're rendering it at.
 (Φ = 1/φ = φ + 1). Because the Ear radius is exactly twice the Lobe
 radius, several distances in the symbol resolve to clean multiples of φ
 or Φ automatically — not because they were forced to, but because of
-the 2:1 Ear-to-Lobe ratio itself (a 1, ½, √5⁄2 right triangle drops out
+the 2:1 Ear-to-Lobe ratio itself (a 1, ½, √5⁄2 right triangle is inherent
 of the construction). The **Eye Ratio Presets** panel offers several
 φ-power values (e.g. the default, φ³ ≈ 0.236) as well as plain fractions
-(⅓, ¼, 5⁄21, etc.) and a free-form equation box if you want to explore
-your own ratio (supports `phi`, `Phi`, `Pi`, `sqrt()`, and arithmetic).
+(⅓, ¼, 5⁄21,) and a free-form equation box if you want to explore
+your own ratio (supports `phi`, `Phi`, `Pi`,  e , tau ,`sqrt()`, and arithmetic).
 
 ### The two measurement overlays
 
 - **Vertical Line Ratios** — reads the symbol from apex to base along
-  the vertical axis, showing every segment length and its cumulative
+  the vertical axis, showing segment length and its cumulative
   distance from the apex, each as a decimal multiple of `R`.
 - **Other Segments** — shows the fixed construction described above:
   a line from point **A** (where the right midline meets the Ear) through
@@ -159,13 +157,12 @@ the code, and the documentation.
 
 ### Special thanks to the Geometers
 
-The mathematical foundations this tool rests on were discovered and shared
-by dedicated geometers whose work makes projects like this possible.
+The mathematical foundations this tool rests upon were discovered and shared
+by geometers whose work makes projects like this possible.
 
-A particular note of gratitude goes to **John Arioni** displayed on *Cut The Knot*,
-whose rigorous and elegant exposition of the golden ratio relationships hidden
-inside the yin–yang symbol provided direct inspiration for the ratio presets
-and overlay constructions in this tool:
+A particular note of gratitude goes to **John Arioni**,
+whose elegant exposition of the golden-ratio relationships of
+the yin–yang symbol provided inspiration for the development of this Generator Tool. Image displayed at *Cut The Knot*:
 
 > [The Golden Ratio in Yin Yang — Cut The Knot](https://www.cut-the-knot.org/do_you_know/GoldenRatioInYinYang.shtml)
 
