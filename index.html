@@ -802,7 +802,7 @@ function buildSegmentOverlay() {
   // AC = distance from A to upper lobe centre
   const ACd = Math.hypot(upper.x - A.x, upper.y - A.y);
   o += `<text x="${CX}" y="20" font-size="14" fill="${cInk}" font-family="${fam}" text-anchor="middle">` +
-       `AO = R &nbsp;·&nbsp; AB = φ·R &nbsp;·&nbsp; AC = √5 ⁄2·R &nbsp;·&nbsp; AG = Φ·R</text>`;
+       `Symbol Constants: 1 = AO = R &nbsp;·&nbsp; AB = φ·R &nbsp;·&nbsp; AC = √5 ⁄2·R &nbsp;·&nbsp; AG = Φ·R</text>`;
   o += `<text x="${CX}" y="37" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">` +
        `AB ≈ ${(Bd/R).toFixed(4)}·R &nbsp;·&nbsp; AC ≈ ${(ACd/R).toFixed(4)}·R &nbsp;·&nbsp; AG ≈ ${(Gd/R).toFixed(4)}·R &nbsp;·&nbsp; AH ≈ ${(G.farT/R).toFixed(4)}·R</text>`;
 
