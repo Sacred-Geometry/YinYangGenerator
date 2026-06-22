@@ -764,21 +764,22 @@ function buildSegmentOverlay() {
   o += `<line x1="${A.x.toFixed(2)}" y1="${A.y.toFixed(2)}" x2="${G.farX.toFixed(2)}" y2="${G.farY.toFixed(2)}" stroke="${cRed}" stroke-width="1.3"/>`;
 
 
-  // Point markers: A, B (on AD), E, F, G, H, lobe centre
+  // Point markers: A, B (on AD), C (upper lobe centre), E, F, G, H
   function dot(p, r, fill) { return `<circle cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r="${r}" fill="${fill}"/>`; }
   o += dot(A, 2.8, cInk);
   o += dot(Bpt, 2.2, cGld);
+  o += dot(upper, 2.4, cInk);
   o += dot(Gpt, 2.2, cGld);
   if (Ept) o += dot(Ept, 2.0, cRed);
   if (Fpt) o += dot(Fpt, 2.0, cRed);
-  o += dot(lower, 2.4, cInk);
   o += dot({x:G.farX, y:G.farY}, 2.8, cInk);
 
-  // Labels for A, B, E, F, G, H, lobe centre
+  // Labels for A, B, C, E, F, G, H
   const lbl = (p, text, dx, dy, color, fs) =>
     `<text x="${(p.x+dx).toFixed(2)}" y="${(p.y+dy).toFixed(2)}" font-size="${fs||13}" fill="${color}" font-family="${fam}" font-style="italic" text-anchor="middle">${text}</text>`;
   o += lbl(A, 'A', 12, -10, cInk, 15);
   o += lbl(Bpt, 'B', -12, -6, cGld, 13);
+  o += lbl(upper, 'C', 14, 4, cInk, 13);
   o += lbl(Gpt, 'G', -12, -10, cGld, 13);
   o += lbl({x:G.farX,y:G.farY}, 'H', -12, 14, cInk, 15);
   if (Ept) o += lbl(Ept, 'E', 13, 4, cRed, 12);
@@ -798,10 +799,12 @@ function buildSegmentOverlay() {
 
   // Header info block (top strip) — three short lines, each safely
   // under the canvas width regardless of digit count.
+  // AC = distance from A to upper lobe centre
+  const ACd = Math.hypot(upper.x - A.x, upper.y - A.y);
   o += `<text x="${CX}" y="20" font-size="14" fill="${cInk}" font-family="${fam}" text-anchor="middle">` +
-       `1 = AO = R &nbsp;·&nbsp; AB = φ·R &nbsp;·&nbsp; AG = Φ·R</text>`;
+       `AO = R &nbsp;·&nbsp; AB = φ·R &nbsp;·&nbsp; AC = √5 ⁄2·R &nbsp;·&nbsp; AG = Φ·R</text>`;
   o += `<text x="${CX}" y="37" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">` +
-       `AB ≈ ${(Bd/R).toFixed(4)}·R &nbsp;&nbsp;·&nbsp;&nbsp; AG ≈ ${(Gd/R).toFixed(4)}·R &nbsp;&nbsp;·&nbsp;&nbsp; AH ≈ ${(G.farT/R).toFixed(4)}·R</text>`;
+       `AB ≈ ${(Bd/R).toFixed(4)}·R &nbsp;·&nbsp; AC ≈ ${(ACd/R).toFixed(4)}·R &nbsp;·&nbsp; AG ≈ ${(Gd/R).toFixed(4)}·R &nbsp;·&nbsp; AH ≈ ${(G.farT/R).toFixed(4)}·R</text>`;
 
 
   if (Ed != null) {
