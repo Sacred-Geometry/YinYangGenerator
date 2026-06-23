@@ -44,6 +44,13 @@ header{flex-shrink:0;padding:10px 18px;background:var(--surf);border-bottom:1px 
 .phifooter .f4{color:var(--mute);font-size:10px;margin-top:2px}
 .phifooter .f4 a{color:inherit;text-decoration:none;border-bottom:1px dotted currentColor}
 .phifooter .f4 a:hover{color:var(--gold)}
+.phifooter .fprox{font-size:10.5px;margin-top:1px;letter-spacing:.03em;transition:color .2s}
+.phifooter .fprox[data-tier="exact"]     {color:#C8A876}
+.phifooter .fprox[data-tier="near-exact"]{color:#B09868}
+.phifooter .fprox[data-tier="adjacent"]  {color:#A89060}
+.phifooter .fprox[data-tier="near"]      {color:#8C7858}
+.phifooter .fprox[data-tier="vicinal"]   {color:#706050}
+.phifooter .fprox[data-tier=""]          {color:var(--mute)}
 .panel{border-left:1px solid var(--bdr);background:var(--surf);overflow-y:auto;overflow-x:hidden;padding:14px 13px;display:flex;flex-direction:column;gap:15px}
 .panel::-webkit-scrollbar{width:3px}
 .panel::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
@@ -97,6 +104,42 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .epbtn b{display:block;font-size:12px}
 .epbtn small{display:block;font-size:9px;color:var(--mute);font-family:'SF Mono','Fira Code','Courier New',monospace}
 .epbtn.on small{color:var(--gold)}
+/* ── Proximity Float Panel ───────────────────────────────────────── */
+#proxFloat{
+  position:fixed;z-index:900;width:320px;max-width:calc(100vw - 32px);
+  background:var(--surf);border:1px solid var(--gold2);border-radius:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,.45);overflow:hidden;
+  font-size:12px;line-height:1.6;color:var(--txt);
+}
+#proxFloatBar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 13px;background:var(--surf2);border-bottom:1px solid var(--bdr);
+  cursor:grab;user-select:none;
+}
+#proxFloatBar:active{cursor:grabbing}
+#proxFloatTitle{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+#proxFloatClose{
+  background:none;border:none;color:var(--mute);cursor:pointer;
+  font-size:13px;line-height:1;padding:0 2px;transition:color .15s
+}
+#proxFloatClose:hover{color:var(--txt)}
+#proxFloatBody{padding:14px 15px;display:flex;flex-direction:column;gap:10px;max-height:70vh;overflow-y:auto}
+#proxFloatBody p{color:var(--txt);font-size:12px}
+#proxFloatBody dl{display:flex;flex-direction:column;gap:7px;margin:0}
+#proxFloatBody dt{
+  font-family:'SF Mono','Fira Code','Courier New',monospace;
+  font-size:11px;font-weight:700;letter-spacing:.04em;margin-bottom:1px;
+}
+#proxFloatBody dt[data-tier="exact"]      {color:#C8A876}
+#proxFloatBody dt[data-tier="near-exact"] {color:#B09868}
+#proxFloatBody dt[data-tier="adjacent"]   {color:#A89060}
+#proxFloatBody dt[data-tier="near"]       {color:#8C7858}
+#proxFloatBody dt[data-tier="vicinal"]    {color:#706050}
+#proxFloatBody dd{margin:0 0 0 12px;color:var(--mute);font-size:11.5px}
+.tier-pct{font-weight:400;opacity:.75}
+.prox-note{font-size:11px;color:var(--mute);border-top:1px solid var(--bdr);padding-top:9px;margin-top:2px}
+#proxInfoBtn:hover{border-color:var(--gold);color:var(--gold)}
+#proxInfoBtn.on{border-color:var(--gold);background:var(--goldA);color:var(--gold)}
 @media(max-width:680px){
   html,body{overflow:auto}
   .layout{grid-template-columns:1fr}
@@ -110,11 +153,25 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 
 <header>
 <div class="hico">
-  <svg viewBox="-1 -1 2 2" width="30" height="30" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="0" cy="0" r="1" fill="#220d59"/>
-    <path d="M0,-1 A1,1,0,0,1,0,1 A0.5,0.5,0,0,1,0,0 A0.5,0.5,0,0,0,0,-1Z" fill="#f5f0de"/>
-    <circle cx="0" cy="-0.5" r="0.15" fill="#f5f0de"/>
-    <circle cx="0" cy="0.5" r="0.15" fill="#bda878"/>
+  <!--
+    Box is square. Inside it the yin-yang circle has the same proportions
+    as the live generator: R = (half-size)·√2/Φ  →  circle fills ≈87.4%
+    of the half-width, leaving a golden-ratio margin to each corner.
+    Box side = 38px  →  half = 19  →  R = 19·√2/1.61803 ≈ 16.60px
+  -->
+  <svg viewBox="0 0 38 38" width="38" height="38" xmlns="http://www.w3.org/2000/svg" style="display:block;border-radius:1px">
+    <!-- Background square -->
+    <rect width="38" height="38" fill="#e9e9de"/>
+    <!-- Yin-yang symbol, centred at (19,19), R≈16.60 -->
+    <g transform="translate(19,19)">
+      <clipPath id="hico-clip"><circle r="16.60"/></clipPath>
+      <circle r="16.60" fill="#220d59"/>
+      <g clip-path="url(#hico-clip)">
+        <path d="M0,-16.60 A16.60,16.60,0,0,1,0,16.60 A8.30,8.30,0,0,1,0,0 A8.30,8.30,0,0,0,0,-16.60Z" fill="#f5f0de"/>
+      </g>
+      <circle cy="-8.30" r="2.49" fill="#f5f0de"/>
+      <circle cy=" 8.30" r="2.49" fill="#bda878"/>
+    </g>
   </svg>
 </div>
   <div class="htxt">
@@ -138,6 +195,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="f1">Key:&nbsp; Uppercase Φ (~1.618) &nbsp;·&nbsp; Lowercase φ (~0.618) &nbsp;·&nbsp; e ≈ 2.718 &nbsp;·&nbsp; τ = 2π ≈ 6.283</div>
       <div class="f2" id="ftLabel">Eye Radius = Lobe Radius × φ³</div>
       <div class="f3" id="ftRatio">Eye∶Lobe Radii Ratio &nbsp;~&nbsp; 0.236067977 &nbsp;·&nbsp; ≈ frac</div>
+      <div class="fprox" id="ftProx" data-tier="exact">φ³  ·  Exact</div>
       <div class="f4"><a href="https://github.com/Sacred-Geometry/YinYangGenerator" target="_blank" rel="noopener">github.com/Sacred-Geometry/YinYangGenerator</a></div>
     </div>
   </div>
@@ -148,6 +206,10 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         <div class="eyeval">
           <span class="ev-lbl">Eye ∶ Lobe radius</span>
           <span class="ev-num" id="ev-num">0.236067977</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;min-height:16px;margin-top:-2px">
+          <div id="ev-prox" style="font-size:10px;color:var(--gold);font-family:'SF Mono','Fira Code','Courier New',monospace;letter-spacing:.03em;line-height:1.4;flex:1;min-width:0">φ³ · Exact</div>
+          <button id="proxInfoBtn" onclick="toggleProxInfo()" title="About Proximity Classification" style="flex-shrink:0;width:16px;height:16px;border-radius:50%;border:1px solid var(--bdr);background:var(--surf2);color:var(--mute);font-size:9px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;transition:border-color .15s,color .15s">ℹ</button>
         </div>
         <input type="range" id="eyeSlider" min="1" max="100" step="1" value="24">
         <div class="srow"><span>1 · tiny dot</span><span>100 · touches lobe edge</span></div>
@@ -187,6 +249,30 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       </div>
       <div class="dlnote" id="dlnote"></div>
     </div>
+  </div>
+</div>
+
+<!-- ── PROXIMITY INFO FLOAT PANEL ─────────────────────────────── -->
+<div id="proxFloat" style="display:none" role="dialog" aria-label="Proximity Classification Guide">
+  <div id="proxFloatBar">
+    <span id="proxFloatTitle">Proximity Classification</span>
+    <button id="proxFloatClose" onclick="toggleProxInfo()" title="Close">✕</button>
+  </div>
+  <div id="proxFloatBody">
+    <p>As you adjust the eye size, the tool checks whether the current ratio is <em>near</em> a mathematically notable value — a power of φ or Φ, a Fibonacci ratio, a harmonic fraction, or a geometric/transcendental constant. The match is labelled by how close it is:</p>
+    <dl>
+      <dt data-tier="exact">Exact <span class="tier-pct">(within ~1 billionth)</span></dt>
+      <dd>The ratio is computationally indistinguishable from the known value at double-precision floating point. Whether arrived at by preset, equation, or slider, the math says it <em>is</em> that value.</dd>
+      <dt data-tier="near-exact">Near-Exact <span class="tier-pct">(within ±0.1%)</span></dt>
+      <dd>Extremely close — well within any perceptible difference visually or in print. The relationship is almost certainly intentional, and the ratio could serve as a practical stand-in for the known value.</dd>
+      <dt data-tier="adjacent">Adjacent <span class="tier-pct">(within ±0.5%)</span></dt>
+      <dd>Clearly related. The deviation is small enough that the proportions feel the same, though a careful measurement would reveal it. Useful as a near-substitute when the exact value is inconvenient.</dd>
+      <dt data-tier="near">Near <span class="tier-pct">(within ±2%)</span></dt>
+      <dd>A visible family resemblance. The ratio shares the character of the reference value — proportions will feel related but not identical under scrutiny.</dd>
+      <dt data-tier="vicinal">Vicinal <span class="tier-pct">(within ±5%)</span></dt>
+      <dd>In the neighbourhood. The human eye may not distinguish this from the reference, but the difference is measurable. "Vicinal" is borrowed from crystallography, where it describes a face or ratio just off a principal plane.</dd>
+    </dl>
+    <p class="prox-note">Powers of Φ and φ are checked up to the 6th power. Fibonacci sequence ratios above F(3) naturally converge toward φ and Φ and will appear here. Other catalogued values include simple harmonic fractions (½, ⅓, ⅝ …), geometric constants (√2, √3, √5-based), and transcendental ratios (π and e based).</p>
   </div>
 </div>
 
@@ -281,7 +367,7 @@ let S = {
   eyeRatio: DEFAULT_EYE_RATIO
 };
 
-function dc(x){ return JSON.parse(JSON.stringify(x)); }
+function dc(x){ return structuredClone(x); }
 
 // ── EYE : LOBE RADIUS RATIO ─────────────────────────────────────────
 // r_eye = R_lobe · S.eyeRatio.  Presets below are all expressed as
@@ -331,6 +417,128 @@ function matchEyeLabel(ratio){
   return null;
 }
 
+// ── PHI-PROXIMITY CLASSIFICATION ─────────────────────────────────
+// Checks a ratio against a catalogue of notable values (powers of Φ/φ,
+// Fibonacci ratios, classic fractions, e-based ratios) and returns a
+// two-part object: { label, tier } where tier is one of:
+//   'exact'    — matches to < 1e-7  (essentially identical)
+//   'adjacent' — within ±0.5%       ("Phi/phi Adjacent")
+//   'near'     — within ±2%         ("Near Phi/phi")
+//   'vicinal'  — within ±5%         ("Phi/phi Vicinal")
+//   null       — no notable proximity found
+//
+// The catalogue is built fresh on each call (tiny cost); this keeps the
+// function self-contained and easy to extend.
+function classifyRatio(ratio) {
+  if (!isFinite(ratio) || ratio <= 0) return null;
+
+  // Build catalogue of notable values with their symbolic labels.
+  const cat = [];
+
+  // Powers of Φ and φ, n = 1..6
+  const SUPS = ['','','²','³','⁴','⁵','⁶'];  // index n → superscript (n=1 → '')
+  for (let n = 1; n <= 6; n++) {
+    const Pn  = Math.pow(BIG_PHI, n);
+    const pn  = Math.pow(LIT_phi,  n);
+    const sup = SUPS[n] || '';
+    // Only include values in the valid eye-ratio range (0.01–0.995)
+    if (Pn >= 0.01 && Pn <= 0.995) cat.push({ val: Pn, sym: `Φ${sup}`, base: 'Phi' });
+    if (pn >= 0.01 && pn <= 0.995) cat.push({ val: pn, sym: `φ${sup}`, base: 'phi' });
+    // Ratios of Φⁿ / integer divisors that land in range
+    for (let d = 2; d <= 30; d++) {
+      const v = Pn / d;
+      if (v >= 0.01 && v <= 0.995) {
+        cat.push({ val: v, sym: `Φ${sup}⁄${d}`, base: 'Phi' });
+      }
+    }
+  }
+
+  // Fibonacci sequence ratios (consecutive pairs, F(n)/F(n+1) and F(n+1)/F(n))
+  // Fibonacci above F(3)=2 will naturally converge toward φ/Φ.
+  const fibs = [1,1,2,3,5,8,13,21,34,55,89,144,233,377];
+  for (let i = 0; i < fibs.length - 1; i++) {
+    const a = fibs[i], b = fibs[i+1];
+    const r1 = a / b, r2 = b / a;
+    const lbl1 = `${a}⁄${b}`, lbl2 = `${b}⁄${a}`;
+    if (r1 >= 0.01 && r1 <= 0.995) cat.push({ val: r1, sym: lbl1, base: 'Fibonacci' });
+    if (r2 >= 0.01 && r2 <= 0.995) cat.push({ val: r2, sym: lbl2, base: 'Fibonacci' });
+  }
+
+  // Simple harmonic fractions (musical/geometric)
+  const harmonics = [
+    { val: 1/2,  sym: '½',      base: 'Harmonic' },
+    { val: 1/3,  sym: '⅓',      base: 'Harmonic' },
+    { val: 2/3,  sym: '⅔',      base: 'Harmonic' },
+    { val: 1/4,  sym: '¼',      base: 'Harmonic' },
+    { val: 3/4,  sym: '¾',      base: 'Harmonic' },
+    { val: 1/5,  sym: '⅕',      base: 'Harmonic' },
+    { val: 2/5,  sym: '⅖',      base: 'Harmonic' },
+    { val: 3/5,  sym: '⅗',      base: 'Harmonic' },
+    { val: 4/5,  sym: '⅘',      base: 'Harmonic' },
+    { val: 1/6,  sym: '⅙',      base: 'Harmonic' },
+    { val: 5/6,  sym: '⅚',      base: 'Harmonic' },
+    { val: 1/7,  sym: '⅐',      base: 'Harmonic' },
+    { val: 1/8,  sym: '⅛',      base: 'Harmonic' },
+    { val: 3/8,  sym: '⅜',      base: 'Harmonic' },
+    { val: 5/8,  sym: '⅝',      base: 'Harmonic' },
+    { val: 7/8,  sym: '⅞',      base: 'Harmonic' },
+    { val: 1/12, sym: '1⁄12',   base: 'Harmonic' },
+    // √ based
+    { val: 1/Math.SQRT2,         sym: '1⁄√2',   base: 'Geometric' },
+    { val: Math.sqrt(3)/2,        sym: '√3⁄2',   base: 'Geometric' },
+    { val: 1/Math.sqrt(3),        sym: '1⁄√3',   base: 'Geometric' },
+    { val: Math.sqrt(5)/4,        sym: '√5⁄4',   base: 'Geometric' },
+    { val: (Math.sqrt(5)-1)/4,    sym: '(√5−1)⁄4', base: 'Geometric' },
+    // e-based
+    { val: 1/Math.E,              sym: '1⁄e',    base: 'Transcendental' },
+    { val: 1/(Math.E*Math.E),     sym: '1⁄e²',   base: 'Transcendental' },
+    { val: Math.E - 2,            sym: 'e−2',     base: 'Transcendental' },
+    // π-based
+    { val: 1/Math.PI,             sym: '1⁄π',    base: 'Transcendental' },
+    { val: Math.PI/10,            sym: 'π⁄10',   base: 'Transcendental' },
+    { val: Math.PI/12,            sym: 'π⁄12',   base: 'Transcendental' },
+  ];
+  harmonics.forEach(h => { if (h.val >= 0.01 && h.val <= 0.995) cat.push(h); });
+
+  // Proximity tiers (relative error thresholds)
+  // 'exact'     — reserved for matchEyeLabel() named presets only; not used here.
+  // 'precise'   — within 1e-9: indistinguishable from the known value at double-precision;
+  //               may not be analytically provable but is computationally identical.
+  // 'near-exact'— within 0.1%: extremely close, essentially the same proportion visually.
+  // 'adjacent'  — within 0.5%: clearly related, a near-substitute.
+  // 'near'      — within 2%: shares the character of the reference.
+  // 'vicinal'   — within 5%: in the neighbourhood.
+  const tiers = [
+    { key: 'exact',      tol: 1e-9,  label: (sym, base) => `${sym}  ·  ${base} Exact` },
+    { key: 'near-exact', tol: 0.001, label: (sym, base) => `${sym}  ·  ${base} Near-Exact  (within ±0.1%)` },
+    { key: 'adjacent',   tol: 0.005, label: (sym, base) => `${sym}  ·  ${base} Adjacent  (within ±0.5%)` },
+    { key: 'near',       tol: 0.02,  label: (sym, base) => `${sym}  ·  Near ${base}  (within ±2%)` },
+    { key: 'vicinal',    tol: 0.05,  label: (sym, base) => `${sym}  ·  ${base} Vicinal  (within ±5%)` },
+  ];
+
+  // Find the closest catalogue entry within the loosest tier
+  let best = null, bestErr = Infinity;
+  for (const entry of cat) {
+    const relErr = Math.abs(ratio - entry.val) / entry.val;
+    if (relErr < 0.05 && relErr < bestErr) {
+      bestErr = relErr;
+      best = entry;
+    }
+  }
+  if (!best) return null;
+
+  // Determine which tier
+  for (const tier of tiers) {
+    const relErr = Math.abs(ratio - best.val) / best.val;
+    if (relErr <= tier.tol) {
+      return { sym: best.sym, base: best.base, tier: tier.key,
+               label: tier.label(best.sym, best.base),
+               relPct: (relErr * 100).toFixed(3) };
+    }
+  }
+  return null;
+}
+
 function setEyeRatio(val){
   if (typeof val !== 'number' || !isFinite(val)) return;
   S.eyeRatio = Math.max(0.001, Math.min(0.995, val));
@@ -371,6 +579,18 @@ function syncEyeUI(){
   if (slider) slider.value = ratioToSlider(r);
   const evn = document.getElementById('ev-num');
   if (evn) evn.textContent = r.toFixed(9);
+  const evProx = document.getElementById('ev-prox');
+  if (evProx) {
+    const prox = classifyRatio(r);
+    if (prox) {
+      evProx.textContent = prox.label;
+      const tierColors = { exact:'var(--gold)', 'near-exact':'#B09868', adjacent:'#A89060', near:'#9C8060', vicinal:'#7A6850' };
+      evProx.style.color = tierColors[prox.tier] || 'var(--mute)';
+    } else {
+      evProx.textContent = 'No notable proximity';
+      evProx.style.color = 'var(--mute)';
+    }
+  }
   document.querySelectorAll('.epbtn').forEach(b=>{
     const v = EYE_PRESETS.find(p=>p.key===b.dataset.k);
     b.classList.toggle('on', v && Math.abs(v.val - r) < 1e-7);
@@ -380,17 +600,29 @@ function syncEyeUI(){
 
 function updateFooter(){
   const r = S.eyeRatio;
-  const lbl = matchEyeLabel(r);
+  const proximity = classifyRatio(r);
   const ftLabel = document.getElementById('ftLabel');
   const ftRatio = document.getElementById('ftRatio');
-  if (ftLabel) ftLabel.textContent = lbl
-    ? `Eye Radius = Lobe Radius × ${lbl}`
-    : `Eye Radius = Lobe Radius × ${r.toFixed(9)}  (custom)`;
+  const ftProx  = document.getElementById('ftProx');
+
+  if (ftLabel) ftLabel.textContent = proximity && proximity.tier === 'exact'
+    ? `Eye Radius = Lobe Radius × ${proximity.sym}`
+    : `Eye Radius = Lobe Radius × ${r.toFixed(9)}${proximity ? '' : '  (custom)'}`;
+
   if (ftRatio){
     const frac = toFraction(r, 999);
     const fracTxt = frac ? `${frac.num}⁄${frac.den}` : '—';
-    ftRatio.textContent =
-      `Eye∶Lobe Radii Ratio  ~  ${r.toFixed(9)}   ·   ≈ ${fracTxt}`;
+    ftRatio.textContent = `Eye∶Lobe Radii Ratio  ~  ${r.toFixed(9)}   ·   ≈ ${fracTxt}`;
+  }
+
+  if (ftProx){
+    if (proximity) {
+      ftProx.textContent = proximity.label;
+      ftProx.dataset.tier = proximity.tier;
+    } else {
+      ftProx.textContent = 'No notable proximity detected';
+      ftProx.dataset.tier = '';
+    }
   }
 }
 
@@ -1047,6 +1279,53 @@ function buildUI(){
     b.textContent=l; b.onclick=fn; tg.appendChild(b);
   });
 }
+
+// ── PROXIMITY INFO FLOAT PANEL ────────────────────────────────────
+(function(){
+  const panel = document.getElementById('proxFloat');
+  const bar   = document.getElementById('proxFloatBar');
+  const btn   = document.getElementById('proxInfoBtn');
+  let visible = false;
+
+  // Default position: top-left of canvas area, away from panel
+  function defaultPos(){
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const pw = 292; // control panel width
+    panel.style.left = '20px';
+    panel.style.top  = Math.max(60, Math.round(vh * 0.15)) + 'px';
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+  }
+
+  window.toggleProxInfo = function(){
+    visible = !visible;
+    panel.style.display = visible ? 'block' : 'none';
+    btn.classList.toggle('on', visible);
+    if (visible) defaultPos();
+  };
+
+  // Drag logic — constrain so panel can't enter the right control panel
+  let drag = null;
+  bar.addEventListener('pointerdown', e=>{
+    if (e.target === document.getElementById('proxFloatClose')) return;
+    bar.setPointerCapture(e.pointerId);
+    const rect = panel.getBoundingClientRect();
+    drag = { ox: e.clientX - rect.left, oy: e.clientY - rect.top };
+  });
+  bar.addEventListener('pointermove', e=>{
+    if (!drag) return;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const pw = 292 + 1; // control panel left edge
+    const maxX = vw - pw - panel.offsetWidth - 4;
+    const maxY = vh - panel.offsetHeight - 4;
+    let x = Math.max(4, Math.min(maxX, e.clientX - drag.ox));
+    let y = Math.max(4, Math.min(maxY, e.clientY - drag.oy));
+    panel.style.left = x + 'px';
+    panel.style.top  = y + 'px';
+  });
+  bar.addEventListener('pointerup',   ()=>{ drag = null; });
+  bar.addEventListener('pointercancel',()=>{ drag = null; });
+})();
 
 buildUI();
 applyPreset('classic');
