@@ -315,6 +315,15 @@ const PRESETS = {
     f:{ lobe1:solid('#FFFFFF'), lobe2:solid('#000000'),
         eye1:solid('#000000'), eye2:solid('#FFFFFF') }
   },
+    sunset: {
+    label:'🌅 Sunset', bg:'#130292',
+    f:{
+      lobe1: lg([{p:0,c:'#FF2020'},{p:45,c:'#FF8800'},{p:100,c:'#FFE400'}]),
+      lobe2: lg([{p:0,c:'#2020FF'},{p:45,c:'#9900CC'},{p:100,c:'#00BBFF'}], CX+R, CY-R, CX-R, CY+R),
+      eye1: solid('#880000'),
+      eye2: solid('#000088')
+    }
+  },
   midnight: {
     label:'🌌 Night Sky', bg:'#0c0b32', stars:true,
     f:{
@@ -322,15 +331,6 @@ const PRESETS = {
       lobe2: rg([{p:0,c:'#0A0A1C'},{p:55,c:'#050512'},{p:100,c:'#020208'}], CX, CY+LR, R*1.2),
       eye1: solid('#FFD700'),
       eye2: solid('#8890FF')
-    }
-  },
-  sunset: {
-    label:'🌅 Sunset', bg:'#130292',
-    f:{
-      lobe1: lg([{p:0,c:'#FF2020'},{p:45,c:'#FF8800'},{p:100,c:'#FFE400'}]),
-      lobe2: lg([{p:0,c:'#2020FF'},{p:45,c:'#9900CC'},{p:100,c:'#00BBFF'}], CX+R, CY-R, CX-R, CY+R),
-      eye1: solid('#880000'),
-      eye2: solid('#000088')
     }
   },
   gold: {
