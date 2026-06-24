@@ -52,12 +52,13 @@ header{flex-shrink:0;padding:10px 18px;background:var(--surf);border-bottom:1px 
 .phifooter .fprox[data-tier="vicinal"]   {color:#706050}
 .phifooter .fprox[data-tier=""]          {color:var(--mute)}
 /* Inline proximity span inside ftLabel */
-.prox-inline{transition:color .2s}
-.prox-inline[data-tier="exact"]     {color:#C8A876}
-.prox-inline[data-tier="near-exact"]{color:#B09868}
-.prox-inline[data-tier="adjacent"]  {color:#A89060}
-.prox-inline[data-tier="near"]      {color:#8C7858}
-.prox-inline[data-tier="vicinal"]   {color:#706050}
+/* Inline proximity span inside ftLabel */
+.prox-inline{transition:color .2s;color:inherit}
+.prox-inline[data-tier="exact"]     {color:inherit}
+.prox-inline[data-tier="near-exact"]{color:inherit}
+.prox-inline[data-tier="adjacent"]  {color:inherit}
+.prox-inline[data-tier="near"]      {color:inherit}
+.prox-inline[data-tier="vicinal"]   {color:inherit}
 .prox-inline[data-tier=""]          {color:var(--mute)}
 .panel{border-left:1px solid var(--bdr);background:var(--surf);overflow-y:auto;overflow-x:hidden;padding:14px 13px;display:flex;flex-direction:column;gap:15px}
 .panel::-webkit-scrollbar{width:3px}
@@ -683,7 +684,7 @@ function updateFooter(){
     const expr = proximity && proximity.tier === 'exact'
       ? `Eye Radius = Lobe Radius × ${proximity.sym}`
       : `Eye Radius = Lobe Radius × ${r.toFixed(9)}${proximity ? '' : '  (custom)'}`;
-    const proxTxt  = proximity ? proximity.label : 'No notable proximity detected';
+    const proxTxt  = proximity ? proximity.label.replace(/^.*?·\s*/, '') : 'No notable proximity detected';
     const proxTier = proximity ? proximity.tier  : '';
     ftLabel.innerHTML = `${expr}   ·   <span class="prox-inline" data-tier="${proxTier}">${proxTxt}</span>`;
   }
