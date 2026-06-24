@@ -82,7 +82,7 @@ This tool was generated with the assistance of **Claude**, an AI assistant
 made by [Anthropic](https://www.anthropic.com). The interactive Yin Yang
 Generator — including the golden-ratio construction logic, measurement
 overlays, color presets, equation input, and PNG/JPG export — was built
-through a series of collaborative conversations between [Giacomo Aureo] (https://BronzeSquare.wixsite.com/labyrinth) and Claude. Claude was tasked with the geometry, HTML code development, and documentation, however Grok/XaI, ChatGPT, and Gemini also made contributions in math and code audits.
+through a series of collaborative conversations between [Giacomo Aureo](https://BronzeSquare.wixsite.com/labyrinth) and Claude. Claude was tasked with the geometry, HTML code development, and documentation, however Grok/XaI, ChatGPT, and Gemini also made contributions in math and code audits.
 
 ### Special thanks to the Geometers
 
