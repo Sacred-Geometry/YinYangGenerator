@@ -51,6 +51,14 @@ header{flex-shrink:0;padding:10px 18px;background:var(--surf);border-bottom:1px 
 .phifooter .fprox[data-tier="near"]      {color:#8C7858}
 .phifooter .fprox[data-tier="vicinal"]   {color:#706050}
 .phifooter .fprox[data-tier=""]          {color:var(--mute)}
+/* Inline proximity span inside ftLabel */
+.prox-inline{transition:color .2s}
+.prox-inline[data-tier="exact"]     {color:#C8A876}
+.prox-inline[data-tier="near-exact"]{color:#B09868}
+.prox-inline[data-tier="adjacent"]  {color:#A89060}
+.prox-inline[data-tier="near"]      {color:#8C7858}
+.prox-inline[data-tier="vicinal"]   {color:#706050}
+.prox-inline[data-tier=""]          {color:var(--mute)}
 .panel{border-left:1px solid var(--bdr);background:var(--surf);overflow-y:auto;overflow-x:hidden;padding:14px 13px;display:flex;flex-direction:column;gap:15px}
 .panel::-webkit-scrollbar{width:3px}
 .panel::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
@@ -140,6 +148,58 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .prox-note{font-size:11px;color:var(--mute);border-top:1px solid var(--bdr);padding-top:9px;margin-top:2px}
 #proxInfoBtn:hover{border-color:var(--gold);color:var(--gold)}
 #proxInfoBtn.on{border-color:var(--gold);background:var(--goldA);color:var(--gold)}
+/* ── Full Geometry Float Panel ───────────────────────────────────── */
+#geoFloat{
+  position:fixed;z-index:900;width:370px;max-width:calc(100vw - 32px);
+  background:var(--surf);border:1px solid var(--gold2);border-radius:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,.45);overflow:hidden;
+  font-size:12px;line-height:1.5;color:var(--txt);
+  display:none;
+}
+#geoFloatBar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 13px;background:var(--surf2);border-bottom:1px solid var(--bdr);
+  cursor:grab;user-select:none;
+}
+#geoFloatBar:active{cursor:grabbing}
+#geoFloatTitle{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+#geoFloatClose{
+  background:none;border:none;color:var(--mute);cursor:pointer;
+  font-size:13px;line-height:1;padding:0 2px;transition:color .15s
+}
+#geoFloatClose:hover{color:var(--txt)}
+#geoFloatBody{padding:10px 13px 13px;max-height:72vh;overflow-y:auto}
+#geoFloatBody .geo-section{margin-bottom:10px}
+#geoFloatBody .geo-section:last-child{margin-bottom:0}
+#geoFloatBody .geo-sec-title{
+  font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--mute);margin-bottom:5px;padding-bottom:3px;
+  border-bottom:1px solid var(--bdr);
+}
+#geoFloatBody table{width:100%;border-collapse:collapse}
+#geoFloatBody td{
+  padding:2px 4px;font-size:11px;
+  font-family:system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-variant-emoji:text;
+  vertical-align:top;
+}
+#geoFloatBody td:first-child{
+  color:var(--gold);font-weight:700;width:28px;text-align:right;
+  padding-right:8px;white-space:nowrap;
+  font-family:'SF Mono','Fira Code','Courier New',monospace;
+  font-variant-emoji:text;
+}
+#geoFloatBody td:nth-child(2){
+  color:var(--txt);width:140px;white-space:nowrap;
+  font-family:system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-variant-emoji:text;
+}
+#geoFloatBody td:nth-child(3){
+  color:var(--mute);font-size:10.5px;
+  font-family:'SF Mono','Fira Code','Courier New',monospace;
+  font-variant-emoji:text;
+}
+#geoFloatBody tr:hover td{background:var(--surf2)}
 @media(max-width:680px){
   html,body{overflow:auto}
   .layout{grid-template-columns:1fr}
@@ -159,7 +219,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
     of the half-width, leaving a golden-ratio margin to each corner.
     Box side = 38px  →  half = 19  →  R = 19·√2/1.61803 ≈ 16.60px
   -->
-  <svg viewBox="0 0 38 38" width="38" height="38" xmlns="http://www.w3.org/2000/svg" style="display:block;border-radius:1px">
+  <svg viewBox="0 0 38 38" width="38" height="38" xmlns="http://www.w3.org/2000/svg" style="display:block;border-radius:0">
     <!-- Background square -->
     <rect width="38" height="38" fill="#e9e9de"/>
     <!-- Yin-yang symbol, centred at (19,19), R≈16.60 -->
@@ -176,7 +236,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 </div>
   <div class="htxt">
     <h1>Yin Yang Generator</h1>
-    <p>Symbol Radius = 1 &nbsp;·&nbsp; Lobe Radii = 1⁄2 &nbsp;·&nbsp; Eye Radii - Adjustable</p>
+    <p>Symbol Radius = 1 &nbsp;·&nbsp; Lobe Radii = 1⁄2 &nbsp;·&nbsp; Eye Radii - Adjustable &nbsp;&nbsp;|&nbsp;&nbsp; Area constants: Lobe∶Symbol = 1/4 &nbsp;·&nbsp; Symbol ≈ <span id="hSymPx">—</span> px² &nbsp;·&nbsp; Each Lobe ≈ <span id="hLobePx">—</span> px²</p>
   </div>
   <div class="hbtns">
     <button class="htog on" id="ldBtn" onclick="toggleTheme()">◑ Dark</button>
@@ -184,6 +244,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <option value="off">Measurements: Off</option>
       <option value="vertical">Vertical Line Ratios</option>
       <option value="segments">Other Segments</option>
+      <option value="fullgeometry">Measure</option>
     </select>
   </div>
 </header>
@@ -192,10 +253,10 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
   <div class="canvas">
     <div id="svgwrap"></div>
     <div class="phifooter">
-      <div class="f1">Key:&nbsp; Uppercase Φ (~1.618) &nbsp;·&nbsp; Lowercase φ (~0.618) &nbsp;·&nbsp; e ≈ 2.718 &nbsp;·&nbsp; τ = 2π ≈ 6.283</div>
       <div class="f2" id="ftLabel">Eye Radius = Lobe Radius × φ³</div>
       <div class="f3" id="ftRatio">Eye∶Lobe Radii Ratio &nbsp;~&nbsp; 0.236067977 &nbsp;·&nbsp; ≈ frac</div>
-      <div class="fprox" id="ftProx" data-tier="exact">φ³  ·  Exact</div>
+      <div class="f3" id="ftAreas" style="margin-top:1px">Eye∶Lobe area = — &nbsp;·&nbsp; Eye∶Symbol area = —</div>
+      <div class="f1" id="ftFixed">Symbol area = πR² &nbsp;·&nbsp; Lobe area = π(R/2)² &nbsp;·&nbsp; Combined Ear = 2πR²</div>
       <div class="f4"><a href="https://github.com/Sacred-Geometry/YinYangGenerator" target="_blank" rel="noopener">github.com/Sacred-Geometry/YinYangGenerator</a></div>
     </div>
   </div>
@@ -220,7 +281,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
           <button onclick="applyEyeEquation()">Apply</button>
         </div>
         <div class="eqnote" id="eqnote"></div>
-        <div class="eyeph">Variables: <b>phi</b> (≈0.618), <b>Phi</b> (≈1.618), <b>Pi</b> (≈3.14159), <b>e</b> (≈2.718), <b>tau</b> (≈6.283), <b>sqrt()</b>. Result sets r = R<sub>lobe</sub> × expression.</div>
+        <div class="eyeph"><b style="color:var(--txt)">Key Variables:</b> &nbsp;<b>Φ</b> Phi (≈1.618) &nbsp;·&nbsp; <b>φ</b> phi (≈0.618) &nbsp;·&nbsp; <b>π</b> Pi (≈3.14159) &nbsp;·&nbsp; <b>e</b> Euler (≈2.718) &nbsp;·&nbsp; <b>τ</b> tau (≈6.283) &nbsp;·&nbsp; <b>sqrt()</b><br>Result sets r = R<sub>lobe</sub> × expression.</div>
       </div>
     </div>
     <hr class="div">
@@ -262,7 +323,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
     <p>As you adjust the eye size, the tool checks whether the current ratio is <em>near</em> a mathematically notable value — a power of φ or Φ, a Fibonacci ratio, a harmonic fraction, or a geometric/transcendental constant. The match is labelled by how close it is:</p>
     <dl>
       <dt data-tier="exact">Exact <span class="tier-pct">(within ~1 billionth)</span></dt>
-      <dd>The ratio is computationally indistinguishable from the known value at double-precision floating point. Whether arrived at by preset, equation, or slider, the tool says it <em>is</em> that value. To ensure precision, use a formula in the Equation Input such as Phi/6 or phi^3.</dd>
+      <dd>The ratio is computationally indistinguishable from the known value at double-precision floating point. Whether arrived at by preset, equation, or slider, the math says it <em>is</em> that value. To ensure precision, use a formula in the Equation Input such as Phi/6 or phi^3.</dd>
       <dt data-tier="near-exact">Near-Exact <span class="tier-pct">(within ±0.1%)</span></dt>
       <dd>Extremely close — well within any perceptible difference visually or in print. The relationship is almost certainly intentional, and the ratio could serve as a practical stand-in for the known value.</dd>
       <dt data-tier="adjacent">Adjacent <span class="tier-pct">(within ±0.5%)</span></dt>
@@ -270,9 +331,20 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <dt data-tier="near">Near <span class="tier-pct">(within ±2%)</span></dt>
       <dd>A visible family resemblance. The ratio shares the character of the reference value — proportions will feel related but not identical under scrutiny.</dd>
       <dt data-tier="vicinal">Vicinal <span class="tier-pct">(within ±5%)</span></dt>
-      <dd>In the neighbourhood. The human eye may not distinguish this from the reference, but the difference is measurable. "Vicinal" is borrowed from crystallography, where it describes a face or ratio just off a principal plane.</dd>
+      <dd>In the neighbourhood. The human eye may not distinguish this from the reference, but the difference is measurable. "Vicinal" is borrowed from crystallography, where it describes a face or ratio just off a principal plane, or "in the vicinity of."</dd>
     </dl>
     <p class="prox-note">Powers of Φ and φ are checked up to the 9th power. Fibonacci sequence ratios above F(3) naturally converge toward φ and Φ and will appear here. Other catalogued values include simple harmonic fractions (½, ⅓, ⅝ …), geometric constants (√2, √3, √5-based), and transcendental ratios (π and e based).</p>
+  </div>
+</div>
+
+<!-- ── FULL GEOMETRY FLOAT PANEL ──────────────────────────────── -->
+<div id="geoFloat" role="dialog" aria-label="Measure · Intersection Points">
+  <div id="geoFloatBar">
+    <span id="geoFloatTitle">Measure &middot; Intersection Points</span>
+    <button id="geoFloatClose" onclick="hideGeoFloat()" title="Close">[close]</button>
+  </div>
+  <div id="geoFloatBody">
+    <!-- populated by updateGeoFloat() -->
   </div>
 </div>
 
@@ -315,8 +387,8 @@ const PRESETS = {
     f:{ lobe1:solid('#FFFFFF'), lobe2:solid('#000000'),
         eye1:solid('#000000'), eye2:solid('#FFFFFF') }
   },
-    sunset: {
-    label:'🌅 Sunset', bg:'#130292',
+  sunset: {
+    label:'🌅 Twilight', bg:'#130292',
     f:{
       lobe1: lg([{p:0,c:'#FF2020'},{p:45,c:'#FF8800'},{p:100,c:'#FFE400'}]),
       lobe2: lg([{p:0,c:'#2020FF'},{p:45,c:'#9900CC'},{p:100,c:'#00BBFF'}], CX+R, CY-R, CX-R, CY+R),
@@ -324,7 +396,7 @@ const PRESETS = {
       eye2: solid('#000088')
     }
   },
-  midnight: {
+    midnight: {
     label:'🌌 Night Sky', bg:'#0c0b32', stars:true,
     f:{
       lobe1: rg([{p:0,c:'#3A5EA8'},{p:35,c:'#1C2E62'},{p:70,c:'#0D1538'},{p:100,c:'#060C1E'}], CX, CY-LR, R*1.3),
@@ -603,27 +675,54 @@ function updateFooter(){
   const proximity = classifyRatio(r);
   const ftLabel = document.getElementById('ftLabel');
   const ftRatio = document.getElementById('ftRatio');
-  const ftProx  = document.getElementById('ftProx');
+  const ftAreas = document.getElementById('ftAreas');
+  const ftFixed = document.getElementById('ftFixed');
 
-  if (ftLabel) ftLabel.textContent = proximity && proximity.tier === 'exact'
-    ? `Eye Radius = Lobe Radius × ${proximity.sym}`
-    : `Eye Radius = Lobe Radius × ${r.toFixed(9)}${proximity ? '' : '  (custom)'}`;
+  // Line 1: expression · proximity label (combined)
+  if (ftLabel) {
+    const expr = proximity && proximity.tier === 'exact'
+      ? `Eye Radius = Lobe Radius × ${proximity.sym}`
+      : `Eye Radius = Lobe Radius × ${r.toFixed(9)}${proximity ? '' : '  (custom)'}`;
+    const proxTxt  = proximity ? proximity.label : 'No notable proximity detected';
+    const proxTier = proximity ? proximity.tier  : '';
+    ftLabel.innerHTML = `${expr}   ·   <span class="prox-inline" data-tier="${proxTier}">${proxTxt}</span>`;
+  }
 
-  if (ftRatio){
+  if (ftRatio) {
     const frac = toFraction(r, 999);
     const fracTxt = frac ? `${frac.num}⁄${frac.den}` : '—';
     ftRatio.textContent = `Eye∶Lobe Radii Ratio  ~  ${r.toFixed(9)}   ·   ≈ ${fracTxt}`;
   }
 
-  if (ftProx){
-    if (proximity) {
-      ftProx.textContent = proximity.label;
-      ftProx.dataset.tier = proximity.tier;
-    } else {
-      ftProx.textContent = 'No notable proximity detected';
-      ftProx.dataset.tier = '';
-    }
+  // ── Area calculations ───────────────────────────────────────────
+  const eyeR       = r * 0.5;
+  const aSymbol    = Math.PI;
+  const aLobe      = Math.PI * 0.25;
+  const aEye       = Math.PI * eyeR * eyeR;
+  const aEyeLobe   = aEye / aLobe;
+  const aEyeSymbol = aEye / aSymbol;
+  const f6 = v => v.toFixed(6);
+
+  // Pixel² values using global R ≈ 262.214 px
+  const symPx  = Math.PI * R * R;
+  const lobePx = Math.PI * (R/2) * (R/2);
+  const eyePx  = Math.PI * (r * R/2) * (r * R/2);
+  const fmtPx  = v => Math.round(v).toLocaleString();
+
+  if (ftAreas) {
+    ftAreas.textContent =
+      `Eye∶Lobe area = ${f6(aEyeLobe)}  (= r²)   ·   Eye∶Symbol area = ${f6(aEyeSymbol)}  (= r²/4)`;
   }
+  if (ftFixed) {
+    ftFixed.innerHTML =
+      `Each Eye = π(r·R/2)²  ≈ ${fmtPx(eyePx)} px²   ·   r = ${r.toFixed(6)}`;
+  }
+
+  // Update header live spans
+  const hSym  = document.getElementById('hSymPx');
+  const hLobe = document.getElementById('hLobePx');
+  if (hSym)  hSym.textContent  = fmtPx(symPx);
+  if (hLobe) hLobe.textContent = fmtPx(lobePx);
 }
 
 // ── THEME & OVERLAY STATE ─────────────────────────────────────────
@@ -642,6 +741,7 @@ function setMeasureMode(mode){
   measureMode = mode;
   const sel = document.getElementById('measureSel');
   sel.classList.toggle('on', mode !== 'off');
+  if (mode !== 'fullgeometry') hideGeoFloat();
   render();
 }
 
@@ -724,20 +824,603 @@ function effFills(){
   return f;
 }
 
-// ── VERTICAL LINE RATIOS OVERLAY ──────────────────────────────────
-// All measurements are from the apex (top of symbol) down to the base.
-// Because the eye radius is live-adjustable, every landmark below is
-// computed from the CURRENT eye ratio (S.eyeRatio) rather than assumed
-// fixed positions. The diagram is drawn at its own scale (oR, oCX, oCY)
-// with dedicated side panels reserved for labels, so label text never
-// runs off the edge of the canvas regardless of how long the strings get.
-//
-//   apex → top of eye 1     : length = R_lobe − r_eye
-//   eye 1 (diameter)        : length = 2 · r_eye
-//   bottom of eye 1 → centre: length = R_lobe − r_eye
-//   centre → top of eye 2   : length = R_lobe − r_eye
-//   eye 2 (diameter)        : length = 2 · r_eye
-//   bottom of eye 2 → base  : length = R_lobe − r_eye
+// ══════════════════════════════════════════════════════════════════
+// GEOMETRY MODEL — single source of truth for all overlays.
+// All coordinates are in the live SVG space (CX, CY, R, LR, ER).
+// Every overlay must derive its points exclusively from this object.
+// ══════════════════════════════════════════════════════════════════
+function buildGeometryModel() {
+  const ER = getER();
+
+  // ── Cardinal points on the Ear (outer circle) ──────────────────
+  // Named by compass / celestial convention with the symbol upright
+  // (apex = north = Zenith, base = south = Nadir).
+  const O  = { x: CX,     y: CY      };   // Origin / Centre
+  const Z  = { x: CX,     y: CY - R  };   // Zenith  (apex, top)
+  const N  = { x: CX,     y: CY + R  };   // Nadir   (base, bottom)
+  const E  = { x: CX + R, y: CY      };   // East Horizon  (right equator)
+  const W  = { x: CX - R, y: CY      };   // West Horizon  (left equator)
+
+  // ── Lobe centres ───────────────────────────────────────────────
+  const LC_upper = { x: CX, y: CY - LR };  // upper lobe centre  (Yang side)
+  const LC_lower = { x: CX, y: CY + LR };  // lower lobe centre  (Yin side)
+
+  // ── Vertical axis intersection points ──────────────────────────
+  // Lettered P1–P10 top-to-bottom along the vertical centre axis.
+  // P1 = Zenith, P10 = Nadir. Eyes sit symmetrically about their centres.
+  const P1  = Z;                                              // Zenith / apex
+  const P2  = { x: CX, y: CY - LR - ER };                   // top of upper eye
+  const P3  = LC_upper;                                       // upper lobe centre
+  const P4  = { x: CX, y: CY - LR + ER };                   // bottom of upper eye
+  const P5  = O;                                              // Centre / equator
+  const P6  = { x: CX, y: CY + LR - ER };                   // top of lower eye
+  const P7  = LC_lower;                                       // lower lobe centre
+  const P8  = { x: CX, y: CY + LR + ER };                   // bottom of lower eye
+  const P9  = N;                                              // Nadir / base  (alias)
+  // (P9 = N; kept separate so the sequence is complete)
+
+  // ── Diagonal geometry from East point (E = A in segment overlay) ─
+  // Line from E through LC_lower → far Ear edge (point H in segment overlay)
+  function lineToFarEdge(from, through) {
+    const dx = through.x - from.x, dy = through.y - from.y;
+    const len = Math.hypot(dx, dy);
+    const ux = dx / len, uy = dy / len;
+    const ax = from.x - CX, ay = from.y - CY;
+    const b = 2 * (ax * ux + ay * uy);
+    const c = ax * ax + ay * ay - R * R;
+    const t = (-b + Math.sqrt(b * b - 4 * c)) / 2;
+    return { ux, uy, farX: from.x + t * ux, farY: from.y + t * uy, farT: t, from };
+  }
+
+  function circleLineIntersections(centre, rad, from, ux, uy) {
+    const ax = from.x - centre.x, ay = from.y - centre.y;
+    const b = 2 * (ax * ux + ay * uy);
+    const c = ax * ax + ay * ay - rad * rad;
+    const disc = b * b - 4 * c;
+    if (disc < 0) return null;
+    const sq = Math.sqrt(disc);
+    const t1 = (-b - sq) / 2, t2 = (-b + sq) / 2;
+    return [
+      { t: t1, x: from.x + t1 * ux, y: from.y + t1 * uy },
+      { t: t2, x: from.x + t2 * ux, y: from.y + t2 * uy },
+    ];
+  }
+
+  // Lower diagonal: E through LC_lower → far Ear edge
+  const diagLower = lineToFarEdge(E, LC_lower);
+  // Upper diagonal (mirror): E through LC_upper → far Ear edge
+  const diagUpper = lineToFarEdge(E, LC_upper);
+
+  // Lobe crossings on lower diagonal
+  const lobeLowerX = circleLineIntersections(LC_lower, LR, E, diagLower.ux, diagLower.uy);
+  // Eye crossings on lower diagonal (variable — depend on eye ratio)
+  const eyeLowerX  = circleLineIntersections(LC_lower, ER, E, diagLower.ux, diagLower.uy);
+  // Eye crossings on upper diagonal — mirrors V/W but for the upper eye on segment AQ
+  const eyeUpperX  = circleLineIntersections(LC_upper, ER, E, diagUpper.ux, diagUpper.uy);
+  // Lobe crossing (near) on upper diagonal — gives point B (φ·R from E)
+  const lobeUpperX = circleLineIntersections(LC_upper, LR, E, diagUpper.ux, diagUpper.uy);
+
+  // Named diagonal points (lettered for the segment overlay convention)
+  // Q = upper line far Ear edge (D in segment overlay)
+  // S = near upper lobe crossing (B in segment overlay) at φ·R from E
+  // T = near lower lobe crossing, U = far lower lobe crossing (G in segment overlay, Φ·R)
+  // V = near eye crossing, W_ = far eye crossing (E, F in segment overlay)
+  // X = far Ear edge on lower diagonal (H in segment overlay)
+  const Qpt  = { x: diagUpper.farX, y: diagUpper.farY };
+  const Spt  = lobeUpperX ? lobeUpperX[0] : null;   // φ·R from E (upper lobe near)
+  const Rpt  = lobeUpperX ? lobeUpperX[1] : null;   // far upper lobe crossing (between C1 and Q)
+  const Tpt  = lobeLowerX ? lobeLowerX[0] : null;   // near lower lobe crossing (between A and V)
+  const Upt  = lobeLowerX ? lobeLowerX[1] : null;   // Φ·R from E (lower lobe far)
+  const Vpt  = eyeLowerX  ? eyeLowerX[0]  : null;   // near lower eye crossing on lower diagonal
+  const Wpt  = eyeLowerX  ? eyeLowerX[1]  : null;   // far lower eye crossing on lower diagonal
+  const V2pt = eyeUpperX  ? eyeUpperX[0]  : null;   // near upper eye crossing on upper diagonal (AQ)
+  const W2pt = eyeUpperX  ? eyeUpperX[1]  : null;   // far upper eye crossing on upper diagonal (AQ)
+  const Xpt  = { x: diagLower.farX, y: diagLower.farY };
+
+  // Distances from E along each diagonal (as multiples of R)
+  const dES  = Spt  ? Math.hypot(Spt.x - E.x, Spt.y - E.y)  / R : null;  // ≈ φ
+  const dER  = Rpt  ? Math.hypot(Rpt.x - E.x, Rpt.y - E.y)  / R : null;
+  const dET  = Tpt  ? Math.hypot(Tpt.x - E.x, Tpt.y - E.y)  / R : null;
+  const dEU  = Upt  ? Math.hypot(Upt.x - E.x, Upt.y - E.y)  / R : null;  // ≈ Φ
+  const dEV  = Vpt  ? Math.hypot(Vpt.x  - E.x, Vpt.y  - E.y) / R : null;
+  const dEW  = Wpt  ? Math.hypot(Wpt.x  - E.x, Wpt.y  - E.y) / R : null;
+  const dEV2 = V2pt ? Math.hypot(V2pt.x - E.x, V2pt.y - E.y) / R : null;  // upper eye near
+  const dEW2 = W2pt ? Math.hypot(W2pt.x - E.x, W2pt.y - E.y) / R : null;  // upper eye far
+  const dEX  = diagLower.farT / R;                                          // ≈ 1.7889
+  const dEQ  = diagUpper.farT / R;
+
+  // Angle the lower diagonal makes with the equator (always = arctan(φ) ≈ 26.565°)
+  const diagAngleDeg = Math.atan2(-diagLower.uy, -diagLower.ux) * 180 / Math.PI;
+  // (negative because SVG y increases downward; the line goes left+down from E)
+  const diagAngleFromEq = Math.abs(Math.atan2(Math.abs(diagLower.uy), Math.abs(diagLower.ux)) * 180 / Math.PI);
+
+  // ── Equator crossings of the two lobe circles ───────────────────
+  // Upper lobe (centre at LC_upper): crosses equator at x = CX ± sqrt(LR²-LR²) — wait,
+  // lobe centre is LR above equator, so equator crossings: y=CY, circle eq gives
+  // (x-CX)²+(CY-CY+LR)² = LR²  →  (x-CX)² = LR²-LR² = 0  → single tangent at CX.
+  // Instead give the lobe circle's own east/west extremes:
+  const upperLobeE = { x: CX + LR, y: CY - LR };
+  const upperLobeW = { x: CX - LR, y: CY - LR };
+  const lowerLobeE = { x: CX + LR, y: CY + LR };
+  const lowerLobeW = { x: CX - LR, y: CY + LR };
+
+  // ── Segment lengths (normalised to R = 1) ──────────────────────
+  const seg = {
+    R,  LR, ER,
+    eyeToLobe : ER / LR,
+    eyeToEar  : ER / R,
+    lobeToEar : LR / R,          // always 0.5
+    OZ        : R,               // centre to Zenith
+    ON        : R,               // centre to Nadir
+    OE        : R,               // centre to East
+    OW        : R,               // centre to West
+    // Vertical axis spans
+    ZP2       : LR - ER,         // Zenith to top of upper eye
+    P2P4      : 2 * ER,          // upper eye diameter
+    P4P3      : ER,              // bottom of upper eye to lobe centre  (= ER by construction? No: P4=CY-LR+ER, P3=CY-LR → P4-P3=ER)
+    // Actually: P3.y - P4.y is negative (P3 is above P4 in y-coords)
+    // Recalc as absolute distances:
+    ZtoP2     : P2.y - P1.y,    // Zenith → top upper eye
+    P2toP4    : P4.y - P2.y,    // upper eye diameter = 2·ER
+    P4toO     : P5.y - P4.y,    // bottom upper eye → centre
+    OtoP6     : P6.y - P5.y,    // centre → top lower eye
+    P6toP8    : P8.y - P6.y,    // lower eye diameter = 2·ER
+    P8toN     : P9.y - P8.y,    // bottom lower eye → Nadir
+  };
+
+  // ── Angles ─────────────────────────────────────────────────────
+  const angles = {
+    diagFromEquator : diagAngleFromEq,                         // ≈ 26.565°
+    diagFromVertical: 90 - diagAngleFromEq,                    // ≈ 63.435°
+    diagFromEquatorRad : Math.atan(LIT_phi),                   // exact: arctan(φ)
+  };
+
+  return {
+    // Named cardinal / celestial points
+    O, Z, N, E, W,
+    // Lobe centres
+    LC_upper, LC_lower,
+    // Vertical axis points P1–P9
+    P1, P2, P3, P4, P5, P6, P7, P8, P9,
+    // Lobe extremes (equatorial)
+    upperLobeE, upperLobeW, lowerLobeE, lowerLobeW,
+    // Diagonal geometry
+    diagLower, diagUpper,
+    // Named diagonal intersection points
+    Qpt, Spt, Rpt, Tpt, Upt, Vpt, Wpt, V2pt, W2pt, Xpt,
+    // Distances (in SVG units and as ·R multiples)
+    dES, dER, dET, dEU, dEV, dEW, dEV2, dEW2, dEX, dEQ,
+    // Segment lengths (SVG units)
+    seg,
+    // Angles
+    angles,
+    // Raw radii
+    R, LR, ER,
+  };
+}
+
+// ── FULL GEOMETRY OVERLAY — CLICK TO MEASURE ────────────────────
+// Renders a scaled diagram of all named construction points as
+// clickable SVG dots. Click 1 to identify, 2 for distance, 3 for
+// angle + ratio. Float panel accumulates measurements live.
+function buildFullGeometryOverlay() {
+  const m = buildGeometryModel();
+  const {
+    O, Z, N, E, W,
+    LC_upper, LC_lower,
+    P1, P2, P3, P4, P5, P6, P7, P8, P9,
+    diagLower, diagUpper,
+    Qpt, Spt, Rpt, Tpt, Upt, Vpt, Wpt, V2pt, W2pt, Xpt,
+    dES, dER, dET, dEU, dEV, dEW, dEV2, dEW2, dEX, dEQ,
+    seg: segData, angles, R: mR, LR: mLR, ER: mER,
+  } = m;
+
+  const FG_PAD    = 88;
+  const LABEL_RIM = 56;
+  const scaledR   = (SZ / 2 + FG_PAD) - LABEL_RIM;
+  const sc        = scaledR / mR;
+  const sp = p => ({ x: CX + (p.x - CX) * sc, y: CY + (p.y - CY) * sc });
+
+  const sR = mR * sc, sLR = mLR * sc, sER = mER * sc;
+  const sZ = sp(Z), sN = sp(N), sE = sp(E), sW = sp(W), sO = sp(O);
+  const sC1 = sp(LC_upper), sC2 = sp(LC_lower);
+  const sP2 = sp(P2), sP4 = sp(P4), sP6 = sp(P6), sP8 = sp(P8);
+  const sSpt = Spt ? sp(Spt) : null;
+  const sRpt = Rpt ? sp(Rpt) : null;
+  const sTpt = Tpt ? sp(Tpt) : null;
+  const sUpt = Upt ? sp(Upt) : null;
+  const sVpt = Vpt ? sp(Vpt) : null;
+  const sWpt = Wpt ? sp(Wpt) : null;
+  const sV2pt = V2pt ? sp(V2pt) : null;
+  const sW2pt = W2pt ? sp(W2pt) : null;
+  const sXpt = sp(Xpt);
+  const sQpt = Qpt ? sp(Qpt) : null;
+
+  const cBg  = '#FAF7EF', cInk = '#2A1E08', cMut = '#9C8C6A';
+  const cGld = '#7C5C2A', cRed = '#962A20', cBlue = '#1A4A80', cGrn = '#2A6030';
+  const fam  = "Georgia,'Times New Roman',serif";
+  const f2   = v => v.toFixed(2);
+  const f4   = v => v.toFixed(4);
+  const LAB  = (col, fs=11) =>
+    `fill="${col}" font-family="${fam}" font-style="normal" font-size="${fs}"`;
+  const txt  = (x, y, s, col, fs, anchor='middle', style='normal') =>
+    `<text x="${f2(x)}" y="${f2(y)}" font-size="${fs}" fill="${col}" font-family="${fam}" font-style="${style}" text-anchor="${anchor}">${s}</text>`;
+
+  // ── Cross-line geometry ─────────────────────────────────────
+  function hLineCircle(yL, cx, cy, r) {
+    const dy = yL - cy, d = r*r - dy*dy;
+    if (d < 0) return [];
+    const sq = Math.sqrt(d);
+    return sq < 1e-6 ? [{x:cx,y:yL}] : [{x:cx-sq,y:yL},{x:cx+sq,y:yL}];
+  }
+  function vLineCircle(xL, cx, cy, r) {
+    const dx = xL - cx, d = r*r - dx*dx;
+    if (d < 0) return [];
+    const sq = Math.sqrt(d);
+    return sq < 1e-6 ? [{x:xL,y:cy}] : [{x:xL,y:cy-sq},{x:xL,y:cy+sq}];
+  }
+  const circles5 = [
+    {name:'Ear',       cx:CX, cy:CY,       r:mR },
+    {name:'UpperLobe', cx:CX, cy:CY-mLR,   r:mLR},
+    {name:'LowerLobe', cx:CX, cy:CY+mLR,   r:mLR},
+    {name:'UpperEye',  cx:CX, cy:CY-mLR,   r:mER},
+    {name:'LowerEye',  cx:CX, cy:CY+mLR,   r:mER},
+  ];
+  function dedup(pts) {
+    const out=[];
+    for(const p of pts) if(!out.some(q=>Math.hypot(q.x-p.x,q.y-p.y)<1)) out.push(p);
+    return out;
+  }
+
+  // ── Point registry ──────────────────────────────────────────
+  let letterIdx = 0;
+  function nextLabel() {
+    const a = 'abcdefghijklmnopqrstuvwxyz';
+    const i = letterIdx++;
+    if (i < 26) return a[i];
+    return a[Math.floor((i-26)/26)%26] + a[(i-26)%26];
+  }
+
+  const namedPoints = [
+    {label:'Z',  pt:sZ,   mx:Z.x,        my:Z.y,        col:cInk,  group:'cardinal'},
+    {label:'N',  pt:sN,   mx:N.x,        my:N.y,        col:cInk,  group:'cardinal'},
+    {label:'A',  pt:sE,   mx:E.x,        my:E.y,        col:cInk,  group:'cardinal'},
+    {label:'W',  pt:sW,   mx:W.x,        my:W.y,        col:cInk,  group:'cardinal'},
+    {label:'O',  pt:sO,   mx:O.x,        my:O.y,        col:cInk,  group:'axis'},
+    {label:'C1', pt:sC1,  mx:LC_upper.x, my:LC_upper.y, col:cBlue, group:'lobe'},
+    {label:'C2', pt:sC2,  mx:LC_lower.x, my:LC_lower.y, col:cGrn,  group:'lobe'},
+    {label:'P2', pt:sP2,  mx:P2.x,       my:P2.y,       col:cMut,  group:'eye'},
+    {label:'P4', pt:sP4,  mx:P4.x,       my:P4.y,       col:cMut,  group:'eye'},
+    {label:'P6', pt:sP6,  mx:P6.x,       my:P6.y,       col:cMut,  group:'eye'},
+    {label:'P8', pt:sP8,  mx:P8.x,       my:P8.y,       col:cMut,  group:'eye'},
+  ];
+  if (sSpt) namedPoints.push({label:'S', pt:sSpt, mx:Spt.x, my:Spt.y, col:cGld,  group:'diag'});
+  if (sRpt) namedPoints.push({label:'R', pt:sRpt, mx:Rpt.x, my:Rpt.y, col:cBlue, group:'diag'});
+  if (sTpt) namedPoints.push({label:'T', pt:sTpt, mx:Tpt.x, my:Tpt.y, col:cGrn,  group:'diag'});
+  if (sUpt) namedPoints.push({label:'U', pt:sUpt, mx:Upt.x, my:Upt.y, col:cGld,  group:'diag'});
+  if (sVpt)  namedPoints.push({label:'V',  pt:sVpt,  mx:Vpt.x,  my:Vpt.y,  col:cRed,  group:'diag'});
+  if (sWpt)  namedPoints.push({label:'W',  pt:sWpt,  mx:Wpt.x,  my:Wpt.y,  col:cRed,  group:'diag'});
+  if (sV2pt) namedPoints.push({label:'V2', pt:sV2pt, mx:V2pt.x, my:V2pt.y, col:cBlue, group:'diag'});
+  if (sW2pt) namedPoints.push({label:'W2', pt:sW2pt, mx:W2pt.x, my:W2pt.y, col:cBlue, group:'diag'});
+  namedPoints.push({label:'X', pt:sXpt, mx:Xpt.x, my:Xpt.y, col:cInk, group:'diag'});
+  if (sQpt) namedPoints.push({label:'Q', pt:sQpt, mx:Qpt.x, my:Qpt.y, col:cMut, group:'diag'});
+
+  // Cross-line intersection points
+  const crossPoints = [];
+  const eyeDefs2 = [
+    {label:'Upper Eye', cx:CX, cy:CY-mLR, er:mER, col:cBlue},
+    {label:'Lower Eye', cx:CX, cy:CY+mLR, er:mER, col:cGrn},
+  ];
+  for (const eye of eyeDefs2) {
+    const lines = [
+      {kind:'H', val:eye.cy-eye.er},
+      {kind:'H', val:eye.cy},
+      {kind:'H', val:eye.cy+eye.er},
+      {kind:'V', val:eye.cx-eye.er},
+      {kind:'V', val:eye.cx+eye.er},
+    ];
+    for (const ln of lines) {
+      let raw = [];
+      for (const c of circles5) {
+        const pts = ln.kind==='H'
+          ? hLineCircle(ln.val,c.cx,c.cy,c.r)
+          : vLineCircle(ln.val,c.cx,c.cy,c.r);
+        pts.forEach(p => raw.push({...p, onCircle:c.name}));
+      }
+      raw.sort((a,b)=>ln.kind==='H'?a.x-b.x:a.y-b.y);
+      raw = dedup(raw).filter(p=>Math.hypot(p.x-CX,p.y-CY)<=mR+0.5);
+      for (const p of raw) {
+        const sv = sp(p);
+        crossPoints.push({
+          label:nextLabel(), pt:sv, mx:p.x, my:p.y,
+          col:eye.col, group:'cross',
+          onCircle:p.onCircle, lineKind:ln.kind, lineVal:ln.val
+        });
+      }
+    }
+  }
+
+  const allPoints = [...namedPoints, ...crossPoints];
+  window._geoPoints = allPoints.map((p,i)=>({
+    id:i, label:p.label, mx:p.mx, my:p.my,
+    sx:p.pt.x, sy:p.pt.y, col:p.col, group:p.group, R:mR
+  }));
+
+  // ── SVG ────────────────────────────────────────────────────
+  let o = '';
+  o += `<rect x="${-FG_PAD}" y="${-FG_PAD}" width="${SZ+2*FG_PAD}" height="${SZ+2*FG_PAD}" fill="${cBg}"/>`;
+
+  o += `<defs><clipPath id="fgoc"><circle cx="${CX}" cy="${CY}" r="${f2(sR)}"/></clipPath></defs>`;
+  o += `<g clip-path="url(#fgoc)" opacity="0.11">`;
+  o += `<circle cx="${CX}" cy="${CY}" r="${f2(sR)}" fill="#4A3A20"/>`;
+  o += `<rect x="${f2(CX-sR)}" y="${f2(CY-sR)}" width="${f2(sR)}" height="${f2(2*sR)}" fill="#C2B492"/>`;
+  o += `<circle cx="${f2(sC1.x)}" cy="${f2(sC1.y)}" r="${f2(sLR)}" fill="#C2B492"/>`;
+  o += `<circle cx="${f2(sC2.x)}" cy="${f2(sC2.y)}" r="${f2(sLR)}" fill="#4A3A20"/>`;
+  o += `<circle cx="${f2(sC1.x)}" cy="${f2(sC1.y)}" r="${f2(sER)}" fill="#4A3A20"/>`;
+  o += `<circle cx="${f2(sC2.x)}" cy="${f2(sC2.y)}" r="${f2(sER)}" fill="#C2B492"/>`;
+  o += `</g>`;
+
+  o += `<circle cx="${CX}" cy="${CY}" r="${f2(sR)}" fill="none" stroke="${cMut}" stroke-width="1.2" opacity="0.6"/>`;
+  o += `<circle cx="${f2(sC1.x)}" cy="${f2(sC1.y)}" r="${f2(sLR)}" fill="none" stroke="${cBlue}" stroke-width="0.8" stroke-dasharray="5,3" opacity="0.4"/>`;
+  o += `<circle cx="${f2(sC2.x)}" cy="${f2(sC2.y)}" r="${f2(sLR)}" fill="none" stroke="${cGrn}"  stroke-width="0.8" stroke-dasharray="5,3" opacity="0.4"/>`;
+  o += `<circle cx="${f2(sC1.x)}" cy="${f2(sC1.y)}" r="${f2(sER)}" fill="none" stroke="${cBlue}" stroke-width="0.8" stroke-dasharray="2,3" opacity="0.65"/>`;
+  o += `<circle cx="${f2(sC2.x)}" cy="${f2(sC2.y)}" r="${f2(sER)}" fill="none" stroke="${cGrn}"  stroke-width="0.8" stroke-dasharray="2,3" opacity="0.65"/>`;
+
+  // Cross-lines (clipped to Ear boundary)
+  for (const eye of eyeDefs2) {
+    const lines = [
+      {kind:'H', val:eye.cy-eye.er, col:eye.col},
+      {kind:'H', val:eye.cy,        col:eye.col},
+      {kind:'H', val:eye.cy+eye.er, col:eye.col},
+      {kind:'V', val:eye.cx-eye.er, col:eye.col},
+      {kind:'V', val:eye.cx+eye.er, col:eye.col},
+    ];
+    for (const ln of lines) {
+      const pts = ln.kind==='H'
+        ? hLineCircle(ln.val, CX,CY,mR)
+        : vLineCircle(ln.val, CX,CY,mR);
+      if (pts.length < 2) continue;
+      const p1=sp(pts[0]), p2=sp(pts[1]);
+      o += `<line x1="${f2(p1.x)}" y1="${f2(p1.y)}" x2="${f2(p2.x)}" y2="${f2(p2.y)}" stroke="${ln.col}" stroke-width="0.6" stroke-dasharray="3,3" opacity="0.45"/>`;
+    }
+  }
+
+  // Axes
+  const axExt = FG_PAD - 12;
+  o += `<line x1="${CX}" y1="${f2(sZ.y-axExt)}" x2="${CX}" y2="${f2(sN.y+axExt)}" stroke="${cMut}" stroke-width="0.7" stroke-dasharray="3,5"/>`;
+  o += `<line x1="${f2(sW.x-axExt)}" y1="${CY}" x2="${f2(sE.x+axExt)}" y2="${CY}" stroke="${cMut}" stroke-width="0.7" stroke-dasharray="3,5"/>`;
+
+  // Diagonal lines
+  o += `<line x1="${f2(sE.x)}" y1="${f2(sE.y)}" x2="${f2(sXpt.x)}" y2="${f2(sXpt.y)}" stroke="${cRed}" stroke-width="1.1"/>`;
+  if (sQpt) o += `<line x1="${f2(sE.x)}" y1="${f2(sE.y)}" x2="${f2(sQpt.x)}" y2="${f2(sQpt.y)}" stroke="${cMut}" stroke-width="0.7" stroke-dasharray="4,3"/>`;
+
+  // Clickable dots — named points
+  for (let i = 0; i < namedPoints.length; i++) {
+    const p = namedPoints[i];
+    const r = p.group==='cardinal'?4.5:p.group==='lobe'?3.5:3;
+    const sk = p.group==='eye'?cInk:'none', sw = p.group==='eye'?0.5:0;
+    o += `<circle id="gpt${i}" cx="${f2(p.pt.x)}" cy="${f2(p.pt.y)}" r="${r}" fill="${p.col}" stroke="${sk}" stroke-width="${sw}" style="cursor:pointer" onclick="geoClick(${i})"/>`;
+    o += `<circle cx="${f2(p.pt.x)}" cy="${f2(p.pt.y)}" r="10" fill="transparent" style="cursor:pointer" onclick="geoClick(${i})"/>`;
+  }
+  // Clickable dots — cross-line points
+  const off = namedPoints.length;
+  for (let i = 0; i < crossPoints.length; i++) {
+    const p = crossPoints[i], gid = off+i;
+    o += `<circle id="gpt${gid}" cx="${f2(p.pt.x)}" cy="${f2(p.pt.y)}" r="2.5" fill="${p.col}" stroke="${cBg}" stroke-width="0.7" style="cursor:pointer" onclick="geoClick(${gid})"/>`;
+    o += `<circle cx="${f2(p.pt.x)}" cy="${f2(p.pt.y)}" r="9" fill="transparent" style="cursor:pointer" onclick="geoClick(${gid})"/>`;
+  }
+
+  // Labels — named points
+  // Cardinal labels placed clear of each other using the full FG_PAD margin.
+  // Z - Zenith: label ABOVE the dot, just outside the symbol boundary.
+  // The title pill sits at sZ.y-60; place label at sZ.y-14 between dot and pill.
+  o += txt(sZ.x, sZ.y - 14, 'Z - Zenith', cInk, 11, 'middle');
+  // N - Nadir: below the dot
+  o += txt(sN.x, sN.y + 22, 'N - Nadir', cInk, 11, 'middle');
+  // A - East: two lines above/below the equator, right of dot, clear of cross-line labels
+  o += txt(sE.x + 16, CY - 9,  'A', cInk, 11, 'start');
+  o += txt(sE.x + 16, CY + 4,  'East', cMut, 9.5, 'start', 'italic');
+  // W - West: name to the left; "Horizon" inside the Ear below the equator
+  o += txt(sW.x - 16, CY - 9,  'W', cInk, 11, 'end');
+  o += txt(sW.x - 16, CY + 4,  'West', cMut, 9.5, 'end', 'italic');
+  o += txt(sW.x + 26,  CY + 17, 'Horizon', cMut, 9, 'start', 'italic');
+
+  o += txt(sO.x+13,  sO.y+5,  'O',  cInk,  11, 'start');
+  o += txt(sC1.x-12, sC1.y+4, 'C1', cBlue, 10, 'end');
+  o += txt(sC2.x-12, sC2.y+4, 'C2', cGrn,  10, 'end');
+  [[sP2,'P2'],[sP4,'P4'],[sP6,'P6'],[sP8,'P8']].forEach(([p,l])=>{
+    o += txt(p.x+9, p.y+4, l, cMut, 9.5, 'start');
+  });
+  if (sSpt) o += txt(sSpt.x-8, sSpt.y-7, 'S', cGld,  10, 'end');
+  if (sRpt) o += txt(sRpt.x-8, sRpt.y-7, 'R', cBlue, 10, 'end');
+  if (sTpt) o += txt(sTpt.x+8, sTpt.y+13,'T', cGrn,  10, 'start');
+  if (sUpt) o += txt(sUpt.x-8, sUpt.y+13,'U', cGld,  10, 'end');
+  if (sVpt)  o += txt(sVpt.x+8,   sVpt.y-5,  'V',  cRed,  10, 'start');
+  if (sWpt)  o += txt(sWpt.x+8,   sWpt.y+12, 'W',  cRed,  10, 'start');
+  if (sV2pt) o += txt(sV2pt.x-8,  sV2pt.y-5, 'V2', cBlue, 10, 'end');
+  if (sW2pt) o += txt(sW2pt.x-8,  sW2pt.y-7, 'W2', cBlue, 10, 'end');
+  o += txt(sXpt.x-8, sXpt.y+13,'X', cInk, 10, 'end');
+  if (sQpt) o += txt(sQpt.x-8, sQpt.y-7, 'Q', cMut, 10, 'end');
+
+  // Cross-line point labels (tiny)
+  for (const p of crossPoints) {
+    const isH = p.lineKind==='H';
+    const above = isH && p.lineVal <= CY;
+    const lx = isH ? p.pt.x : p.pt.x+(p.mx<CX?-8:8);
+    const ly = isH ? p.pt.y+(above?-7:11) : p.pt.y+4;
+    const anc = isH?'middle':(p.mx<CX?'end':'start');
+    o += `<text x="${f2(lx)}" y="${f2(ly)}" font-size="8" fill="${p.col}" font-family="${fam}" font-style="normal" text-anchor="${anc}" pointer-events="none">${p.label}</text>`;
+  }
+
+  // Title pill — pushed up toward viewBox top edge, single combined line
+  const titleY = sZ.y - 60;
+  o += `<rect x="${CX-270}" y="${titleY}" width="540" height="22" rx="4" fill="${cBg}" opacity="0.93"/>`;
+  o += txt(CX, titleY+15, 'Click To Measure  ·  1 pt: identify  ·  2 pts: distance  ·  3 pts: angle + ratio', cInk, 10.5, 'middle');
+
+  // Instructions strip — below Nadir label
+  const instrY = sN.y + 36;
+  o += `<rect x="${CX-200}" y="${instrY}" width="400" height="17" rx="3" fill="${cBg}" opacity="0.87"/>`;
+  o += txt(CX, instrY+11, 'Click a selected point again to deselect  ·  Use Clear in the panel to reset', cMut, 8.5, 'middle', 'italic');
+
+  initGeoMeasure(mR);
+  return o;
+}
+
+// ── GEO MEASURE SYSTEM ───────────────────────────────────────────
+(function() {
+  let sel = [];  // up to 3 selected point IDs (indices into _geoPoints)
+  let _mR = 1;
+
+  window.initGeoMeasure = function(radius) {
+    _mR = radius;
+    sel = [];
+    showGeoFloat();
+    renderGeoPanel();
+  };
+
+  window.geoClick = function(id) {
+    const idx = sel.indexOf(id);
+    if (idx !== -1) {
+      sel.splice(idx, 1);
+    } else {
+      if (sel.length >= 3) sel.shift();
+      sel.push(id);
+    }
+    updateGeoHighlights();
+    renderGeoPanel();
+  };
+
+  window.geoClear = function() {
+    sel = [];
+    updateGeoHighlights();
+    renderGeoPanel();
+  };
+
+  function getDotRadius(p) {
+    if (p.group==='cardinal') return 4.5;
+    if (p.group==='lobe')     return 3.5;
+    if (p.group==='cross')    return 2.5;
+    return 3;
+  }
+
+  function updateGeoHighlights() {
+    const pts = window._geoPoints || [];
+    pts.forEach((p, i) => {
+      const el = document.getElementById('gpt'+i);
+      if (!el) return;
+      const isSel = sel.includes(i);
+      el.setAttribute('stroke', isSel ? '#f9f964' : 'none');
+      el.setAttribute('stroke-width', isSel ? '3' : '0');
+      el.setAttribute('r', isSel ? '6.5' : getDotRadius(p));
+    });
+    // Remove previous measure lines
+    document.querySelectorAll('.geo-mline').forEach(e => e.remove());
+    const pts2 = window._geoPoints || [];
+    const svgEl = document.querySelector('#svgWrap svg, #svgOut svg, svg');
+    if (!svgEl || sel.length < 2) return;
+    // Draw segment line(s)
+    for (let i = 0; i < sel.length-1; i++) {
+      const pa = pts2[sel[i]], pb = pts2[sel[i+1]];
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1',pa.sx); line.setAttribute('y1',pa.sy);
+      line.setAttribute('x2',pb.sx); line.setAttribute('y2',pb.sy);
+      line.setAttribute('stroke','#f9f964');
+      line.setAttribute('stroke-width','1.4');
+      line.setAttribute('stroke-dasharray','5,3');
+      line.setAttribute('pointer-events','none');
+      line.setAttribute('class','geo-mline');
+      svgEl.appendChild(line);
+    }
+  }
+
+  function renderGeoPanel() {
+    const body = document.getElementById('geoFloatBody');
+    if (!body) return;
+    const pts = window._geoPoints || [];
+    const f4  = v => v.toFixed(4);
+    const f2  = v => v.toFixed(2);
+    const PHI = 1.6180339887, phi = 0.6180339887;
+    let html = '';
+
+    // Instruction header
+    html += `<div style="font-size:10px;color:var(--mute);line-height:1.65;border-bottom:1px solid var(--bdr);padding-bottom:8px;margin-bottom:8px">
+      <b style="color:var(--txt);font-size:11px">Click To Measure</b><br>
+      <b>1</b> point &rarr; identify &nbsp;&nbsp;
+      <b>2</b> points &rarr; distance &nbsp;&nbsp;
+      <b>3</b> points &rarr; angle &amp; ratio<br>
+      <span style="font-size:9px">Click a highlighted dot again to deselect.</span>
+    </div>`;
+
+    if (sel.length === 0) {
+      html += `<div style="color:var(--mute);font-size:10.5px;text-align:center;padding:20px 0 12px">No point selected.<br><span style="font-size:9.5px">Click any dot on the diagram.</span></div>`;
+    }
+
+    // ── 1 point: identify ───────────────────────────────────
+    if (sel.length >= 1) {
+      const p = pts[sel[0]];
+      const xR = (p.mx - CX) / _mR, yR = (p.my - CY) / _mR;
+      const dO = Math.hypot(p.mx-CX, p.my-CY) / _mR;
+      html += `<div class="geo-section">
+        <div class="geo-sec-title">Point 1 &mdash; <b>${p.label}</b> (${p.group})</div>
+        <table>
+          <tr><td>x</td><td>${(xR>=0?'+':'')+f4(xR)} R</td></tr>
+          <tr><td>y</td><td>${(yR>=0?'+':'')+f4(yR)} R</td></tr>
+          <tr><td>|O|</td><td>${f4(dO)} R from origin</td></tr>
+          <tr><td>/ phi</td><td>${f4(dO/phi)} &times; &phi;</td></tr>
+          <tr><td>/ Phi</td><td>${f4(dO/PHI)} &times; &Phi;</td></tr>
+        </table></div>`;
+    }
+
+    // ── 2 points: distance ──────────────────────────────────
+    if (sel.length >= 2) {
+      const p0=pts[sel[0]], p1=pts[sel[1]];
+      const dx=p1.mx-p0.mx, dy=p1.my-p0.my;
+      const dist = Math.hypot(dx,dy) / _mR;
+      const angDeg = Math.atan2(-dy,dx)*180/Math.PI;
+      html += `<div class="geo-section">
+        <div class="geo-sec-title">Segment ${p0.label} &rarr; ${p1.label}</div>
+        <table>
+          <tr><td>Length</td><td><b>${f4(dist)}</b> R</td></tr>
+          <tr><td>Angle</td><td>${f2(angDeg)}&deg; from horizontal</td></tr>
+          <tr><td>/ phi</td><td>${f4(dist/phi)} &times; &phi;</td></tr>
+          <tr><td>/ Phi</td><td>${f4(dist/PHI)} &times; &Phi;</td></tr>
+        </table></div>`;
+    }
+
+    // ── 3 points: angle at middle + ratios ──────────────────
+    if (sel.length === 3) {
+      const pA=pts[sel[0]], pB=pts[sel[1]], pC=pts[sel[2]];
+      const bax=pA.mx-pB.mx, bay=pA.my-pB.my;
+      const bcx=pC.mx-pB.mx, bcy=pC.my-pB.my;
+      const dot2 = bax*bcx + bay*bcy;
+      const mA = Math.hypot(bax,bay), mC = Math.hypot(bcx,bcy);
+      const cosA = Math.max(-1,Math.min(1, dot2/(mA*mC)));
+      const angDeg = Math.acos(cosA)*180/Math.PI;
+      const dAB = mA/_mR, dBC = mC/_mR;
+      const ratio = dBC > 0 ? dAB/dBC : null;
+      html += `<div class="geo-section">
+        <div class="geo-sec-title">Angle at ${pB.label}  (${pA.label}-${pB.label}-${pC.label})</div>
+        <table>
+          <tr><td>Angle</td><td><b>${f2(angDeg)}&deg;</b></td></tr>
+          <tr><td>${pA.label}-${pB.label}</td><td>${f4(dAB)} R</td></tr>
+          <tr><td>${pB.label}-${pC.label}</td><td>${f4(dBC)} R</td></tr>
+          ${ratio!=null?`<tr><td>Ratio</td><td>${f4(dAB)} : ${f4(dBC)}</td></tr>`:''}
+          ${ratio!=null?`<tr><td>=</td><td>${f4(ratio)}</td></tr>`:''}
+          ${ratio!=null?`<tr><td>/ phi</td><td>${f4(ratio/phi)}</td></tr>`:''}
+          ${ratio!=null?`<tr><td>/ Phi</td><td>${f4(ratio/PHI)}</td></tr>`:''}
+        </table></div>`;
+    }
+
+    // Clear button
+    html += `<div style="text-align:center;margin-top:12px;padding-top:8px;border-top:1px solid var(--bdr)">
+      <button onclick="geoClear()" style="font-size:10px;padding:4px 20px;background:var(--surf2);border:1px solid var(--bdr);border-radius:5px;color:var(--txt);cursor:pointer;letter-spacing:.04em">Clear</button>
+    </div>`;
+
+    body.innerHTML = html;
+  }
+
+  window.updateGeoFloat = function() {}; // legacy no-op
+})();
 
 function buildVerticalOverlay() {
   // ── Local diagram scale — independent of the live symbol's CX/CY/R,
@@ -1085,14 +1768,25 @@ ${withStars ? genStars() : ''}
 
   // Overlay renders on top of everything; excluded from downloads
   let overlay = '';
+  let fgMode = false;
   if (dlSize === SZ) {
     if (measureMode === 'vertical') overlay = buildVerticalOverlay();
     else if (measureMode === 'segments') overlay = buildSegmentOverlay();
+    else if (measureMode === 'fullgeometry') { overlay = buildFullGeometryOverlay(); fgMode = true; }
+    else hideGeoFloat();
   }
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SZ} ${SZ}" width="${dlSize}" height="${dlSize}">
+  // Full-geometry gets an expanded viewBox so labels outside the Ear have room
+  const FG_PAD = 88;  // px of breathing space on each side
+  const vbStr = fgMode
+    ? `${-FG_PAD} ${-FG_PAD} ${SZ + 2*FG_PAD} ${SZ + 2*FG_PAD}`
+    : `0 0 ${SZ} ${SZ}`;
+  const dimW = fgMode ? dlSize + Math.round(2*FG_PAD * dlSize/SZ) : dlSize;
+  const dimH = dimW;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vbStr}" width="${dimW}" height="${dimH}">
 <defs>${defs}</defs>
-<rect width="${SZ}" height="${SZ}" fill="${S.bg}"/>
+<rect ${fgMode ? `x="${-FG_PAD}" y="${-FG_PAD}" width="${SZ+2*FG_PAD}" height="${SZ+2*FG_PAD}"` : `width="${SZ}" height="${SZ}"`} fill="${S.bg}"/>
 <g clip-path="url(#oc)"${ga}>${hT}${vT}${rT}${core}${rE}${vE}${hE}</g>
 ${overlay}
 </svg>`;
@@ -1327,6 +2021,54 @@ function buildUI(){
   bar.addEventListener('pointercancel',()=>{ drag = null; });
 })();
 
+// ── FULL GEOMETRY FLOAT PANEL ─────────────────────────────────────
+(function(){
+  const panel = document.getElementById('geoFloat');
+  const bar   = document.getElementById('geoFloatBar');
+
+  function defaultPos() {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    panel.style.right  = '300px';
+    panel.style.top    = Math.max(60, Math.round(vh * 0.08)) + 'px';
+    panel.style.left   = 'auto';
+    panel.style.bottom = 'auto';
+  }
+
+  window.hideGeoFloat = function() {
+    panel.style.display = 'none';
+  };
+
+  window.showGeoFloat = function() {
+    panel.style.display = 'block';
+    defaultPos();
+  };
+
+  // Drag logic — same pattern as proxFloat
+  let drag = null;
+  bar.addEventListener('pointerdown', e => {
+    if (e.target === document.getElementById('geoFloatClose')) return;
+    bar.setPointerCapture(e.pointerId);
+    const rect = panel.getBoundingClientRect();
+    drag = { ox: e.clientX - rect.left, oy: e.clientY - rect.top };
+  });
+  bar.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const maxX = vw - panel.offsetWidth - 4;
+    const maxY = vh - panel.offsetHeight - 4;
+    let x = Math.max(4, Math.min(maxX, e.clientX - drag.ox));
+    let y = Math.max(4, Math.min(maxY, e.clientY - drag.oy));
+    panel.style.left  = x + 'px';
+    panel.style.top   = y + 'px';
+    panel.style.right = 'auto';
+  });
+  bar.addEventListener('pointerup',    () => { drag = null; });
+  bar.addEventListener('pointercancel',() => { drag = null; });
+})();
+
+// Populate the geometry float panel with live data.
+// Called as a side-effect from buildFullGeometryOverlay().
+window.updateGeoFloat = window.updateGeoFloat || function(){}; // replaced above
 buildUI();
 applyPreset('classic');
 syncEyeUI();
