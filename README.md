@@ -55,7 +55,7 @@ in the construction). The **Eye Ratio Presets** panel offers several
 (⅓, ¼, 5⁄21,) and a free-form equation box to explore
 other ratios (supports `phi`, `Phi`, `Pi`,  e , tau ,`sqrt()`, and arithmetic).
 
-### The two measurement overlays
+### The three measurement overlays
 
 - **Vertical Line Ratios** — reads the symbol from apex to base along
   the vertical axis, showing segment length and its cumulative
@@ -66,6 +66,13 @@ other ratios (supports `phi`, `Phi`, `Pi`,  e , tau ,`sqrt()`, and arithmetic).
   exact φ/Φ relationships that exist independent of eye size, plus the
   two live points (E, F) where that same line crosses the Eye's own
   boundary.
+- **Measure** — an interactive click-to-measure mode. Clicking points
+  directly on the symbol accumulates measurements in a floating panel:
+  one click identifies the nearest named construction point, two clicks
+  report the distance between them (expressed as a multiple of `R`), and
+  three clicks compute the angle at the middle point along with the ratio
+  of the two flanking segments. The panel can be dragged anywhere on
+  screen and cleared between measurements.
 
 ---
 
@@ -74,9 +81,9 @@ other ratios (supports `phi`, `Phi`, `Pi`,  e , tau ,`sqrt()`, and arithmetic).
 This tool was generated with the assistance of **Claude**, an AI assistant
 made by [Anthropic](https://www.anthropic.com). The interactive Yin Yang
 Generator — including the golden-ratio construction logic, measurement
-overlays, color presets, equation input, and PNG/SVG export — was built
-through a collaborative conversation with Claude, which handled the geometry,
-the code, and the documentation.
+overlays, color presets, equation input, and PNG/JPG export — was built
+through a series of collaborative conversations between Giacomo Aureo and Claude. Claude was tasked with the geometry,
+the code, and the documentation, however Grok/XaI, ChatGPT, and Gemini also made contributions in math and code audits.
 
 ### Special thanks to the Geometers
 
