@@ -171,5 +171,5 @@ no other steps needed.
 
 You can also just double-click `index.html` to open it in any modern
 browser — no server, no internet connection, and no install required.
-Everything (rendering, color presets, PNG/SVG export) runs entirely in
+Everything (rendering, color presets, PNG/JPG export) runs entirely in
 the page.
