@@ -304,7 +304,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <dt data-tier="vicinal">Vicinal <span class="tier-pct">(within ±5%)</span></dt>
       <dd>In the neighbourhood. "Vicinal" is borrowed from crystallography, where it describes a face or ratio just off a principal plane.</dd>
     </dl>
-    <p class="prox-note">Powers of Φ and φ are checked up to the 6th power. Fibonacci sequence ratios, simple harmonic fractions (½, ⅓, ⅝ …), geometric constants (√2, √3, √5-based), and transcendental ratios (π and e based) are also catalogued.</p>
+    <p class="prox-note">Powers of Φ and φ are checked up to the 9th power. Fibonacci sequence ratios, simple harmonic fractions (½, ⅓, ⅝ …), geometric constants (√2, √3, √5-based), and transcendental ratios (π and e based) are also catalogued.</p>
   </div>
 </div>
 
@@ -394,8 +394,8 @@ function classifyRatio(ratio){
   if(!isFinite(ratio)||ratio<=0)return null;
   const cat=[];
   // SUPS[0] unused; SUPS[1]='' intentional — Φ¹ displays as 'Φ', not 'Φ¹'
-  const SUPS=['','','²','³','⁴','⁵','⁶'];
-  for(let n=1;n<=6;n++){
+  const SUPS=['','','²','³','⁴','⁵','⁶','⁷','⁸','⁹'];
+  for(let n=1;n<=9;n++){
     const Pn=Math.pow(BIG_PHI,n),pn=Math.pow(LIT_phi,n),sup=SUPS[n]||'';
     if(Pn>=0.01&&Pn<=0.995)cat.push({val:Pn,sym:`Φ${sup}`,base:'Phi'});
     if(pn>=0.01&&pn<=0.995)cat.push({val:pn,sym:`φ${sup}`,base:'phi'});
