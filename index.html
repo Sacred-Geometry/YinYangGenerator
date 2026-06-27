@@ -911,15 +911,15 @@ function buildVerticalOverlay(){
   o+=`<text x="${((gutter+panelW)/2).toFixed(1)}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">SEGMENT LENGTH</text>`;
   o+=`<text x="${(rightX+(panelW+gutter)/2).toFixed(1)}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">FROM APEX</text>`;
   o+=`<text x="${oCX}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">R = Symbol / Ear Radius (set to 1)  ·  r = Eye Radius (adjustable)</text>`;
-  o+=`<g opacity="0.18"><clipPath id="ocOverlay"><circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}"/></clipPath>`;
-  o+=`<g clip-path="url(#ocOverlay)">`;
+  o+=`<defs><clipPath id="ocOverlay"><circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}"/></clipPath></defs>`;
+  o+=`<g opacity="0.18"><g clip-path="url(#ocOverlay)">`;
   o+=`<circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}" fill="${cYin}"/>`;
   o+=`<rect x="${(oCX-oR).toFixed(2)}" y="${tY.toFixed(2)}" width="${oR.toFixed(3)}" height="${(2*oR).toFixed(2)}" fill="${cYang}"/>`;
   o+=`<circle cx="${oCX}" cy="${(oCY-oLR).toFixed(2)}" r="${oLR.toFixed(3)}" fill="${cYang}"/>`;
   o+=`<circle cx="${oCX}" cy="${(oCY+oLR).toFixed(2)}" r="${oLR.toFixed(3)}" fill="${cYin}"/>`;
   o+=`<circle cx="${oCX}" cy="${(oCY-oLR).toFixed(2)}" r="${oER.toFixed(4)}" fill="${cYin}"/>`;
   o+=`<circle cx="${oCX}" cy="${(oCY+oLR).toFixed(2)}" r="${oER.toFixed(4)}" fill="${cYang}"/>`;
-  o+=`</g></g>`;
+  o+=`</g></g></g>`;
   o+=`<circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}" fill="none" stroke="${cMut}" stroke-width="0.65" opacity="0.45"/>`;
   o+=`<line x1="${oCX}" y1="${tY.toFixed(2)}" x2="${oCX}" y2="${bY.toFixed(2)}" stroke="${cMut}" stroke-width="0.55" stroke-dasharray="3,4"/>`;
   o+=`<line x1="${leftX.toFixed(1)}" y1="${tY.toFixed(2)}" x2="${rightX.toFixed(1)}" y2="${tY.toFixed(2)}" stroke="${cMut}" stroke-width="0.4" stroke-dasharray="2,6" opacity="0.45"/>`;
@@ -1130,10 +1130,14 @@ function triggerDownload(dataUriOrBlob,filename){
 function snapScreenshot(){
   const svgEl=document.querySelector('#svgwrap svg');
   if(!svgEl){alert('No SVG to capture.');return;}
-  const vb=svgEl.getAttribute('viewBox')||`0 0 ${SZ} ${SZ}`;
   const W=DL_SIZE,H=DL_SIZE;
-  const fullSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" width="${W}" height="${H}">${svgEl.innerHTML}</svg>`;
-  const uri='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(fullSvg);
+  // Clone so the live canvas is untouched, then resize for download
+  const clone=svgEl.cloneNode(true);
+  clone.setAttribute('width',W); clone.setAttribute('height',H);
+  // XMLSerializer preserves all namespace declarations (xmlns:xlink etc.)
+  // — more reliable than hand-building from innerHTML for overlay content
+  const svgStr=new XMLSerializer().serializeToString(clone);
+  const uri='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgStr);
   const img=new Image();
   img.onload=()=>{
     const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
