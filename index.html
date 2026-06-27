@@ -3,13 +3,12 @@
   Yin Yang Generator — Golden Ratio Geometry
   Repository: https://github.com/Sacred-Geometry/YinYangGenerator
   Live tool:  https://sacred-geometry.github.io/YinYangGenerator/
-  (Served via GitHub Pages from the repo root; this file is index.html.)
 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Yin Yang Generator — an interactive golden-ratio (φ/Φ) construction tool with adjustable eye size, color presets, measurement overlays, and SVG/PNG export.">
+<meta name="description" content="Yin Yang Generator — an interactive golden-ratio (φ/Φ) construction tool with adjustable eye size, color presets, measurement overlays, UI scaling, and SVG/PNG export.">
 <title>Yin Yang Generator — Golden Ratio Geometry</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -33,26 +32,23 @@ header{flex-shrink:0;padding:10px 18px;background:var(--surf);border-bottom:1px 
 .htog{background:var(--surf2);border:1px solid var(--bdr);color:var(--mute);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.04em;transition:border-color .15s,background .15s,color .15s;white-space:nowrap}
 .htog:hover{border-color:var(--gold);color:var(--txt)}
 .htog.on{border-color:var(--gold);background:var(--goldA);color:var(--gold)}
-.layout{flex:1;display:grid;grid-template-columns:1fr 292px;min-height:0}
+.hsel{background:var(--surf2);border:1px solid var(--bdr);color:var(--mute);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.03em;transition:border-color .15s,background .15s,color .15s}
+.hsel:hover{border-color:var(--gold)}
+.hsel.on{border-color:var(--gold);background:var(--goldA);color:var(--gold)}
+/* Screenshot button */
+.snap-btn{background:var(--surf2);border:1px solid var(--bdr);color:var(--mute);padding:5px 9px;border-radius:6px;cursor:pointer;font-size:14px;line-height:1;transition:border-color .15s,background .15s,color .15s}
+.snap-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--goldA)}
+.layout{flex:1;display:grid;grid-template-columns:1fr var(--panel-w,292px);min-height:0}
 .canvas{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:10px;overflow:hidden}
 #svgwrap{display:flex;align-items:center;justify-content:center;flex:1;width:100%;min-height:0}
 #svgwrap svg{max-width:min(100%,calc(100vh - 148px));max-height:min(100%,calc(100vh - 148px));width:auto;height:auto;display:block}
 .phifooter{background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:7px 18px;font-family:'SF Mono','Fira Code','Courier New',monospace;font-size:11px;color:var(--gold);letter-spacing:.03em;flex-shrink:0;text-align:center;line-height:1.9}
 .phifooter .f1{color:var(--mute)}
 .phifooter .f2{color:var(--gold)}
-.phifooter .f3{color:#A08858;font-size:10.5px}
+.phifooter .f3{color:var(--gold)}
 .phifooter .f4{color:var(--mute);font-size:10px;margin-top:2px}
 .phifooter .f4 a{color:inherit;text-decoration:none;border-bottom:1px dotted currentColor}
 .phifooter .f4 a:hover{color:var(--gold)}
-.phifooter .fprox{font-size:10.5px;margin-top:1px;letter-spacing:.03em;transition:color .2s}
-.phifooter .fprox[data-tier="exact"]     {color:#C8A876}
-.phifooter .fprox[data-tier="near-exact"]{color:#B09868}
-.phifooter .fprox[data-tier="adjacent"]  {color:#A89060}
-.phifooter .fprox[data-tier="near"]      {color:#8C7858}
-.phifooter .fprox[data-tier="vicinal"]   {color:#706050}
-.phifooter .fprox[data-tier=""]          {color:var(--mute)}
-/* Inline proximity span inside ftLabel */
-/* Inline proximity span inside ftLabel */
 .prox-inline{transition:color .2s;color:inherit}
 .prox-inline[data-tier="exact"]     {color:inherit}
 .prox-inline[data-tier="near-exact"]{color:inherit}
@@ -83,12 +79,11 @@ header{flex-shrink:0;padding:10px 18px;background:var(--surf);border-bottom:1px 
 .dbtn{background:#906c22;border:1px solid var(--gold);color:#FFF8EC;padding:9px 5px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.06em;text-align:center;transition:background .15s,color .15s}
 .dbtn:hover{background:var(--gold);color:#0E0A00}
 .dbtn:disabled{opacity:.45;cursor:not-allowed}
+.cbtn{background:var(--surf2);border:1px solid var(--bdr);color:var(--txt);padding:8px 5px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.03em;text-align:center;transition:border-color .15s,background .15s,color .15s;line-height:1.3}
+.cbtn:hover{border-color:var(--gold);background:var(--surf3);color:var(--gold)}
 .rinfo{margin-top:7px;text-align:center;font-size:11px;color:var(--mute);font-family:'SF Mono','Courier New',monospace}
 .div{border:none;border-top:1px solid var(--bdr)}
 .dlnote{font-size:10px;color:var(--mute);text-align:center;margin-top:6px;line-height:1.5}
-.hsel{background:var(--surf2);border:1px solid var(--bdr);color:var(--mute);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.03em;transition:border-color .15s,background .15s,color .15s}
-.hsel:hover{border-color:var(--gold)}
-.hsel.on{border-color:var(--gold);background:var(--goldA);color:var(--gold)}
 .eyebox{display:flex;flex-direction:column;gap:9px}
 .eyeval{display:flex;align-items:baseline;justify-content:space-between;font-family:'SF Mono','Fira Code','Courier New',monospace}
 .eyeval .ev-lbl{font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
@@ -113,32 +108,18 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .epbtn b{display:block;font-size:12px}
 .epbtn small{display:block;font-size:9px;color:var(--mute);font-family:'SF Mono','Fira Code','Courier New',monospace}
 .epbtn.on small{color:var(--gold)}
-/* ── Proximity Float Panel ───────────────────────────────────────── */
-#proxFloat{
-  position:fixed;z-index:900;width:320px;max-width:calc(100vw - 32px);
-  background:var(--surf);border:1px solid var(--gold2);border-radius:10px;
-  box-shadow:0 8px 32px rgba(0,0,0,.45);overflow:hidden;
-  font-size:12px;line-height:1.6;color:var(--txt);
-}
-#proxFloatBar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:9px 13px;background:var(--surf2);border-bottom:1px solid var(--bdr);
-  cursor:grab;user-select:none;
-}
+
+/* ── Proximity Float Panel ─────────────────── */
+#proxFloat{position:fixed;z-index:900;width:320px;max-width:calc(100vw - 32px);background:var(--surf);border:1px solid var(--gold2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.45);overflow:hidden;font-size:12px;line-height:1.6;color:var(--txt)}
+#proxFloatBar{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:var(--surf2);border-bottom:1px solid var(--bdr);cursor:grab;user-select:none}
 #proxFloatBar:active{cursor:grabbing}
 #proxFloatTitle{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
-#proxFloatClose{
-  background:none;border:none;color:var(--mute);cursor:pointer;
-  font-size:13px;line-height:1;padding:0 2px;transition:color .15s
-}
+#proxFloatClose{background:none;border:none;color:var(--mute);cursor:pointer;font-size:13px;line-height:1;padding:0 2px;transition:color .15s}
 #proxFloatClose:hover{color:var(--txt)}
 #proxFloatBody{padding:14px 15px;display:flex;flex-direction:column;gap:10px;max-height:70vh;overflow-y:auto}
 #proxFloatBody p{color:var(--txt);font-size:12px}
 #proxFloatBody dl{display:flex;flex-direction:column;gap:7px;margin:0}
-#proxFloatBody dt{
-  font-family:'SF Mono','Fira Code','Courier New',monospace;
-  font-size:11px;font-weight:700;letter-spacing:.04em;margin-bottom:1px;
-}
+#proxFloatBody dt{font-family:'SF Mono','Fira Code','Courier New',monospace;font-size:11px;font-weight:700;letter-spacing:.04em;margin-bottom:1px}
 #proxFloatBody dt[data-tier="exact"]      {color:#C8A876}
 #proxFloatBody dt[data-tier="near-exact"] {color:#B09868}
 #proxFloatBody dt[data-tier="adjacent"]   {color:#A89060}
@@ -149,58 +130,37 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .prox-note{font-size:11px;color:var(--mute);border-top:1px solid var(--bdr);padding-top:9px;margin-top:2px}
 #proxInfoBtn:hover{border-color:var(--gold);color:var(--gold)}
 #proxInfoBtn.on{border-color:var(--gold);background:var(--goldA);color:var(--gold)}
-/* ── Full Geometry Float Panel ───────────────────────────────────── */
-#geoFloat{
-  position:fixed;z-index:900;width:370px;max-width:calc(100vw - 32px);
-  background:var(--surf);border:1px solid var(--gold2);border-radius:10px;
-  box-shadow:0 8px 32px rgba(0,0,0,.45);overflow:hidden;
-  font-size:12px;line-height:1.5;color:var(--txt);
-  display:none;
-}
-#geoFloatBar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:9px 13px;background:var(--surf2);border-bottom:1px solid var(--bdr);
-  cursor:grab;user-select:none;
-}
+
+/* ── Full Geometry Float Panel ─────────────── */
+#geoFloat{position:fixed;z-index:900;width:380px;max-width:calc(100vw - 32px);background:var(--surf);border:1px solid var(--gold2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.45);overflow:hidden;font-size:12px;line-height:1.5;color:var(--txt);display:none}
+#geoFloatBar{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:var(--surf2);border-bottom:1px solid var(--bdr);cursor:grab;user-select:none}
 #geoFloatBar:active{cursor:grabbing}
 #geoFloatTitle{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
-#geoFloatClose{
-  background:none;border:none;color:var(--mute);cursor:pointer;
-  font-size:13px;line-height:1;padding:0 2px;transition:color .15s
-}
+#geoFloatClose{background:none;border:none;color:var(--mute);cursor:pointer;font-size:13px;line-height:1;padding:0 2px;transition:color .15s}
 #geoFloatClose:hover{color:var(--txt)}
-#geoFloatBody{padding:10px 13px 13px;max-height:72vh;overflow-y:auto}
+#geoFloatBody{padding:10px 13px 13px;max-height:78vh;overflow-y:auto}
 #geoFloatBody .geo-section{margin-bottom:10px}
 #geoFloatBody .geo-section:last-child{margin-bottom:0}
-#geoFloatBody .geo-sec-title{
-  font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--mute);margin-bottom:5px;padding-bottom:3px;
-  border-bottom:1px solid var(--bdr);
-}
+#geoFloatBody .geo-sec-title{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid var(--bdr)}
 #geoFloatBody table{width:100%;border-collapse:collapse}
-#geoFloatBody td{
-  padding:2px 4px;font-size:11px;
-  font-family:system-ui,-apple-system,'Segoe UI',sans-serif;
-  font-variant-emoji:text;
-  vertical-align:top;
-}
-#geoFloatBody td:first-child{
-  color:var(--gold);font-weight:700;width:28px;text-align:right;
-  padding-right:8px;white-space:nowrap;
-  font-family:'SF Mono','Fira Code','Courier New',monospace;
-  font-variant-emoji:text;
-}
-#geoFloatBody td:nth-child(2){
-  color:var(--txt);width:140px;white-space:nowrap;
-  font-family:system-ui,-apple-system,'Segoe UI',sans-serif;
-  font-variant-emoji:text;
-}
-#geoFloatBody td:nth-child(3){
-  color:var(--mute);font-size:10.5px;
-  font-family:'SF Mono','Fira Code','Courier New',monospace;
-  font-variant-emoji:text;
-}
+#geoFloatBody td{padding:2px 4px;font-size:11px;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;vertical-align:top}
+#geoFloatBody td:first-child{color:var(--gold);font-weight:700;width:28px;text-align:right;padding-right:8px;white-space:nowrap;font-family:'SF Mono','Fira Code','Courier New',monospace}
+#geoFloatBody td:nth-child(2){color:var(--txt);width:140px;white-space:nowrap}
+#geoFloatBody td:nth-child(3){color:var(--mute);font-size:10.5px;font-family:'SF Mono','Fira Code','Courier New',monospace}
 #geoFloatBody tr:hover td{background:var(--surf2)}
+/* History table inside geo float */
+.hist-table{width:100%;border-collapse:collapse;font-size:10px;font-family:'SF Mono','Fira Code','Courier New',monospace;margin-top:4px}
+.hist-table th{color:var(--mute);font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 5px;border-bottom:1px solid var(--bdr);text-align:left;font-size:9px}
+.hist-table td{padding:3px 5px;color:var(--txt);border-bottom:1px solid rgba(100,100,100,.1);vertical-align:top;font-size:10px}
+.hist-table tr:hover td{background:var(--surf2)}
+
+/* ── UI Scale (replaces magnifier) ──────────── */
+/* Scaling is applied via CSS zoom on .panel only for the control panel,
+   and font-size scaling on the phifooter. The SVG canvas is untouched.
+   The scale select in the header drives these. */
+.panel{transition:font-size .15s;}
+.phifooter{transition:font-size .15s;}
+
 @media(max-width:680px){
   html,body{overflow:auto}
   .layout{grid-template-columns:1fr}
@@ -214,16 +174,8 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 
 <header>
 <div class="hico">
-  <!--
-    Box is square. Inside it the yin-yang circle has the same proportions
-    as the live generator: R = (half-size)·√2/Φ  →  circle fills ≈87.4%
-    of the half-width, leaving a golden-ratio margin to each corner.
-    Box side = 38px  →  half = 19  →  R = 19·√2/1.61803 ≈ 16.60px
-  -->
   <svg viewBox="0 0 38 38" width="38" height="38" xmlns="http://www.w3.org/2000/svg" style="display:block;border-radius:0">
-    <!-- Background square -->
     <rect width="38" height="38" fill="#e9e9de"/>
-    <!-- Yin-yang symbol, centred at (19,19), R≈16.60 -->
     <g transform="translate(19,19)">
       <clipPath id="hico-clip"><circle r="16.60"/></clipPath>
       <circle r="16.60" fill="#220d59"/>
@@ -235,29 +187,36 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
     </g>
   </svg>
 </div>
-  <div class="htxt">
-    <h1>Yin Yang Generator</h1>
-    <p>Symbol Radius = 1 &nbsp;·&nbsp; Lobe Radii = 1⁄2 &nbsp;·&nbsp; Eye Radii - Adjustable &nbsp;&nbsp;|&nbsp;&nbsp; Area constants: Lobe∶Symbol = 1/4 &nbsp;·&nbsp; Symbol ≈ <span id="hSymPx">—</span> px² &nbsp;·&nbsp; Each Lobe ≈ <span id="hLobePx">—</span> px²</p>
-  </div>
-  <div class="hbtns">
-    <button class="htog on" id="ldBtn" onclick="toggleTheme()">◑ Dark</button>
-    <select class="hsel" id="measureSel" onchange="setMeasureMode(this.value)">
-      <option value="off">Measurements: Off</option>
-      <option value="vertical">Vertical Line Ratios</option>
-      <option value="segments">Other Segments</option>
-      <option value="fullgeometry">Measure</option>
-    </select>
-  </div>
+<div class="htxt">
+  <h1>Yin Yang Generator</h1>
+  <p>Symbol Radius = 1 &nbsp;·&nbsp; Lobe Radii = 1⁄2 &nbsp;·&nbsp; Eye Radii - Adjustable &nbsp;&nbsp;|&nbsp;&nbsp; Area Constants: Lobe∶Symbol = 1⁄4 &nbsp;·&nbsp; Symbol∶Box = π⁄(2Φ²) ≈ 0.600 &nbsp;&nbsp;|&nbsp;&nbsp; Symbol ≈ <span id="hSymPx">—</span> px² &nbsp;·&nbsp; Each Lobe ≈ <span id="hLobePx">—</span> px² &nbsp;·&nbsp; Box = <span id="hBoxPx">—</span> px²</p>
+</div>
+<div class="hbtns">
+  <button class="htog on" id="ldBtn" onclick="toggleTheme()">◑ Dark</button>
+  <select class="hsel" id="measureSel" onchange="setMeasureMode(this.value)">
+    <option value="off">Measurements: Off</option>
+    <option value="vertical">Vertical Line Ratios</option>
+    <option value="segments">Other Segments</option>
+    <option value="measure">Measure</option>
+  </select>
+  <select class="hsel" id="scaleSel" onchange="setUIScale(this.value)" title="Panel &amp; footer font size">
+    <option value="1">𝐓 Scale: Normal</option>
+    <option value="1.15">𝐓 Scale: +15%</option>
+    <option value="1.3">𝐓 Scale: +30%</option>
+    <option value="1.5">𝐓 Scale: +50%</option>
+    <option value="0.88">𝐓 Scale: −12%</option>
+  </select>
+  <button class="snap-btn" onclick="snapScreenshot()" title="Snap Screenshot">📷</button>
+</div>
 </header>
 
 <div class="layout">
-  <div class="canvas">
+  <div class="canvas" id="canvasArea">
     <div id="svgwrap"></div>
     <div class="phifooter">
       <div class="f2" id="ftLabel">Eye Radius = Lobe Radius × φ³</div>
       <div class="f3" id="ftRatio">Eye∶Lobe Radii Ratio &nbsp;~&nbsp; 0.236067977 &nbsp;·&nbsp; ≈ frac</div>
       <div class="f3" id="ftAreas" style="margin-top:1px">Eye∶Lobe area = — &nbsp;·&nbsp; Eye∶Symbol area = —</div>
-      <div class="f1" id="ftFixed">Symbol area = πR² &nbsp;·&nbsp; Lobe area = π(R/2)² &nbsp;·&nbsp; Combined Ear = 2πR²</div>
       <div class="f4"><a href="https://github.com/Sacred-Geometry/YinYangGenerator" target="_blank" rel="noopener">github.com/Sacred-Geometry/YinYangGenerator</a></div>
     </div>
   </div>
@@ -275,14 +234,13 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
         </div>
         <input type="range" id="eyeSlider" min="1" max="100" step="1" value="24">
         <div class="srow"><span>1 · tiny dot</span><span>100 · touches lobe edge</span></div>
-
         <div class="slbl" style="margin:6px 0 2px">Equation Input</div>
         <div class="eqrow">
           <input type="text" id="eyeEq" placeholder="Phi^2/10" spellcheck="false">
           <button onclick="applyEyeEquation()">Apply</button>
         </div>
         <div class="eqnote" id="eqnote"></div>
-        <div class="eyeph"><b style="color:var(--txt)">Key Variables:</b> &nbsp;<b>Φ</b> Phi (≈1.618) &nbsp;·&nbsp; <b>φ</b> phi (≈0.618) &nbsp;·&nbsp; <b>π</b> Pi (≈3.14159) &nbsp;·&nbsp; <b>e</b> Euler (≈2.718) &nbsp;·&nbsp; <b>τ</b> tau (≈6.283) &nbsp;·&nbsp; <b>sqrt()</b><br>Result sets r = R<sub>lobe</sub> × expression.</div>
+        <div class="eyeph"><b style="color:var(--txt)">Key Variables:</b> &nbsp;<b>Φ</b> Phi (≈1.618) &nbsp;·&nbsp; <b>φ</b> phi (≈0.618) &nbsp;·&nbsp; <b>π</b> Pi &nbsp;·&nbsp; <b>e</b> Euler &nbsp;·&nbsp; <b>τ</b> tau &nbsp;·&nbsp; <b>sqrt()</b><br>Result sets r = R<sub>lobe</sub> × expression.</div>
       </div>
     </div>
     <hr class="div">
@@ -311,6 +269,15 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       </div>
       <div class="dlnote" id="dlnote"></div>
     </div>
+    <hr class="div">
+    <div>
+      <div class="slbl">Export Data</div>
+      <div class="g2">
+        <button class="cbtn" onclick="exportConfigCSV()">⬇ Config CSV</button>
+        <button class="cbtn" onclick="exportMeasureCSV()">⬇ Measure CSV</button>
+      </div>
+      <div class="dlnote" id="csvnote"></div>
+    </div>
   </div>
 </div>
 
@@ -324,17 +291,17 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
     <p>As you adjust the eye size, the tool checks whether the current ratio is <em>near</em> a mathematically notable value — a power of φ or Φ, a Fibonacci ratio, a harmonic fraction, or a geometric/transcendental constant. The match is labelled by how close it is:</p>
     <dl>
       <dt data-tier="exact">Exact <span class="tier-pct">(within ~1 billionth)</span></dt>
-      <dd>The ratio is computationally indistinguishable from the known value at double-precision floating point. Whether arrived at by preset, equation, or slider, the math says it <em>is</em> that value. To ensure precision, use a formula in the Equation Input such as Phi/6 or phi^3.</dd>
+      <dd>The ratio is computationally indistinguishable from the known value at double-precision. Use a formula in Equation Input such as Phi/6 or phi^3 to ensure precision.</dd>
       <dt data-tier="near-exact">Near-Exact <span class="tier-pct">(within ±0.1%)</span></dt>
-      <dd>Extremely close — well within any perceptible difference visually or in print. The relationship is almost certainly intentional, and the ratio could serve as a practical stand-in for the known value.</dd>
+      <dd>Extremely close — well within any perceptible visual difference. The ratio could serve as a practical stand-in for the known value.</dd>
       <dt data-tier="adjacent">Adjacent <span class="tier-pct">(within ±0.5%)</span></dt>
-      <dd>Clearly related. The deviation is small enough that the proportions feel the same, though a careful measurement would reveal it. Useful as a near-substitute when the exact value is inconvenient.</dd>
+      <dd>Clearly related. The deviation is small enough that the proportions feel the same, though a careful measurement would reveal it.</dd>
       <dt data-tier="near">Near <span class="tier-pct">(within ±2%)</span></dt>
-      <dd>A visible family resemblance. The ratio shares the character of the reference value — proportions will feel related but not identical under scrutiny.</dd>
+      <dd>A visible family resemblance. The ratio shares the character of the reference value.</dd>
       <dt data-tier="vicinal">Vicinal <span class="tier-pct">(within ±5%)</span></dt>
-      <dd>In the neighbourhood. The human eye may not distinguish this from the reference, but the difference is measurable. "Vicinal" is borrowed from crystallography, where it describes a face or ratio just off a principal plane, or "in the vicinity of."</dd>
+      <dd>In the neighbourhood. "Vicinal" is borrowed from crystallography, where it describes a face or ratio just off a principal plane.</dd>
     </dl>
-    <p class="prox-note">Powers of Φ and φ are checked up to the 9th power. Fibonacci sequence ratios above F(3) naturally converge toward φ and Φ and will appear here. Other catalogued values include simple harmonic fractions (½, ⅓, ⅝ …), geometric constants (√2, √3, √5-based), and transcendental ratios (π and e based).</p>
+    <p class="prox-note">Powers of Φ and φ are checked up to the 6th power. Fibonacci sequence ratios, simple harmonic fractions (½, ⅓, ⅝ …), geometric constants (√2, √3, √5-based), and transcendental ratios (π and e based) are also catalogued.</p>
   </div>
 </div>
 
@@ -342,1452 +309,734 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 <div id="geoFloat" role="dialog" aria-label="Measure · Intersection Points">
   <div id="geoFloatBar">
     <span id="geoFloatTitle">Measure &middot; Intersection Points</span>
-    <button id="geoFloatClose" onclick="hideGeoFloat()" title="Close">[close]</button>
+    <button id="geoFloatClose" onclick="hideGeoFloat()" title="Close">✕</button>
   </div>
-  <div id="geoFloatBody">
-    <!-- populated by updateGeoFloat() -->
-  </div>
+  <div id="geoFloatBody"></div>
 </div>
 
 <script>
 // ── GOLDEN RATIO CONSTANTS ────────────────────────────────────────
-// User convention: Φ (uppercase) = 1.618…, φ (lowercase) = 0.618…
 const BIG_PHI  = (1 + Math.sqrt(5)) / 2;   // Φ ≈ 1.618034
 const LIT_phi  = 1 / BIG_PHI;              // φ ≈ 0.618034
 
-// Eye radius is now a live-adjustable fraction of the LOBE radius:
-//   r_eye = R_lobe · S.eyeRatio
-// Default per spec: φ³ (lowercase — the small golden-ratio power, ≈0.236)
-const DEFAULT_EYE_RATIO = Math.pow(LIT_phi, 3);   // ≈ 0.236067977
-const EYE_RATIO_MIN = 0.01;     // 1  on the slider — a tiny dot
-const EYE_RATIO_MAX = 0.995;    // 100 on the slider — almost touches the lobe edge
+const DEFAULT_EYE_RATIO = Math.pow(LIT_phi, 3);
+const PANEL_W = 292; // sync with CSS .layout grid-template-columns
+const EYE_RATIO_MIN = 0.01;
+const EYE_RATIO_MAX = 0.995;
 
 // ── SVG COORDINATE SPACE ──────────────────────────────────────────
-const SZ = 600;   // viewBox side (square)
-const CX = 300;   // center x
-const CY = 300;   // center y
-
-// Phi-geometric background square padding:
-//   centre → Ear (outer circle) : Ear → corner  =  1 : φ
-//   (SZ/2)·√2  =  R_ear·Φ   →   R_ear = (SZ/2)·√2 / Φ
-const R  = (SZ / 2) * Math.SQRT2 / BIG_PHI;  // Ear radius   ≈ 262.214
-const LR = R / 2;                              // Lobe radius  ≈ 131.107
-function getER(){ return LR * S.eyeRatio; }    // Eye radius — live
+const SZ = 1000;
+const CX = 500, CY = 500;
+// Phi-geometric radius: R = (SZ/2)·√2 / Φ  ≈ 437.016 px
+const R  = (SZ / 2) * Math.SQRT2 / BIG_PHI;  // ≈ 437.016 px
+const LR = R / 2;
+function getER(){ return LR * S.eyeRatio; }
 
 // ── FILL CONSTRUCTORS ─────────────────────────────────────────────
 const solid = c => ({type:'solid', color:c});
-const lg = (stops, x1=CX-R, y1=CY-R, x2=CX+R, y2=CY+R) =>
-  ({type:'lg', stops, x1, y1, x2, y2});
-const rg = (stops, gcx=CX, gcy=CY, gr=R*1.3) =>
-  ({type:'rg', stops, gcx, gcy, gr});
+const lg = (stops, x1=CX-R, y1=CY-R, x2=CX+R, y2=CY+R) => ({type:'lg', stops, x1, y1, x2, y2});
+const rg = (stops, gcx=CX, gcy=CY, gr=R*1.3) => ({type:'rg', stops, gcx, gcy, gr});
 
 // ── PRESETS ───────────────────────────────────────────────────────
 const PRESETS = {
-  classic: {
-    label:'☯ Classic', bg:'#F5F5DC',
-    f:{ lobe1:solid('#FFFFFF'), lobe2:solid('#000000'),
-        eye1:solid('#000000'), eye2:solid('#FFFFFF') }
-  },
-  sunset: {
-    label:'🌅 Twilight', bg:'#130292',
-    f:{
-      lobe1: lg([{p:0,c:'#FF2020'},{p:45,c:'#FF8800'},{p:100,c:'#FFE400'}]),
-      lobe2: lg([{p:0,c:'#2020FF'},{p:45,c:'#9900CC'},{p:100,c:'#00BBFF'}], CX+R, CY-R, CX-R, CY+R),
-      eye1: solid('#880000'),
-      eye2: solid('#000088')
-    }
-  },
-    midnight: {
-    label:'🌌 Night Sky', bg:'#0c0b32', stars:true,
-    f:{
-      lobe1: rg([{p:0,c:'#3A5EA8'},{p:35,c:'#1C2E62'},{p:70,c:'#0D1538'},{p:100,c:'#060C1E'}], CX, CY-LR, R*1.3),
-      lobe2: rg([{p:0,c:'#0A0A1C'},{p:55,c:'#050512'},{p:100,c:'#020208'}], CX, CY+LR, R*1.2),
-      eye1: solid('#FFD700'),
-      eye2: solid('#8890FF')
-    }
-  },
-  gold: {
-    label:'✨ Gold & Silver', bg:'#fcfcfc',
-    f:{
-      lobe1: lg([{p:0,c:'#6B4400'},{p:22,c:'#C47A08'},{p:45,c:'#FFE870'},{p:68,c:'#C47A08'},{p:100,c:'#6B4400'}]),
-      lobe2: lg([{p:0,c:'#2C2C2C'},{p:22,c:'#A0A0A0'},{p:45,c:'#EEEEEE'},{p:68,c:'#A0A0A0'},{p:100,c:'#2C2C2C'}], CX+R, CY-R, CX-R, CY+R),
-      eye1: solid('#C0C8D2'),
-      eye2: solid('#C89000')
-    }
-  },
-  fireice: {
-    label:'🔥 Fire & Ice', bg:'#1c1c4f',
-    f:{
-      lobe1: rg([{p:0,c:'#FF9900'},{p:38,c:'#FF2200'},{p:75,c:'#880000'},{p:100,c:'#3A0000'}], CX, CY-LR, R*1.1),
-      lobe2: rg([{p:0,c:'#00EEFF'},{p:38,c:'#0055FF'},{p:75,c:'#000088'},{p:100,c:'#000020'}], CX, CY+LR, R*1.1),
-      eye1: solid('#FFFF00'),
-      eye2: solid('#AAFFFF')
-    }
-  },
-  zen: {
-    label:'🪨 Zen Garden', bg:'#D4B896',
-    f:{ lobe1:solid('#F0E8D8'), lobe2:solid('#2C4220'),
-        eye1:solid('#5C3810'), eye2:solid('#8AB880') }
-  }
+  classic:{label:'☯ Classic',bg:'#F5F5DC',f:{lobe1:solid('#FFFFFF'),lobe2:solid('#000000'),eye1:solid('#000000'),eye2:solid('#FFFFFF')}},
+  sunset:{label:'🌅 Twilight',bg:'#130292',f:{
+    lobe1:lg([{p:0,c:'#FF2020'},{p:45,c:'#FF8800'},{p:100,c:'#FFE400'}]),
+    lobe2:lg([{p:0,c:'#2020FF'},{p:45,c:'#9900CC'},{p:100,c:'#00BBFF'}],CX+R,CY-R,CX-R,CY+R),
+    eye1:solid('#880000'),eye2:solid('#000088')}},
+  midnight:{label:'🌌 Night Sky',bg:'#0c0b32',stars:true,f:{
+    lobe1:rg([{p:0,c:'#3A5EA8'},{p:35,c:'#1C2E62'},{p:70,c:'#0D1538'},{p:100,c:'#060C1E'}],CX,CY-LR,R*1.3),
+    lobe2:rg([{p:0,c:'#0A0A1C'},{p:55,c:'#050512'},{p:100,c:'#020208'}],CX,CY+LR,R*1.2),
+    eye1:solid('#FFD700'),eye2:solid('#8890FF')}},
+  gold:{label:'✨ Gold & Silver',bg:'#fcfcfc',f:{
+    lobe1:lg([{p:0,c:'#6B4400'},{p:22,c:'#C47A08'},{p:45,c:'#FFE870'},{p:68,c:'#C47A08'},{p:100,c:'#6B4400'}]),
+    lobe2:lg([{p:0,c:'#2C2C2C'},{p:22,c:'#A0A0A0'},{p:45,c:'#EEEEEE'},{p:68,c:'#A0A0A0'},{p:100,c:'#2C2C2C'}],CX+R,CY-R,CX-R,CY+R),
+    eye1:solid('#C0C8D2'),eye2:solid('#C89000')}},
+  fireice:{label:'🔥 Fire & Ice',bg:'#1c1c4f',f:{
+    lobe1:rg([{p:0,c:'#FF9900'},{p:38,c:'#FF2200'},{p:75,c:'#880000'},{p:100,c:'#3A0000'}],CX,CY-LR,R*1.1),
+    lobe2:rg([{p:0,c:'#00EEFF'},{p:38,c:'#0055FF'},{p:75,c:'#000088'},{p:100,c:'#000020'}],CX,CY+LR,R*1.1),
+    eye1:solid('#FFFF00'),eye2:solid('#AAFFFF')}},
+  zen:{label:'🪨 Zen Garden',bg:'#D4B896',f:{lobe1:solid('#F0E8D8'),lobe2:solid('#2C4220'),eye1:solid('#5C3810'),eye2:solid('#8AB880')}}
 };
 
 // ── STATE ─────────────────────────────────────────────────────────
-let S = {
-  preset:'classic', bg:'#F5F5DC',
-  fills: dc(PRESETS.classic.f),
-  style:'flat',
-  rot:0, flipH:false, flipV:false,
-  eyeRatio: DEFAULT_EYE_RATIO
-};
+// S — app state: preset, bg, fills:{lobe1,lobe2,eye1,eye2}, style, rot, flipH, flipV, eyeRatio
+let S = {preset:'classic',bg:'#F5F5DC',fills:clone(PRESETS.classic.f),style:'flat',rot:0,flipH:false,flipV:false,eyeRatio:DEFAULT_EYE_RATIO};
+function clone(x){ return structuredClone(x); }
 
-function dc(x){ return structuredClone(x); }
-
-// ── EYE : LOBE RADIUS RATIO ─────────────────────────────────────────
-// r_eye = R_lobe · S.eyeRatio.  Presets below are all expressed as
-// that same ratio (fraction of the LOBE radius).
+// ── EYE PRESETS & SLIDER ─────────────────────────────────────────
 const EYE_PRESETS = [
-  { key:'default', label:'φ³',    sub:'Default', val: Math.pow(LIT_phi,3) },
-  { key:'phi3o17', label:'Φ³⁄17', sub:'', val: Math.pow(BIG_PHI,3)/17 },
-  { key:'phi2o10', label:'Φ²⁄10', sub:'', val: Math.pow(BIG_PHI,2)/10 },
-  { key:'phi5o37', label:'Φ⁵⁄37', sub:'', val: Math.pow(BIG_PHI,5)/37 },
-  { key:'phi4o26', label:'Φ⁴⁄26', sub:'', val: Math.pow(BIG_PHI,4)/26 },
-  { key:'phi5o49', label:'Φ⁵⁄49', sub:'', val: Math.pow(BIG_PHI,5)/49 },
-  { key:'f3',  label:'⅓',   sub:'', val: 1/3 },
-  { key:'f4',  label:'¼',   sub:'', val: 1/4 },
-  { key:'f521', label:'5⁄21', sub:'', val: 5/21 },
-  { key:'phi4', label:'φ⁴', sub:'', val: Math.pow(LIT_phi,4) },
+  {key:'default',label:'φ³',   sub:'Default',val:Math.pow(LIT_phi,3)},
+  {key:'phi3o17',label:'Φ³⁄17',sub:'',       val:Math.pow(BIG_PHI,3)/17},
+  {key:'phi2o10',label:'Φ²⁄10',sub:'',       val:Math.pow(BIG_PHI,2)/10},
+  {key:'phi5o37',label:'Φ⁵⁄37',sub:'',       val:Math.pow(BIG_PHI,5)/37},
+  {key:'phi4o26',label:'Φ⁴⁄26',sub:'',       val:Math.pow(BIG_PHI,4)/26},
+  {key:'phi5o49',label:'Φ⁵⁄49',sub:'',       val:Math.pow(BIG_PHI,5)/49},
+  {key:'f3', label:'⅓', sub:'',val:1/3},
+  {key:'f4', label:'¼', sub:'',val:1/4},
+  {key:'f521',label:'5⁄21',sub:'',val:5/21},
+  {key:'phi4',label:'φ⁴',sub:'',val:Math.pow(LIT_phi,4)},
 ];
-
-function sliderToRatio(v){ return EYE_RATIO_MIN + (v-1)/99 * (EYE_RATIO_MAX-EYE_RATIO_MIN); }
-function ratioToSlider(r){
-  const v = 1 + (r-EYE_RATIO_MIN)/(EYE_RATIO_MAX-EYE_RATIO_MIN) * 99;
-  return Math.max(1, Math.min(100, Math.round(v)));
-}
-
-// Best simple rational approximation (continued fractions), capped
-// at a "reasonably simple" denominator so the footer doesn't show
-// something like 88913/841061 for an irrational ratio.
-function toFraction(x, maxDen=999){
-  if (!isFinite(x) || x <= 0) return null;
+function sliderToRatio(v){return EYE_RATIO_MIN+(v-1)/99*(EYE_RATIO_MAX-EYE_RATIO_MIN);}
+function ratioToSlider(r){return Math.max(1,Math.min(100,Math.round(1+(r-EYE_RATIO_MIN)/(EYE_RATIO_MAX-EYE_RATIO_MIN)*99)));}
+function toFraction(x,maxDen=999){
+  if(!isFinite(x)||x<=0)return null;
   let h0=0,h1=1,k0=1,k1=0,b=x,a;
-  for (let i=0;i<32;i++){
-    a = Math.floor(b);
-    const h2 = a*h1+h0, k2 = a*k1+k0;
-    if (k2 > maxDen) break;
-    h0=h1; h1=h2; k0=k1; k1=k2;
-    const frac = b-a;
-    if (frac < 1e-12) break;
-    b = 1/frac;
-  }
-  return { num:h1, den:k1, err: Math.abs(h1/k1 - x) };
-}
-
-// Identify a known closed-form label for the current ratio, if any
-// (the preset list), else null ("Custom").
-function matchEyeLabel(ratio){
-  const tol = 1e-7;
-  for (const p of EYE_PRESETS) if (Math.abs(p.val-ratio) < tol) return p.label;
-  return null;
+  for(let i=0;i<32;i++){a=Math.floor(b);const h2=a*h1+h0,k2=a*k1+k0;if(k2>maxDen)break;h0=h1;h1=h2;k0=k1;k1=k2;const f=b-a;if(f<1e-12)break;b=1/f;}
+  return{num:h1,den:k1,err:Math.abs(h1/k1-x)};
 }
 
 // ── PHI-PROXIMITY CLASSIFICATION ─────────────────────────────────
-// Checks a ratio against a catalogue of notable values (powers of Φ/φ,
-// Fibonacci ratios, classic fractions, e-based ratios) and returns a
-// two-part object: { label, tier } where tier is one of:
-//   'exact'    — matches to < 1e-7  (essentially identical)
-//   'adjacent' — within ±0.5%       ("Phi/phi Adjacent")
-//   'near'     — within ±2%         ("Near Phi/phi")
-//   'vicinal'  — within ±5%         ("Phi/phi Vicinal")
-//   null       — no notable proximity found
-//
-// The catalogue is built fresh on each call (tiny cost); this keeps the
-// function self-contained and easy to extend.
-function classifyRatio(ratio) {
-  if (!isFinite(ratio) || ratio <= 0) return null;
-
-  // Build catalogue of notable values with their symbolic labels.
-  const cat = [];
-
-  // Powers of Φ and φ, n = 1..6
-  const SUPS = ['','','²','³','⁴','⁵','⁶'];  // index n → superscript (n=1 → '')
-  for (let n = 1; n <= 6; n++) {
-    const Pn  = Math.pow(BIG_PHI, n);
-    const pn  = Math.pow(LIT_phi,  n);
-    const sup = SUPS[n] || '';
-    // Only include values in the valid eye-ratio range (0.01–0.995)
-    if (Pn >= 0.01 && Pn <= 0.995) cat.push({ val: Pn, sym: `Φ${sup}`, base: 'Phi' });
-    if (pn >= 0.01 && pn <= 0.995) cat.push({ val: pn, sym: `φ${sup}`, base: 'phi' });
-    // Ratios of Φⁿ / integer divisors that land in range
-    for (let d = 2; d <= 30; d++) {
-      const v = Pn / d;
-      if (v >= 0.01 && v <= 0.995) {
-        cat.push({ val: v, sym: `Φ${sup}⁄${d}`, base: 'Phi' });
-      }
+function classifyRatio(ratio){
+  if(!isFinite(ratio)||ratio<=0)return null;
+  const cat=[];
+  // SUPS[0] unused; SUPS[1]='' intentional — Φ¹ displays as 'Φ', not 'Φ¹'
+  const SUPS=['','','²','³','⁴','⁵','⁶'];
+  for(let n=1;n<=6;n++){
+    const Pn=Math.pow(BIG_PHI,n),pn=Math.pow(LIT_phi,n),sup=SUPS[n]||'';
+    if(Pn>=0.01&&Pn<=0.995)cat.push({val:Pn,sym:`Φ${sup}`,base:'Phi'});
+    if(pn>=0.01&&pn<=0.995)cat.push({val:pn,sym:`φ${sup}`,base:'phi'});
+    for(let d=2;d<=30;d++){
+      const v=Pn/d;if(v>=0.01&&v<=0.995)cat.push({val:v,sym:`Φ${sup}⁄${d}`,base:'Phi'});
+      const vp=pn/d;if(vp>=0.01&&vp<=0.995)cat.push({val:vp,sym:`φ${sup}⁄${d}`,base:'phi'});
     }
   }
-
-  // Fibonacci sequence ratios (consecutive pairs, F(n)/F(n+1) and F(n+1)/F(n))
-  // Fibonacci above F(3)=2 will naturally converge toward φ/Φ.
-  const fibs = [1,1,2,3,5,8,13,21,34,55,89,144,233,377];
-  for (let i = 0; i < fibs.length - 1; i++) {
-    const a = fibs[i], b = fibs[i+1];
-    const r1 = a / b, r2 = b / a;
-    const lbl1 = `${a}⁄${b}`, lbl2 = `${b}⁄${a}`;
-    if (r1 >= 0.01 && r1 <= 0.995) cat.push({ val: r1, sym: lbl1, base: 'Fibonacci' });
-    if (r2 >= 0.01 && r2 <= 0.995) cat.push({ val: r2, sym: lbl2, base: 'Fibonacci' });
+  const fibs=[1,1,2,3,5,8,13,21,34,55,89,144,233,377];
+  for(let i=0;i<fibs.length-1;i++){
+    const a=fibs[i],b=fibs[i+1],r1=a/b,r2=b/a;
+    if(r1>=0.01&&r1<=0.995)cat.push({val:r1,sym:`${a}⁄${b}`,base:'Fibonacci'});
+    if(r2>=0.01&&r2<=0.995)cat.push({val:r2,sym:`${b}⁄${a}`,base:'Fibonacci'});
   }
-
-  // Simple harmonic fractions (musical/geometric)
-  const harmonics = [
-    { val: 1/2,  sym: '½',      base: 'Harmonic' },
-    { val: 1/3,  sym: '⅓',      base: 'Harmonic' },
-    { val: 2/3,  sym: '⅔',      base: 'Harmonic' },
-    { val: 1/4,  sym: '¼',      base: 'Harmonic' },
-    { val: 3/4,  sym: '¾',      base: 'Harmonic' },
-    { val: 1/5,  sym: '⅕',      base: 'Harmonic' },
-    { val: 2/5,  sym: '⅖',      base: 'Harmonic' },
-    { val: 3/5,  sym: '⅗',      base: 'Harmonic' },
-    { val: 4/5,  sym: '⅘',      base: 'Harmonic' },
-    { val: 1/6,  sym: '⅙',      base: 'Harmonic' },
-    { val: 5/6,  sym: '⅚',      base: 'Harmonic' },
-    { val: 1/7,  sym: '⅐',      base: 'Harmonic' },
-    { val: 1/8,  sym: '⅛',      base: 'Harmonic' },
-    { val: 3/8,  sym: '⅜',      base: 'Harmonic' },
-    { val: 5/8,  sym: '⅝',      base: 'Harmonic' },
-    { val: 7/8,  sym: '⅞',      base: 'Harmonic' },
-    { val: 1/12, sym: '1⁄12',   base: 'Harmonic' },
-    // √ based
-    { val: 1/Math.SQRT2,         sym: '1⁄√2',   base: 'Geometric' },
-    { val: Math.sqrt(3)/2,        sym: '√3⁄2',   base: 'Geometric' },
-    { val: 1/Math.sqrt(3),        sym: '1⁄√3',   base: 'Geometric' },
-    { val: Math.sqrt(5)/4,        sym: '√5⁄4',   base: 'Geometric' },
-    { val: (Math.sqrt(5)-1)/4,    sym: '(√5−1)⁄4', base: 'Geometric' },
-    // e-based
-    { val: 1/Math.E,              sym: '1⁄e',    base: 'Transcendental' },
-    { val: 1/(Math.E*Math.E),     sym: '1⁄e²',   base: 'Transcendental' },
-    { val: Math.E - 2,            sym: 'e−2',     base: 'Transcendental' },
-    // π-based
-    { val: 1/Math.PI,             sym: '1⁄π',    base: 'Transcendental' },
-    { val: Math.PI/10,            sym: 'π⁄10',   base: 'Transcendental' },
-    { val: Math.PI/12,            sym: 'π⁄12',   base: 'Transcendental' },
+  const harmonics=[
+    {val:1/2,sym:'½',base:'Harmonic'},{val:1/3,sym:'⅓',base:'Harmonic'},
+    {val:2/3,sym:'⅔',base:'Harmonic'},{val:1/4,sym:'¼',base:'Harmonic'},
+    {val:3/4,sym:'¾',base:'Harmonic'},{val:1/5,sym:'⅕',base:'Harmonic'},
+    {val:2/5,sym:'⅖',base:'Harmonic'},{val:3/5,sym:'⅗',base:'Harmonic'},
+    {val:4/5,sym:'⅘',base:'Harmonic'},{val:1/6,sym:'⅙',base:'Harmonic'},
+    {val:5/6,sym:'⅚',base:'Harmonic'},{val:1/7,sym:'⅐',base:'Harmonic'},
+    {val:1/8,sym:'⅛',base:'Harmonic'},{val:3/8,sym:'⅜',base:'Harmonic'},
+    {val:5/8,sym:'⅝',base:'Harmonic'},{val:7/8,sym:'⅞',base:'Harmonic'},
+    {val:1/12,sym:'1⁄12',base:'Harmonic'},
+    {val:1/Math.SQRT2,sym:'1⁄√2',base:'Geometric'},{val:Math.sqrt(3)/2,sym:'√3⁄2',base:'Geometric'},
+    {val:1/Math.sqrt(3),sym:'1⁄√3',base:'Geometric'},{val:Math.sqrt(5)/4,sym:'√5⁄4',base:'Geometric'},
+    {val:(Math.sqrt(5)-1)/4,sym:'(√5−1)⁄4',base:'Geometric'},
+    {val:1/Math.E,sym:'1⁄e',base:'Transcendental'},{val:1/(Math.E*Math.E),sym:'1⁄e²',base:'Transcendental'},
+    {val:Math.E-2,sym:'e−2',base:'Transcendental'},{val:1/Math.PI,sym:'1⁄π',base:'Transcendental'},
+    {val:Math.PI/10,sym:'π⁄10',base:'Transcendental'},{val:Math.PI/12,sym:'π⁄12',base:'Transcendental'},
   ];
-  harmonics.forEach(h => { if (h.val >= 0.01 && h.val <= 0.995) cat.push(h); });
-
-  // Proximity tiers (relative error thresholds)
-  // 'exact'     — reserved for matchEyeLabel() named presets only; not used here.
-  // 'precise'   — within 1e-9: indistinguishable from the known value at double-precision;
-  //               may not be analytically provable but is computationally identical.
-  // 'near-exact'— within 0.1%: extremely close, essentially the same proportion visually.
-  // 'adjacent'  — within 0.5%: clearly related, a near-substitute.
-  // 'near'      — within 2%: shares the character of the reference.
-  // 'vicinal'   — within 5%: in the neighbourhood.
-  const tiers = [
-    { key: 'exact',      tol: 1e-9,  label: (sym, base) => `${sym}  ·  ${base} Exact` },
-    { key: 'near-exact', tol: 0.001, label: (sym, base) => `${sym}  ·  ${base} Near-Exact  (within ±0.1%)` },
-    { key: 'adjacent',   tol: 0.005, label: (sym, base) => `${sym}  ·  ${base} Adjacent  (within ±0.5%)` },
-    { key: 'near',       tol: 0.02,  label: (sym, base) => `${sym}  ·  Near ${base}  (within ±2%)` },
-    { key: 'vicinal',    tol: 0.05,  label: (sym, base) => `${sym}  ·  ${base} Vicinal  (within ±5%)` },
+  harmonics.forEach(h=>{if(h.val>=0.01&&h.val<=0.995)cat.push(h);});
+  const tiers=[
+    {key:'exact',tol:1e-9,label:(s,b)=>`${s}  ·  ${b} Exact`},
+    {key:'near-exact',tol:0.001,label:(s,b)=>`${s}  ·  ${b} Near-Exact  (within ±0.1%)`},
+    {key:'adjacent',tol:0.005,label:(s,b)=>`${s}  ·  ${b} Adjacent  (within ±0.5%)`},
+    {key:'near',tol:0.02,label:(s,b)=>`${s}  ·  Near ${b}  (within ±2%)`},
+    {key:'vicinal',tol:0.05,label:(s,b)=>`${s}  ·  ${b} Vicinal  (within ±5%)`},
   ];
-
-  // Find the closest catalogue entry within the loosest tier
-  let best = null, bestErr = Infinity;
-  for (const entry of cat) {
-    const relErr = Math.abs(ratio - entry.val) / entry.val;
-    if (relErr < 0.05 && relErr < bestErr) {
-      bestErr = relErr;
-      best = entry;
-    }
-  }
-  if (!best) return null;
-
-  // Determine which tier
-  for (const tier of tiers) {
-    const relErr = Math.abs(ratio - best.val) / best.val;
-    if (relErr <= tier.tol) {
-      return { sym: best.sym, base: best.base, tier: tier.key,
-               label: tier.label(best.sym, best.base),
-               relPct: (relErr * 100).toFixed(3) };
-    }
+  let best=null,bestErr=Infinity;
+  for(const e of cat){const re=Math.abs(ratio-e.val)/e.val;if(re<0.05&&re<bestErr){bestErr=re;best=e;}}
+  if(!best)return null;
+  for(const tier of tiers){
+    const re=Math.abs(ratio-best.val)/best.val;
+    if(re<=tier.tol)return{sym:best.sym,base:best.base,tier:tier.key,label:tier.label(best.sym,best.base),relPct:(re*100).toFixed(3)};
   }
   return null;
 }
 
 function setEyeRatio(val){
-  if (typeof val !== 'number' || !isFinite(val)) return;
-  S.eyeRatio = Math.max(0.001, Math.min(0.995, val));
-  syncEyeUI();
-  render();
+  if(typeof val!=='number'||!isFinite(val))return;
+  S.eyeRatio=Math.max(0.001,Math.min(0.995,val));
+  syncEyeUI();render();
 }
-function setEyeSlider(v){ setEyeRatio(sliderToRatio(parseInt(v,10))); }
-
+function setEyeSlider(v){setEyeRatio(sliderToRatio(parseInt(v,10)));}
 function applyEyeEquation(){
-  const note = document.getElementById('eqnote');
-  const raw = document.getElementById('eyeEq').value.trim();
-  if (!raw){ note.textContent=''; note.classList.remove('err'); return; }
-  if (!/^[0-9+\-*/^().\s a-zA-Z]+$/.test(raw)){
-    note.textContent = 'Only numbers, + − * / ^ ( ) and phi/Phi/Pi/e/tau/sqrt allowed.';
-    note.classList.add('err'); return;
-  }
-  try {
-    const expr = raw.replace(/\^/g, '**');
-    const fn = new Function('phi','Phi','Pi','sqrt','e','tau', 'return (' + expr + ');');
-    let val = fn(LIT_phi, BIG_PHI, Math.PI, Math.sqrt, Math.E, 2*Math.PI);
-    if (typeof val !== 'number' || !isFinite(val) || isNaN(val)) throw new Error('NaN');
-    const clamped = Math.max(0.001, Math.min(0.995, val));
+  const note=document.getElementById('eqnote');
+  const raw=document.getElementById('eyeEq').value.trim();
+  if(!raw){note.textContent='';note.classList.remove('err');return;}
+  if(!/^[0-9+\-*/^().\s a-zA-Z]+$/.test(raw)){note.textContent='Only numbers, + − * / ^ ( ) and phi/Phi/Pi/e/tau/sqrt allowed.';note.classList.add('err');return;}
+  try{
+    const expr=raw.replace(/\^/g,'**');
+    const fn=new Function('phi','Phi','Pi','sqrt','e','tau','return ('+expr+');');
+    let val=fn(LIT_phi,BIG_PHI,Math.PI,Math.sqrt,Math.E,2*Math.PI);
+    if(typeof val!=='number'||!isFinite(val)||isNaN(val))throw new Error('NaN');
+    const clamped=Math.max(0.001,Math.min(0.995,val));
     setEyeRatio(clamped);
     note.classList.remove('err');
-    note.textContent = clamped === val
-      ? 'Applied — ratio = ' + clamped.toFixed(9)
-      : 'Applied (clamped to valid range) — ratio = ' + clamped.toFixed(9);
-  } catch (e){
-    note.textContent = 'Could not evaluate that expression.';
-    note.classList.add('err');
-  }
+    note.textContent=clamped===val?'Applied — ratio = '+clamped.toFixed(9):'Applied (clamped) — ratio = '+clamped.toFixed(9);
+  }catch(e){note.textContent='Could not evaluate that expression.';note.classList.add('err');}
 }
 
-
 function syncEyeUI(){
-  const r = S.eyeRatio;
-  const slider = document.getElementById('eyeSlider');
-  if (slider) slider.value = ratioToSlider(r);
-  const evn = document.getElementById('ev-num');
-  if (evn) evn.textContent = r.toFixed(9);
-  const evProx = document.getElementById('ev-prox');
-  if (evProx) {
-    const prox = classifyRatio(r);
-    if (prox) {
-      evProx.textContent = prox.label;
-      const tierColors = { exact:'var(--gold)', 'near-exact':'#B09868', adjacent:'#A89060', near:'#9C8060', vicinal:'#7A6850' };
-      evProx.style.color = tierColors[prox.tier] || 'var(--mute)';
-    } else {
-      evProx.textContent = 'No notable proximity';
-      evProx.style.color = 'var(--mute)';
-    }
+  const r=S.eyeRatio;
+  const slider=document.getElementById('eyeSlider');
+  if(slider)slider.value=ratioToSlider(r);
+  const evn=document.getElementById('ev-num');
+  if(evn)evn.textContent=r.toFixed(9);
+  const evProx=document.getElementById('ev-prox');
+  if(evProx){
+    const prox=classifyRatio(r);
+    if(prox){evProx.textContent=prox.label;const tc={exact:'var(--gold)','near-exact':'#B09868',adjacent:'#A89060',near:'#9C8060',vicinal:'#7A6850'};evProx.style.color=tc[prox.tier]||'var(--mute)';}
+    else{evProx.textContent='No notable proximity';evProx.style.color='var(--mute)';}
   }
-  document.querySelectorAll('.epbtn').forEach(b=>{
-    const v = EYE_PRESETS.find(p=>p.key===b.dataset.k);
-    b.classList.toggle('on', v && Math.abs(v.val - r) < 1e-7);
-  });
+  document.querySelectorAll('.epbtn').forEach(b=>{const v=EYE_PRESETS.find(p=>p.key===b.dataset.k);b.classList.toggle('on',v&&Math.abs(v.val-r)<1e-7);});
   updateFooter();
 }
 
 function updateFooter(){
-  const r = S.eyeRatio;
-  const proximity = classifyRatio(r);
-  const ftLabel = document.getElementById('ftLabel');
-  const ftRatio = document.getElementById('ftRatio');
-  const ftAreas = document.getElementById('ftAreas');
-  const ftFixed = document.getElementById('ftFixed');
-
-  // Line 1: expression · proximity label (combined)
-  if (ftLabel) {
-    const expr = proximity && proximity.tier === 'exact'
-      ? `Eye Radius = Lobe Radius × ${proximity.sym}`
-      : `Eye Radius = Lobe Radius × ${r.toFixed(9)}${proximity ? '' : '  (custom)'}`;
-    const proxTxt  = proximity ? proximity.label.replace(/^.*?·\s*/, '') : 'No notable proximity detected';
-    const proxTier = proximity ? proximity.tier  : '';
-    ftLabel.innerHTML = `${expr}   ·   <span class="prox-inline" data-tier="${proxTier}">${proxTxt}</span>`;
+  const r=S.eyeRatio;
+  const proximity=classifyRatio(r);
+  const ftLabel=document.getElementById('ftLabel');
+  const ftRatio=document.getElementById('ftRatio');
+  const ftAreas=document.getElementById('ftAreas');
+  if(ftLabel){
+    const expr=proximity&&proximity.tier==='exact'?`Eye Radius = Lobe Radius × ${proximity.sym}`:`Eye Radius = Lobe Radius × ${r.toFixed(9)}${proximity?'':'  (custom)'}`;
+    const proxTxt=proximity?proximity.label.replace(/^.*?·\s*/,''):'No notable proximity detected';
+    const proxTier=proximity?proximity.tier:'';
+    ftLabel.innerHTML=`${expr}   ·   <span class="prox-inline" data-tier="${proxTier}">${proxTxt}</span>`;
   }
-
-  if (ftRatio) {
-    const frac = toFraction(r, 999);
-    const fracTxt = frac ? `${frac.num}⁄${frac.den}` : '—';
-    ftRatio.textContent = `Eye∶Lobe Radii Ratio  ~  ${r.toFixed(9)}   ·   ≈ ${fracTxt}`;
-  }
-
-  // ── Area calculations ───────────────────────────────────────────
-  const eyeR       = r * 0.5;
-  const aSymbol    = Math.PI;
-  const aLobe      = Math.PI * 0.25;
-  const aEye       = Math.PI * eyeR * eyeR;
-  const aEyeLobe   = aEye / aLobe;
-  const aEyeSymbol = aEye / aSymbol;
-  const f6 = v => v.toFixed(6);
-
-  // Pixel² values using global R ≈ 262.214 px
-  const symPx  = Math.PI * R * R;
-  const lobePx = Math.PI * (R/2) * (R/2);
-  const eyePx  = Math.PI * (r * R/2) * (r * R/2);
-  const fmtPx  = v => Math.round(v).toLocaleString();
-
-  if (ftAreas) {
-    ftAreas.textContent =
-      `Eye∶Lobe area = ${f6(aEyeLobe)}  (= r²)   ·   Eye∶Symbol area = ${f6(aEyeSymbol)}  (= r²/4)`;
-  }
-  if (ftFixed) {
-    ftFixed.innerHTML =
-      `Each Eye = π(r·R/2)²  ≈ ${fmtPx(eyePx)} px²   ·   r = ${r.toFixed(6)}`;
-  }
-
-  // Update header live spans
-  const hSym  = document.getElementById('hSymPx');
-  const hLobe = document.getElementById('hLobePx');
-  if (hSym)  hSym.textContent  = fmtPx(symPx);
-  if (hLobe) hLobe.textContent = fmtPx(lobePx);
+  if(ftRatio){const frac=toFraction(r,999);ftRatio.textContent=`Eye∶Lobe Radii Ratio = ρ  ~  ${r.toFixed(9)}   ·   ≈ ${frac?`${frac.num}⁄${frac.den}`:'—'}`;}
+  // erNorm = ER/R (eye radius normalised to symbol radius R = 1 unit)
+  const erNorm=r*0.5,aLobe=Math.PI*0.25,aEye=Math.PI*erNorm*erNorm;
+  const f6=v=>v.toFixed(6);
+  // viewBox = 1000 = download size, so px values are direct (sc = 1)
+  const symPx=Math.PI*R*R,lobePx=Math.PI*LR*LR;
+  const boxPx=SZ*SZ;
+  const fmtPx=v=>Math.round(v).toLocaleString();
+  if(ftAreas)ftAreas.textContent=`Eye∶Lobe area = ${f6(aEye/aLobe)}  (= ρ²)   ·   Eye∶Symbol area = ${f6(aEye/Math.PI)}  (= ρ²/4)`;
+  const hSym=document.getElementById('hSymPx');
+  const hLobe=document.getElementById('hLobePx');
+  const hBox=document.getElementById('hBoxPx');
+  if(hSym) hSym.textContent=fmtPx(symPx);
+  if(hLobe)hLobe.textContent=fmtPx(lobePx);
+  if(hBox) hBox.textContent=fmtPx(boxPx);
 }
 
 // ── THEME & OVERLAY STATE ─────────────────────────────────────────
-let isLight    = true;
-let measureMode = 'off';   // 'off' | 'vertical' | 'segments'
-
+let isLight=true;
+let measureMode='off';
 function toggleTheme(){
-  isLight = !isLight;
-  document.body.classList.toggle('light', isLight);
-  const btn = document.getElementById('ldBtn');
-  btn.textContent = isLight ? '◑ Dark' : '☀ Light';
-  btn.classList.toggle('on', isLight);
+  isLight=!isLight;
+  document.body.classList.toggle('light',isLight);
+  const btn=document.getElementById('ldBtn');
+  btn.textContent=isLight?'◑ Dark':'☀ Light';
+  btn.classList.toggle('on',isLight);
 }
-
 function setMeasureMode(mode){
-  measureMode = mode;
-  const sel = document.getElementById('measureSel');
-  sel.classList.toggle('on', mode !== 'off');
-  if (mode !== 'fullgeometry') hideGeoFloat();
+  measureMode=mode;
+  const sel=document.getElementById('measureSel');
+  sel.classList.toggle('on',mode!=='off');
+  if(mode!=='measure')hideGeoFloat();
   render();
 }
 
 // ── COLOR HELPERS ─────────────────────────────────────────────────
-function h2rgb(h){
-  h = h.replace('#','');
-  if(h.length===3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
-  const n = parseInt(h,16);
-  return [(n>>16)&255,(n>>8)&255,n&255];
-}
-function rgb2h(r,g,b){
-  return '#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');
-}
-function lighten(h,f=.32){ const[r,g,b]=h2rgb(h); return rgb2h(r+(255-r)*f,g+(255-g)*f,b+(255-b)*f); }
-function darken(h,f=.32){  const[r,g,b]=h2rgb(h); return rgb2h(r*(1-f),g*(1-f),b*(1-f)); }
+function h2rgb(h){h=h.replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];const n=parseInt(h,16);return[(n>>16)&255,(n>>8)&255,n&255];}
+function rgb2h(r,g,b){return'#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');}
+function lighten(h,f=.32){const[r,g,b]=h2rgb(h);return rgb2h(r+(255-r)*f,g+(255-g)*f,b+(255-b)*f);}
+function darken(h,f=.32){const[r,g,b]=h2rgb(h);return rgb2h(r*(1-f),g*(1-f),b*(1-f));}
+function getFillColor(fill){if(fill.type==='solid')return fill.color;if(fill.stops&&fill.stops.length)return fill.stops[Math.floor(fill.stops.length/2)].c;return'#888888';}
+function toAutoGrad(fill){if(fill.type!=='solid')return fill;const c=fill.color;return lg([{p:0,c:darken(c,.35)},{p:45,c:c},{p:100,c:lighten(c,.35)}]);}
 
-function repC(fill){
-  if(fill.type==='solid') return fill.color;
-  if(fill.stops && fill.stops.length) return fill.stops[Math.floor(fill.stops.length/2)].c;
-  return '#888888';
-}
-function toAutoGrad(fill){
-  if(fill.type !== 'solid') return fill;
-  const c = fill.color;
-  return lg([{p:0,c:darken(c,.35)},{p:45,c:c},{p:100,c:lighten(c,.35)}]);
-}
-
-// ── STAR FIELD (Night Sky) ────────────────────────────────────────
-let _stars = '';
+// ── STAR FIELD ────────────────────────────────────────────────────
+// Stars use a fixed seed + fixed canvas constants — safe to cache indefinitely.
+let _stars='';
 function genStars(){
-  if(_stars) return _stars;
-  let o='', seed=0xF0CACC;
-  const rn=()=>{ seed=(seed*1664525+1013904223)&0xFFFFFFFF; return(seed>>>0)/0xFFFFFFFF; };
-  for(let i=0;i<80;i++){
-    const a=rn()*Math.PI*2, d=Math.sqrt(rn())*(R-3);
-    const x=(CX+Math.cos(a)*d).toFixed(1), y=(CY+Math.sin(a)*d).toFixed(1);
-    const r=(rn()*.9+.2).toFixed(1), op=(rn()*.35+.2).toFixed(2);
-    o+=`<circle cx="${x}" cy="${y}" r="${r}" fill="white" opacity="${op}"/>`;
-  }
-  for(let i=0;i<22;i++){
-    const a=rn()*Math.PI*2, d=Math.sqrt(rn())*(R-3);
-    const x=(CX+Math.cos(a)*d).toFixed(1), y=(CY+Math.sin(a)*d).toFixed(1);
-    const r=(rn()*1.5+.9).toFixed(1), op=(rn()*.3+.65).toFixed(2);
-    const c=['white','#C0D0FF','#FFE0B0','#B0FFD8'][Math.floor(rn()*4)];
-    o+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity="${op}"/>`;
-  }
-  [[CX-LR*.4,CY-LR*.7],[CX+LR*.4,CY+LR*.7]].forEach(([gx,gy])=>{
-    for(let i=0;i<16;i++){
-      const a=rn()*Math.PI*2, d=rn()*LR*.42;
-      const x=(gx+Math.cos(a)*d).toFixed(1), y=(gy+Math.sin(a)*d).toFixed(1);
-      const r=(rn()*.8+.18).toFixed(1), op=(rn()*.45+.2).toFixed(2);
-      const c=['white','#A0B8FF','#FFD8A0','#A0FFD8'][Math.floor(rn()*4)];
-      o+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity="${op}"/>`;
-    }
-  });
-  _stars = o;
-  return o;
+  if(_stars)return _stars;
+  let o='',seed=0xF0CACC;
+  const rn=()=>{seed=(seed*1664525+1013904223)&0xFFFFFFFF;return(seed>>>0)/0x100000000;};
+  for(let i=0;i<80;i++){const a=rn()*Math.PI*2,d=Math.sqrt(rn())*(R-3),x=(CX+Math.cos(a)*d).toFixed(1),y=(CY+Math.sin(a)*d).toFixed(1),r=(rn()*.9+.2).toFixed(1),op=(rn()*.35+.2).toFixed(2);o+=`<circle cx="${x}" cy="${y}" r="${r}" fill="white" opacity="${op}"/>`;}
+  for(let i=0;i<22;i++){const a=rn()*Math.PI*2,d=Math.sqrt(rn())*(R-3),x=(CX+Math.cos(a)*d).toFixed(1),y=(CY+Math.sin(a)*d).toFixed(1),r=(rn()*1.5+.9).toFixed(1),op=(rn()*.3+.65).toFixed(2),c=['white','#C0D0FF','#FFE0B0','#B0FFD8'][Math.floor(rn()*4)];o+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity="${op}"/>`;}
+  [[CX-LR*.4,CY-LR*.7],[CX+LR*.4,CY+LR*.7]].forEach(([gx,gy])=>{for(let i=0;i<16;i++){const a=rn()*Math.PI*2,d=rn()*LR*.42,x=(gx+Math.cos(a)*d).toFixed(1),y=(gy+Math.sin(a)*d).toFixed(1),r=(rn()*.8+.18).toFixed(1),op=(rn()*.45+.2).toFixed(2),c=['white','#A0B8FF','#FFD8A0','#A0FFD8'][Math.floor(rn()*4)];o+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity="${op}"/>`;}});
+  _stars=o;return o;
 }
 
 // ── SVG BUILDERS ─────────────────────────────────────────────────
-function gradDef(id, fill){
-  if(!fill || fill.type==='solid') return '';
-  const s = fill.stops.map(st=>`<stop offset="${st.p}%" stop-color="${st.c}"/>`).join('');
-  if(fill.type==='lg'){
-    return `<linearGradient id="${id}" gradientUnits="userSpaceOnUse"` +
-      ` x1="${fill.x1.toFixed(2)}" y1="${fill.y1.toFixed(2)}"` +
-      ` x2="${fill.x2.toFixed(2)}" y2="${fill.y2.toFixed(2)}">${s}</linearGradient>`;
+function gradDef(id,fill){
+  if(!fill||fill.type==='solid')return'';
+  const s=fill.stops.map(st=>`<stop offset="${st.p}%" stop-color="${st.c}"/>`).join('');
+  if(fill.type==='lg')return`<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${fill.x1.toFixed(2)}" y1="${fill.y1.toFixed(2)}" x2="${fill.x2.toFixed(2)}" y2="${fill.y2.toFixed(2)}">${s}</linearGradient>`;
+  return`<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="${fill.gcx.toFixed(2)}" cy="${fill.gcy.toFixed(2)}" r="${fill.gr.toFixed(2)}">${s}</radialGradient>`;
+}
+function fref(k,fill){return fill.type==='solid'?fill.color:`url(#g${k})`;}
+function effFills(){const f=clone(S.fills);if(S.style==='gradient'){['lobe1','lobe2'].forEach(k=>{if(f[k].type==='solid')f[k]=toAutoGrad(f[k]);});}return f;}
+
+// ── GEOMETRY MODEL ────────────────────────────────────────────────
+function buildGeometryModel(){
+  const ER=getER();
+  const O={x:CX,y:CY},Z={x:CX,y:CY-R},N={x:CX,y:CY+R},E={x:CX+R,y:CY},W={x:CX-R,y:CY};
+  const LC_upper={x:CX,y:CY-LR},LC_lower={x:CX,y:CY+LR};
+  const P1=Z,P2={x:CX,y:CY-LR-ER},P3=LC_upper,P4={x:CX,y:CY-LR+ER};
+  const P5=O,P6={x:CX,y:CY+LR-ER},P7=LC_lower,P8={x:CX,y:CY+LR+ER},P9=N;
+  function lineToFarEdge(from,through){
+    const dx=through.x-from.x,dy=through.y-from.y,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len;
+    const ax=from.x-CX,ay=from.y-CY,b=2*(ax*ux+ay*uy),c=ax*ax+ay*ay-R*R;
+    const t=(-b+Math.sqrt(b*b-4*c))/2;
+    return{ux,uy,farX:from.x+t*ux,farY:from.y+t*uy,farT:t,from};
   }
-  return `<radialGradient id="${id}" gradientUnits="userSpaceOnUse"` +
-    ` cx="${fill.gcx.toFixed(2)}" cy="${fill.gcy.toFixed(2)}" r="${fill.gr.toFixed(2)}">${s}</radialGradient>`;
+  function circleLineIntersections(centre,rad,from,ux,uy){
+    const ax=from.x-centre.x,ay=from.y-centre.y,b=2*(ax*ux+ay*uy),c=ax*ax+ay*ay-rad*rad;
+    const disc=b*b-4*c;if(disc<0)return null;
+    const sq=Math.sqrt(disc),t1=(-b-sq)/2,t2=(-b+sq)/2;
+    return[{t:t1,x:from.x+t1*ux,y:from.y+t1*uy},{t:t2,x:from.x+t2*ux,y:from.y+t2*uy}];
+  }
+  const diagLower=lineToFarEdge(E,LC_lower),diagUpper=lineToFarEdge(E,LC_upper);
+  const lobeLowerX=circleLineIntersections(LC_lower,LR,E,diagLower.ux,diagLower.uy);
+  const eyeLowerX=circleLineIntersections(LC_lower,ER,E,diagLower.ux,diagLower.uy);
+  const eyeUpperX=circleLineIntersections(LC_upper,ER,E,diagUpper.ux,diagUpper.uy);
+  const lobeUpperX=circleLineIntersections(LC_upper,LR,E,diagUpper.ux,diagUpper.uy);
+  const Qpt={x:diagUpper.farX,y:diagUpper.farY};
+  const Spt=lobeUpperX?lobeUpperX[0]:null,Rpt=lobeUpperX?lobeUpperX[1]:null;
+  const Tpt=lobeLowerX?lobeLowerX[0]:null,Upt=lobeLowerX?lobeLowerX[1]:null;
+  const Vpt=eyeLowerX?eyeLowerX[0]:null,Wpt=eyeLowerX?eyeLowerX[1]:null;
+  const V2pt=eyeUpperX?eyeUpperX[0]:null,W2pt=eyeUpperX?eyeUpperX[1]:null;
+  const Xpt={x:diagLower.farX,y:diagLower.farY};
+  const dES=Spt?Math.hypot(Spt.x-E.x,Spt.y-E.y)/R:null;
+  const dEU=Upt?Math.hypot(Upt.x-E.x,Upt.y-E.y)/R:null;
+  const dEX=diagLower.farT/R,dEQ=diagUpper.farT/R;
+  const diagAngleFromEq=Math.abs(Math.atan2(Math.abs(diagLower.uy),Math.abs(diagLower.ux))*180/Math.PI);
+  return{O,Z,N,E,W,LC_upper,LC_lower,P1,P2,P3,P4,P5,P6,P7,P8,P9,diagLower,diagUpper,
+    Qpt,Spt,Rpt,Tpt,Upt,Vpt,Wpt,V2pt,W2pt,Xpt,dES,dEU,dEX,dEQ,R,LR,ER};
 }
 
-function fref(k, fill){ return fill.type==='solid' ? fill.color : `url(#g${k})`; }
-
-function effFills(){
-  const f = dc(S.fills);
-  if(S.style==='gradient'){
-    ['lobe1','lobe2'].forEach(k=>{ if(f[k].type==='solid') f[k]=toAutoGrad(f[k]); });
-  }
-  return f;
-}
-
-// ══════════════════════════════════════════════════════════════════
-// GEOMETRY MODEL — single source of truth for all overlays.
-// All coordinates are in the live SVG space (CX, CY, R, LR, ER).
-// Every overlay must derive its points exclusively from this object.
-// ══════════════════════════════════════════════════════════════════
-function buildGeometryModel() {
-  const ER = getER();
-
-  // ── Cardinal points on the Ear (outer circle) ──────────────────
-  // Named by compass / celestial convention with the symbol upright
-  // (apex = north = Zenith, base = south = Nadir).
-  const O  = { x: CX,     y: CY      };   // Origin / Centre
-  const Z  = { x: CX,     y: CY - R  };   // Zenith  (apex, top)
-  const N  = { x: CX,     y: CY + R  };   // Nadir   (base, bottom)
-  const E  = { x: CX + R, y: CY      };   // East Horizon  (right equator)
-  const W  = { x: CX - R, y: CY      };   // West Horizon  (left equator)
-
-  // ── Lobe centres ───────────────────────────────────────────────
-  const LC_upper = { x: CX, y: CY - LR };  // upper lobe centre  (Yang side)
-  const LC_lower = { x: CX, y: CY + LR };  // lower lobe centre  (Yin side)
-
-  // ── Vertical axis intersection points ──────────────────────────
-  // Lettered P1–P10 top-to-bottom along the vertical centre axis.
-  // P1 = Zenith, P10 = Nadir. Eyes sit symmetrically about their centres.
-  const P1  = Z;                                              // Zenith / apex
-  const P2  = { x: CX, y: CY - LR - ER };                   // top of upper eye
-  const P3  = LC_upper;                                       // upper lobe centre
-  const P4  = { x: CX, y: CY - LR + ER };                   // bottom of upper eye
-  const P5  = O;                                              // Centre / equator
-  const P6  = { x: CX, y: CY + LR - ER };                   // top of lower eye
-  const P7  = LC_lower;                                       // lower lobe centre
-  const P8  = { x: CX, y: CY + LR + ER };                   // bottom of lower eye
-  const P9  = N;                                              // Nadir / base  (alias)
-  // (P9 = N; kept separate so the sequence is complete)
-
-  // ── Diagonal geometry from East point (E = A in segment overlay) ─
-  // Line from E through LC_lower → far Ear edge (point H in segment overlay)
-  function lineToFarEdge(from, through) {
-    const dx = through.x - from.x, dy = through.y - from.y;
-    const len = Math.hypot(dx, dy);
-    const ux = dx / len, uy = dy / len;
-    const ax = from.x - CX, ay = from.y - CY;
-    const b = 2 * (ax * ux + ay * uy);
-    const c = ax * ax + ay * ay - R * R;
-    const t = (-b + Math.sqrt(b * b - 4 * c)) / 2;
-    return { ux, uy, farX: from.x + t * ux, farY: from.y + t * uy, farT: t, from };
-  }
-
-  function circleLineIntersections(centre, rad, from, ux, uy) {
-    const ax = from.x - centre.x, ay = from.y - centre.y;
-    const b = 2 * (ax * ux + ay * uy);
-    const c = ax * ax + ay * ay - rad * rad;
-    const disc = b * b - 4 * c;
-    if (disc < 0) return null;
-    const sq = Math.sqrt(disc);
-    const t1 = (-b - sq) / 2, t2 = (-b + sq) / 2;
-    return [
-      { t: t1, x: from.x + t1 * ux, y: from.y + t1 * uy },
-      { t: t2, x: from.x + t2 * ux, y: from.y + t2 * uy },
-    ];
-  }
-
-  // Lower diagonal: E through LC_lower → far Ear edge
-  const diagLower = lineToFarEdge(E, LC_lower);
-  // Upper diagonal (mirror): E through LC_upper → far Ear edge
-  const diagUpper = lineToFarEdge(E, LC_upper);
-
-  // Lobe crossings on lower diagonal
-  const lobeLowerX = circleLineIntersections(LC_lower, LR, E, diagLower.ux, diagLower.uy);
-  // Eye crossings on lower diagonal (variable — depend on eye ratio)
-  const eyeLowerX  = circleLineIntersections(LC_lower, ER, E, diagLower.ux, diagLower.uy);
-  // Eye crossings on upper diagonal — mirrors V/W but for the upper eye on segment AQ
-  const eyeUpperX  = circleLineIntersections(LC_upper, ER, E, diagUpper.ux, diagUpper.uy);
-  // Lobe crossing (near) on upper diagonal — gives point B (φ·R from E)
-  const lobeUpperX = circleLineIntersections(LC_upper, LR, E, diagUpper.ux, diagUpper.uy);
-
-  // Named diagonal points (lettered for the segment overlay convention)
-  // Q = upper line far Ear edge (D in segment overlay)
-  // S = near upper lobe crossing (B in segment overlay) at φ·R from E
-  // T = near lower lobe crossing, U = far lower lobe crossing (G in segment overlay, Φ·R)
-  // V = near eye crossing, W_ = far eye crossing (E, F in segment overlay)
-  // X = far Ear edge on lower diagonal (H in segment overlay)
-  const Qpt  = { x: diagUpper.farX, y: diagUpper.farY };
-  const Spt  = lobeUpperX ? lobeUpperX[0] : null;   // φ·R from E (upper lobe near)
-  const Rpt  = lobeUpperX ? lobeUpperX[1] : null;   // far upper lobe crossing (between C1 and Q)
-  const Tpt  = lobeLowerX ? lobeLowerX[0] : null;   // near lower lobe crossing (between A and V)
-  const Upt  = lobeLowerX ? lobeLowerX[1] : null;   // Φ·R from E (lower lobe far)
-  const Vpt  = eyeLowerX  ? eyeLowerX[0]  : null;   // near lower eye crossing on lower diagonal
-  const Wpt  = eyeLowerX  ? eyeLowerX[1]  : null;   // far lower eye crossing on lower diagonal
-  const V2pt = eyeUpperX  ? eyeUpperX[0]  : null;   // near upper eye crossing on upper diagonal (AQ)
-  const W2pt = eyeUpperX  ? eyeUpperX[1]  : null;   // far upper eye crossing on upper diagonal (AQ)
-  const Xpt  = { x: diagLower.farX, y: diagLower.farY };
-
-  // Distances from E along each diagonal (as multiples of R)
-  const dES  = Spt  ? Math.hypot(Spt.x - E.x, Spt.y - E.y)  / R : null;  // ≈ φ
-  const dER  = Rpt  ? Math.hypot(Rpt.x - E.x, Rpt.y - E.y)  / R : null;
-  const dET  = Tpt  ? Math.hypot(Tpt.x - E.x, Tpt.y - E.y)  / R : null;
-  const dEU  = Upt  ? Math.hypot(Upt.x - E.x, Upt.y - E.y)  / R : null;  // ≈ Φ
-  const dEV  = Vpt  ? Math.hypot(Vpt.x  - E.x, Vpt.y  - E.y) / R : null;
-  const dEW  = Wpt  ? Math.hypot(Wpt.x  - E.x, Wpt.y  - E.y) / R : null;
-  const dEV2 = V2pt ? Math.hypot(V2pt.x - E.x, V2pt.y - E.y) / R : null;  // upper eye near
-  const dEW2 = W2pt ? Math.hypot(W2pt.x - E.x, W2pt.y - E.y) / R : null;  // upper eye far
-  const dEX  = diagLower.farT / R;                                          // ≈ 1.7889
-  const dEQ  = diagUpper.farT / R;
-
-  // Angle the lower diagonal makes with the equator (always = arctan(φ) ≈ 26.565°)
-  const diagAngleDeg = Math.atan2(-diagLower.uy, -diagLower.ux) * 180 / Math.PI;
-  // (negative because SVG y increases downward; the line goes left+down from E)
-  const diagAngleFromEq = Math.abs(Math.atan2(Math.abs(diagLower.uy), Math.abs(diagLower.ux)) * 180 / Math.PI);
-
-  // ── Equator crossings of the two lobe circles ───────────────────
-  // Upper lobe (centre at LC_upper): crosses equator at x = CX ± sqrt(LR²-LR²) — wait,
-  // lobe centre is LR above equator, so equator crossings: y=CY, circle eq gives
-  // (x-CX)²+(CY-CY+LR)² = LR²  →  (x-CX)² = LR²-LR² = 0  → single tangent at CX.
-  // Instead give the lobe circle's own east/west extremes:
-  const upperLobeE = { x: CX + LR, y: CY - LR };
-  const upperLobeW = { x: CX - LR, y: CY - LR };
-  const lowerLobeE = { x: CX + LR, y: CY + LR };
-  const lowerLobeW = { x: CX - LR, y: CY + LR };
-
-  // ── Segment lengths (normalised to R = 1) ──────────────────────
-  const seg = {
-    R,  LR, ER,
-    eyeToLobe : ER / LR,
-    eyeToEar  : ER / R,
-    lobeToEar : LR / R,          // always 0.5
-    OZ        : R,               // centre to Zenith
-    ON        : R,               // centre to Nadir
-    OE        : R,               // centre to East
-    OW        : R,               // centre to West
-    // Vertical axis spans
-    ZP2       : LR - ER,         // Zenith to top of upper eye
-    P2P4      : 2 * ER,          // upper eye diameter
-    P4P3      : ER,              // bottom of upper eye to lobe centre  (= ER by construction? No: P4=CY-LR+ER, P3=CY-LR → P4-P3=ER)
-    // Actually: P3.y - P4.y is negative (P3 is above P4 in y-coords)
-    // Recalc as absolute distances:
-    ZtoP2     : P2.y - P1.y,    // Zenith → top upper eye
-    P2toP4    : P4.y - P2.y,    // upper eye diameter = 2·ER
-    P4toO     : P5.y - P4.y,    // bottom upper eye → centre
-    OtoP6     : P6.y - P5.y,    // centre → top lower eye
-    P6toP8    : P8.y - P6.y,    // lower eye diameter = 2·ER
-    P8toN     : P9.y - P8.y,    // bottom lower eye → Nadir
-  };
-
-  // ── Angles ─────────────────────────────────────────────────────
-  const angles = {
-    diagFromEquator : diagAngleFromEq,                         // ≈ 26.565°
-    diagFromVertical: 90 - diagAngleFromEq,                    // ≈ 63.435°
-    diagFromEquatorRad : Math.atan(LIT_phi),                   // exact: arctan(φ)
-  };
-
-  return {
-    // Named cardinal / celestial points
-    O, Z, N, E, W,
-    // Lobe centres
-    LC_upper, LC_lower,
-    // Vertical axis points P1–P9
-    P1, P2, P3, P4, P5, P6, P7, P8, P9,
-    // Lobe extremes (equatorial)
-    upperLobeE, upperLobeW, lowerLobeE, lowerLobeW,
-    // Diagonal geometry
-    diagLower, diagUpper,
-    // Named diagonal intersection points
-    Qpt, Spt, Rpt, Tpt, Upt, Vpt, Wpt, V2pt, W2pt, Xpt,
-    // Distances (in SVG units and as ·R multiples)
-    dES, dER, dET, dEU, dEV, dEW, dEV2, dEW2, dEX, dEQ,
-    // Segment lengths (SVG units)
-    seg,
-    // Angles
-    angles,
-    // Raw radii
-    R, LR, ER,
-  };
-}
-
-// ── FULL GEOMETRY OVERLAY — CLICK TO MEASURE ────────────────────
-// Renders a scaled diagram of all named construction points as
-// clickable SVG dots. Click 1 to identify, 2 for distance, 3 for
-// angle + ratio. Float panel accumulates measurements live.
-function buildFullGeometryOverlay() {
-  const m = buildGeometryModel();
-  const {
-    O, Z, N, E, W,
-    LC_upper, LC_lower,
-    P1, P2, P3, P4, P5, P6, P7, P8, P9,
-    diagLower, diagUpper,
-    Qpt, Spt, Rpt, Tpt, Upt, Vpt, Wpt, V2pt, W2pt, Xpt,
-    dES, dER, dET, dEU, dEV, dEW, dEV2, dEW2, dEX, dEQ,
-    seg: segData, angles, R: mR, LR: mLR, ER: mER,
-  } = m;
-
-  const FG_PAD    = 88;
-  const LABEL_RIM = 56;
-  const scaledR   = (SZ / 2 + FG_PAD) - LABEL_RIM;
-  const sc        = scaledR / mR;
-  const sp = p => ({ x: CX + (p.x - CX) * sc, y: CY + (p.y - CY) * sc });
-
-  const sR = mR * sc, sLR = mLR * sc, sER = mER * sc;
-  const sZ = sp(Z), sN = sp(N), sE = sp(E), sW = sp(W), sO = sp(O);
-  const sC1 = sp(LC_upper), sC2 = sp(LC_lower);
-  const sP2 = sp(P2), sP4 = sp(P4), sP6 = sp(P6), sP8 = sp(P8);
-  const sSpt = Spt ? sp(Spt) : null;
-  const sRpt = Rpt ? sp(Rpt) : null;
-  const sTpt = Tpt ? sp(Tpt) : null;
-  const sUpt = Upt ? sp(Upt) : null;
-  const sVpt = Vpt ? sp(Vpt) : null;
-  const sWpt = Wpt ? sp(Wpt) : null;
-  const sV2pt = V2pt ? sp(V2pt) : null;
-  const sW2pt = W2pt ? sp(W2pt) : null;
-  const sXpt = sp(Xpt);
-  const sQpt = Qpt ? sp(Qpt) : null;
-
-  const cBg  = '#FAF7EF', cInk = '#2A1E08', cMut = '#9C8C6A';
-  const cGld = '#7C5C2A', cRed = '#962A20', cBlue = '#1A4A80', cGrn = '#2A6030';
-  const fam  = "Georgia,'Times New Roman',serif";
-  const f2   = v => v.toFixed(2);
-  const f4   = v => v.toFixed(4);
-  const LAB  = (col, fs=11) =>
-    `fill="${col}" font-family="${fam}" font-style="normal" font-size="${fs}"`;
-  const txt  = (x, y, s, col, fs, anchor='middle', style='normal') =>
+// ── FULL GEOMETRY OVERLAY ────────────────────────────────────────
+function buildFullGeometryOverlay(){
+  const m=buildGeometryModel();
+  const{O,Z,N,E,W,LC_upper,LC_lower,P1,P2,P3,P4,P5,P6,P7,P8,P9,diagLower,diagUpper,
+    Qpt,Spt,Rpt,Tpt,Upt,Vpt,Wpt,V2pt,W2pt,Xpt,R:mR,LR:mLR,ER:mER}=m;
+  const FG_PAD=88,LABEL_RIM=56,scaledR=(SZ/2+FG_PAD)-LABEL_RIM,sc=scaledR/mR;
+  const sp=p=>({x:CX+(p.x-CX)*sc,y:CY+(p.y-CY)*sc});
+  const sR=mR*sc,sLR=mLR*sc,sER=mER*sc;
+  const sZ=sp(Z),sN=sp(N),sE=sp(E),sW=sp(W),sO=sp(O);
+  const sC1=sp(LC_upper),sC2=sp(LC_lower);
+  const sP2=sp(P2),sP4=sp(P4),sP6=sp(P6),sP8=sp(P8);
+  const sSpt=Spt?sp(Spt):null,sRpt=Rpt?sp(Rpt):null,sTpt=Tpt?sp(Tpt):null,sUpt=Upt?sp(Upt):null;
+  const sVpt=Vpt?sp(Vpt):null,sWpt=Wpt?sp(Wpt):null,sV2pt=V2pt?sp(V2pt):null,sW2pt=W2pt?sp(W2pt):null;
+  const sXpt=sp(Xpt),sQpt=Qpt?sp(Qpt):null;
+  const{cBg,cInk,cMut,cGld,cRed,cBlue,cGrn,cYin,cYang}=overlayPalette();
+  const fam="Georgia,'Times New Roman',serif";
+  const f2=v=>v.toFixed(2);
+  const txt=(x,y,s,col,fs,anchor='middle',style='normal')=>
     `<text x="${f2(x)}" y="${f2(y)}" font-size="${fs}" fill="${col}" font-family="${fam}" font-style="${style}" text-anchor="${anchor}">${s}</text>`;
-
-  // ── Cross-line geometry ─────────────────────────────────────
-  function hLineCircle(yL, cx, cy, r) {
-    const dy = yL - cy, d = r*r - dy*dy;
-    if (d < 0) return [];
-    const sq = Math.sqrt(d);
-    return sq < 1e-6 ? [{x:cx,y:yL}] : [{x:cx-sq,y:yL},{x:cx+sq,y:yL}];
-  }
-  function vLineCircle(xL, cx, cy, r) {
-    const dx = xL - cx, d = r*r - dx*dx;
-    if (d < 0) return [];
-    const sq = Math.sqrt(d);
-    return sq < 1e-6 ? [{x:xL,y:cy}] : [{x:xL,y:cy-sq},{x:xL,y:cy+sq}];
-  }
-  const circles5 = [
-    {name:'Ear',       cx:CX, cy:CY,       r:mR },
-    {name:'UpperLobe', cx:CX, cy:CY-mLR,   r:mLR},
-    {name:'LowerLobe', cx:CX, cy:CY+mLR,   r:mLR},
-    {name:'UpperEye',  cx:CX, cy:CY-mLR,   r:mER},
-    {name:'LowerEye',  cx:CX, cy:CY+mLR,   r:mER},
+  function hLineCircle(yL,cx,cy,r){const dy=yL-cy,d=r*r-dy*dy;if(d<0)return[];const sq=Math.sqrt(d);return sq<1e-6?[{x:cx,y:yL}]:[{x:cx-sq,y:yL},{x:cx+sq,y:yL}];}
+  function vLineCircle(xL,cx,cy,r){const dx=xL-cx,d=r*r-dx*dx;if(d<0)return[];const sq=Math.sqrt(d);return sq<1e-6?[{x:xL,y:cy}]:[{x:xL,y:cy-sq},{x:xL,y:cy+sq}];}
+  const circles5=[
+    {name:'Ear',cx:CX,cy:CY,r:mR},{name:'UpperLobe',cx:CX,cy:CY-mLR,r:mLR},
+    {name:'LowerLobe',cx:CX,cy:CY+mLR,r:mLR},{name:'UpperEye',cx:CX,cy:CY-mLR,r:mER},{name:'LowerEye',cx:CX,cy:CY+mLR,r:mER}];
+  function dedup(pts){const out=[];for(const p of pts)if(!out.some(q=>Math.hypot(q.x-p.x,q.y-p.y)<1))out.push(p);return out;}
+  let letterIdx=0;
+  function nextLabel(){const a='abcdefghijklmnopqrstuvwxyz',i=letterIdx++;if(i<26)return a[i];return a[Math.floor((i-26)/26)%26]+a[(i-26)%26];}
+  const namedPoints=[
+    {label:'Z',pt:sZ,mx:Z.x,my:Z.y,col:cInk,group:'cardinal'},
+    {label:'N',pt:sN,mx:N.x,my:N.y,col:cInk,group:'cardinal'},
+    {label:'A',pt:sE,mx:E.x,my:E.y,col:cInk,group:'cardinal'},
+    {label:'W',pt:sW,mx:W.x,my:W.y,col:cInk,group:'cardinal'},
+    {label:'O',pt:sO,mx:O.x,my:O.y,col:cInk,group:'axis'},
+    {label:'C1',pt:sC1,mx:LC_upper.x,my:LC_upper.y,col:cBlue,group:'lobe'},
+    {label:'C2',pt:sC2,mx:LC_lower.x,my:LC_lower.y,col:cGrn,group:'lobe'},
+    {label:'P2',pt:sP2,mx:P2.x,my:P2.y,col:cMut,group:'eye'},
+    {label:'P4',pt:sP4,mx:P4.x,my:P4.y,col:cMut,group:'eye'},
+    {label:'P6',pt:sP6,mx:P6.x,my:P6.y,col:cMut,group:'eye'},
+    {label:'P8',pt:sP8,mx:P8.x,my:P8.y,col:cMut,group:'eye'},
   ];
-  function dedup(pts) {
-    const out=[];
-    for(const p of pts) if(!out.some(q=>Math.hypot(q.x-p.x,q.y-p.y)<1)) out.push(p);
-    return out;
-  }
-
-  // ── Point registry ──────────────────────────────────────────
-  let letterIdx = 0;
-  function nextLabel() {
-    const a = 'abcdefghijklmnopqrstuvwxyz';
-    const i = letterIdx++;
-    if (i < 26) return a[i];
-    return a[Math.floor((i-26)/26)%26] + a[(i-26)%26];
-  }
-
-  const namedPoints = [
-    {label:'Z',  pt:sZ,   mx:Z.x,        my:Z.y,        col:cInk,  group:'cardinal'},
-    {label:'N',  pt:sN,   mx:N.x,        my:N.y,        col:cInk,  group:'cardinal'},
-    {label:'A',  pt:sE,   mx:E.x,        my:E.y,        col:cInk,  group:'cardinal'},
-    {label:'W',  pt:sW,   mx:W.x,        my:W.y,        col:cInk,  group:'cardinal'},
-    {label:'O',  pt:sO,   mx:O.x,        my:O.y,        col:cInk,  group:'axis'},
-    {label:'C1', pt:sC1,  mx:LC_upper.x, my:LC_upper.y, col:cBlue, group:'lobe'},
-    {label:'C2', pt:sC2,  mx:LC_lower.x, my:LC_lower.y, col:cGrn,  group:'lobe'},
-    {label:'P2', pt:sP2,  mx:P2.x,       my:P2.y,       col:cMut,  group:'eye'},
-    {label:'P4', pt:sP4,  mx:P4.x,       my:P4.y,       col:cMut,  group:'eye'},
-    {label:'P6', pt:sP6,  mx:P6.x,       my:P6.y,       col:cMut,  group:'eye'},
-    {label:'P8', pt:sP8,  mx:P8.x,       my:P8.y,       col:cMut,  group:'eye'},
-  ];
-  if (sSpt) namedPoints.push({label:'S', pt:sSpt, mx:Spt.x, my:Spt.y, col:cGld,  group:'diag'});
-  if (sRpt) namedPoints.push({label:'R', pt:sRpt, mx:Rpt.x, my:Rpt.y, col:cBlue, group:'diag'});
-  if (sTpt) namedPoints.push({label:'T', pt:sTpt, mx:Tpt.x, my:Tpt.y, col:cGrn,  group:'diag'});
-  if (sUpt) namedPoints.push({label:'U', pt:sUpt, mx:Upt.x, my:Upt.y, col:cGld,  group:'diag'});
-  if (sVpt)  namedPoints.push({label:'V',  pt:sVpt,  mx:Vpt.x,  my:Vpt.y,  col:cRed,  group:'diag'});
-  if (sWpt)  namedPoints.push({label:'W',  pt:sWpt,  mx:Wpt.x,  my:Wpt.y,  col:cRed,  group:'diag'});
-  if (sV2pt) namedPoints.push({label:'V2', pt:sV2pt, mx:V2pt.x, my:V2pt.y, col:cBlue, group:'diag'});
-  if (sW2pt) namedPoints.push({label:'W2', pt:sW2pt, mx:W2pt.x, my:W2pt.y, col:cBlue, group:'diag'});
-  namedPoints.push({label:'X', pt:sXpt, mx:Xpt.x, my:Xpt.y, col:cInk, group:'diag'});
-  if (sQpt) namedPoints.push({label:'Q', pt:sQpt, mx:Qpt.x, my:Qpt.y, col:cMut, group:'diag'});
-
-  // Cross-line intersection points
-  const crossPoints = [];
-  const eyeDefs2 = [
-    {label:'Upper Eye', cx:CX, cy:CY-mLR, er:mER, col:cBlue},
-    {label:'Lower Eye', cx:CX, cy:CY+mLR, er:mER, col:cGrn},
-  ];
-  for (const eye of eyeDefs2) {
-    const lines = [
-      {kind:'H', val:eye.cy-eye.er},
-      {kind:'H', val:eye.cy},
-      {kind:'H', val:eye.cy+eye.er},
-      {kind:'V', val:eye.cx-eye.er},
-      {kind:'V', val:eye.cx+eye.er},
-    ];
-    for (const ln of lines) {
-      let raw = [];
-      for (const c of circles5) {
-        const pts = ln.kind==='H'
-          ? hLineCircle(ln.val,c.cx,c.cy,c.r)
-          : vLineCircle(ln.val,c.cx,c.cy,c.r);
-        pts.forEach(p => raw.push({...p, onCircle:c.name}));
-      }
+  if(sSpt)namedPoints.push({label:'S',pt:sSpt,mx:Spt.x,my:Spt.y,col:cGld,group:'diag'});
+  if(sRpt)namedPoints.push({label:'R',pt:sRpt,mx:Rpt.x,my:Rpt.y,col:cBlue,group:'diag'});
+  if(sTpt)namedPoints.push({label:'T',pt:sTpt,mx:Tpt.x,my:Tpt.y,col:cGrn,group:'diag'});
+  if(sUpt)namedPoints.push({label:'U',pt:sUpt,mx:Upt.x,my:Upt.y,col:cGld,group:'diag'});
+  if(sVpt) namedPoints.push({label:'V', pt:sVpt, mx:Vpt.x, my:Vpt.y, col:cRed,group:'diag'});
+  if(sWpt) namedPoints.push({label:'W', pt:sWpt, mx:Wpt.x, my:Wpt.y, col:cRed,group:'diag'});
+  if(sV2pt)namedPoints.push({label:'V2',pt:sV2pt,mx:V2pt.x,my:V2pt.y,col:cBlue,group:'diag'});
+  if(sW2pt)namedPoints.push({label:'W2',pt:sW2pt,mx:W2pt.x,my:W2pt.y,col:cBlue,group:'diag'});
+  namedPoints.push({label:'X',pt:sXpt,mx:Xpt.x,my:Xpt.y,col:cInk,group:'diag'});
+  if(sQpt)namedPoints.push({label:'Q',pt:sQpt,mx:Qpt.x,my:Qpt.y,col:cMut,group:'diag'});
+  const crossPoints=[];
+  const eyeDefs2=[{label:'Upper Eye',cx:CX,cy:CY-mLR,er:mER,col:cBlue},{label:'Lower Eye',cx:CX,cy:CY+mLR,er:mER,col:cGrn}];
+  for(const eye of eyeDefs2){
+    const lines=[{kind:'H',val:eye.cy-eye.er},{kind:'H',val:eye.cy},{kind:'H',val:eye.cy+eye.er},{kind:'V',val:eye.cx-eye.er},{kind:'V',val:eye.cx+eye.er}];
+    for(const ln of lines){
+      let raw=[];
+      for(const c of circles5){const pts=ln.kind==='H'?hLineCircle(ln.val,c.cx,c.cy,c.r):vLineCircle(ln.val,c.cx,c.cy,c.r);pts.forEach(p=>raw.push({...p,onCircle:c.name}));}
       raw.sort((a,b)=>ln.kind==='H'?a.x-b.x:a.y-b.y);
-      raw = dedup(raw).filter(p=>Math.hypot(p.x-CX,p.y-CY)<=mR+0.5);
-      for (const p of raw) {
-        const sv = sp(p);
-        crossPoints.push({
-          label:nextLabel(), pt:sv, mx:p.x, my:p.y,
-          col:eye.col, group:'cross',
-          onCircle:p.onCircle, lineKind:ln.kind, lineVal:ln.val
-        });
-      }
+      raw=dedup(raw).filter(p=>Math.hypot(p.x-CX,p.y-CY)<=mR+0.5);
+      for(const p of raw){const sv=sp(p);crossPoints.push({label:nextLabel(),pt:sv,mx:p.x,my:p.y,col:eye.col,group:'cross',onCircle:p.onCircle,lineKind:ln.kind,lineVal:ln.val});}
     }
   }
-
-  const allPoints = [...namedPoints, ...crossPoints];
-  window._geoPoints = allPoints.map((p,i)=>({
-    id:i, label:p.label, mx:p.mx, my:p.my,
-    sx:p.pt.x, sy:p.pt.y, col:p.col, group:p.group, R:mR
-  }));
-
-  // ── SVG ────────────────────────────────────────────────────
-  let o = '';
-  o += `<rect x="${-FG_PAD}" y="${-FG_PAD}" width="${SZ+2*FG_PAD}" height="${SZ+2*FG_PAD}" fill="${cBg}"/>`;
-
-  o += `<defs><clipPath id="fgoc"><circle cx="${CX}" cy="${CY}" r="${f2(sR)}"/></clipPath></defs>`;
-  o += `<g clip-path="url(#fgoc)" opacity="0.11">`;
-  o += `<circle cx="${CX}" cy="${CY}" r="${f2(sR)}" fill="#4A3A20"/>`;
-  o += `<rect x="${f2(CX-sR)}" y="${f2(CY-sR)}" width="${f2(sR)}" height="${f2(2*sR)}" fill="#C2B492"/>`;
-  o += `<circle cx="${f2(sC1.x)}" cy="${f2(sC1.y)}" r="${f2(sLR)}" fill="#C2B492"/>`;
-  o += `<circle cx="${f2(sC2.x)}" cy="${f2(sC2.y)}" r="${f2(sLR)}" fill="#4A3A20"/>`;
-  o += `<circle cx="${f2(sC1.x)}" cy="${f2(sC1.y)}" r="${f2(sER)}" fill="#4A3A20"/>`;
-  o += `<circle cx="${f2(sC2.x)}" cy="${f2(sC2.y)}" r="${f2(sER)}" fill="#C2B492"/>`;
-  o += `</g>`;
-
-  o += `<circle cx="${CX}" cy="${CY}" r="${f2(sR)}" fill="none" stroke="${cMut}" stroke-width="1.2" opacity="0.6"/>`;
-  o += `<circle cx="${f2(sC1.x)}" cy="${f2(sC1.y)}" r="${f2(sLR)}" fill="none" stroke="${cBlue}" stroke-width="0.8" stroke-dasharray="5,3" opacity="0.4"/>`;
-  o += `<circle cx="${f2(sC2.x)}" cy="${f2(sC2.y)}" r="${f2(sLR)}" fill="none" stroke="${cGrn}"  stroke-width="0.8" stroke-dasharray="5,3" opacity="0.4"/>`;
-  o += `<circle cx="${f2(sC1.x)}" cy="${f2(sC1.y)}" r="${f2(sER)}" fill="none" stroke="${cBlue}" stroke-width="0.8" stroke-dasharray="2,3" opacity="0.65"/>`;
-  o += `<circle cx="${f2(sC2.x)}" cy="${f2(sC2.y)}" r="${f2(sER)}" fill="none" stroke="${cGrn}"  stroke-width="0.8" stroke-dasharray="2,3" opacity="0.65"/>`;
-
-  // Cross-lines (clipped to Ear boundary)
-  for (const eye of eyeDefs2) {
-    const lines = [
-      {kind:'H', val:eye.cy-eye.er, col:eye.col},
-      {kind:'H', val:eye.cy,        col:eye.col},
-      {kind:'H', val:eye.cy+eye.er, col:eye.col},
-      {kind:'V', val:eye.cx-eye.er, col:eye.col},
-      {kind:'V', val:eye.cx+eye.er, col:eye.col},
-    ];
-    for (const ln of lines) {
-      const pts = ln.kind==='H'
-        ? hLineCircle(ln.val, CX,CY,mR)
-        : vLineCircle(ln.val, CX,CY,mR);
-      if (pts.length < 2) continue;
-      const p1=sp(pts[0]), p2=sp(pts[1]);
-      o += `<line x1="${f2(p1.x)}" y1="${f2(p1.y)}" x2="${f2(p2.x)}" y2="${f2(p2.y)}" stroke="${ln.col}" stroke-width="0.6" stroke-dasharray="3,3" opacity="0.45"/>`;
+  const allPoints=[...namedPoints,...crossPoints];
+  window._geoPoints=allPoints.map((p,i)=>({id:i,label:p.label,mx:p.mx,my:p.my,sx:p.pt.x,sy:p.pt.y,col:p.col,group:p.group,R:mR}));
+  let o='';
+  o+=`<rect x="${-FG_PAD}" y="${-FG_PAD}" width="${SZ+2*FG_PAD}" height="${SZ+2*FG_PAD}" fill="${cBg}"/>`;
+  o+=`<defs><clipPath id="fgoc"><circle cx="${CX}" cy="${CY}" r="${f2(sR)}"/></clipPath></defs>`;
+  o+=`<g clip-path="url(#fgoc)" opacity="0.11">`;
+  o+=`<circle cx="${CX}" cy="${CY}" r="${f2(sR)}" fill="${cYin}"/>`;
+  o+=`<rect x="${f2(CX-sR)}" y="${f2(CY-sR)}" width="${f2(sR)}" height="${f2(2*sR)}" fill="${cYang}"/>`;
+  o+=`<circle cx="${f2(sC1.x)}" cy="${f2(sC1.y)}" r="${f2(sLR)}" fill="${cYang}"/>`;
+  o+=`<circle cx="${f2(sC2.x)}" cy="${f2(sC2.y)}" r="${f2(sLR)}" fill="${cYin}"/>`;
+  o+=`<circle cx="${f2(sC1.x)}" cy="${f2(sC1.y)}" r="${f2(sER)}" fill="${cYin}"/>`;
+  o+=`<circle cx="${f2(sC2.x)}" cy="${f2(sC2.y)}" r="${f2(sER)}" fill="${cYang}"/>`;
+  o+=`</g>`;
+  o+=`<circle cx="${CX}" cy="${CY}" r="${f2(sR)}" fill="none" stroke="${cMut}" stroke-width="1.2" opacity="0.6"/>`;
+  o+=`<circle cx="${f2(sC1.x)}" cy="${f2(sC1.y)}" r="${f2(sLR)}" fill="none" stroke="${cBlue}" stroke-width="0.8" stroke-dasharray="5,3" opacity="0.4"/>`;
+  o+=`<circle cx="${f2(sC2.x)}" cy="${f2(sC2.y)}" r="${f2(sLR)}" fill="none" stroke="${cGrn}" stroke-width="0.8" stroke-dasharray="5,3" opacity="0.4"/>`;
+  o+=`<circle cx="${f2(sC1.x)}" cy="${f2(sC1.y)}" r="${f2(sER)}" fill="none" stroke="${cBlue}" stroke-width="0.8" stroke-dasharray="2,3" opacity="0.65"/>`;
+  o+=`<circle cx="${f2(sC2.x)}" cy="${f2(sC2.y)}" r="${f2(sER)}" fill="none" stroke="${cGrn}" stroke-width="0.8" stroke-dasharray="2,3" opacity="0.65"/>`;
+  for(const eye of eyeDefs2){
+    const lines=[{kind:'H',val:eye.cy-eye.er,col:eye.col},{kind:'H',val:eye.cy,col:eye.col},{kind:'H',val:eye.cy+eye.er,col:eye.col},{kind:'V',val:eye.cx-eye.er,col:eye.col},{kind:'V',val:eye.cx+eye.er,col:eye.col}];
+    for(const ln of lines){
+      const pts=ln.kind==='H'?[{x:CX-sR,y:sp({x:CX,y:ln.val}).y},{x:CX+sR,y:sp({x:CX,y:ln.val}).y}]:[{x:sp({x:ln.val,y:CY}).x,y:CY-sR},{x:sp({x:ln.val,y:CY}).x,y:CY+sR}];
+      o+=`<line x1="${f2(pts[0].x)}" y1="${f2(pts[0].y)}" x2="${f2(pts[1].x)}" y2="${f2(pts[1].y)}" stroke="${ln.col}" stroke-width="0.5" stroke-dasharray="3,4" opacity="0.28" clip-path="url(#fgoc)"/>`;
     }
   }
-
-  // Axes
-  const axExt = FG_PAD - 12;
-  o += `<line x1="${CX}" y1="${f2(sZ.y-axExt)}" x2="${CX}" y2="${f2(sN.y+axExt)}" stroke="${cMut}" stroke-width="0.7" stroke-dasharray="3,5"/>`;
-  o += `<line x1="${f2(sW.x-axExt)}" y1="${CY}" x2="${f2(sE.x+axExt)}" y2="${CY}" stroke="${cMut}" stroke-width="0.7" stroke-dasharray="3,5"/>`;
-
-  // Diagonal lines
-  o += `<line x1="${f2(sE.x)}" y1="${f2(sE.y)}" x2="${f2(sXpt.x)}" y2="${f2(sXpt.y)}" stroke="${cRed}" stroke-width="1.1"/>`;
-  if (sQpt) o += `<line x1="${f2(sE.x)}" y1="${f2(sE.y)}" x2="${f2(sQpt.x)}" y2="${f2(sQpt.y)}" stroke="${cMut}" stroke-width="0.7" stroke-dasharray="4,3"/>`;
-
-  // Clickable dots — named points
-  for (let i = 0; i < namedPoints.length; i++) {
-    const p = namedPoints[i];
-    const r = p.group==='cardinal'?4.5:p.group==='lobe'?3.5:3;
-    const sk = p.group==='eye'?cInk:'none', sw = p.group==='eye'?0.5:0;
-    o += `<circle id="gpt${i}" cx="${f2(p.pt.x)}" cy="${f2(p.pt.y)}" r="${r}" fill="${p.col}" stroke="${sk}" stroke-width="${sw}" style="cursor:pointer" onclick="geoClick(${i})"/>`;
-    o += `<circle cx="${f2(p.pt.x)}" cy="${f2(p.pt.y)}" r="10" fill="transparent" style="cursor:pointer" onclick="geoClick(${i})"/>`;
+  o+=`<line x1="${f2(sE.x)}" y1="${f2(sE.y)}" x2="${f2(sXpt.x)}" y2="${f2(sXpt.y)}" stroke="${cRed}" stroke-width="0.8" opacity="0.5"/>`;
+  if(sQpt)o+=`<line x1="${f2(sE.x)}" y1="${f2(sE.y)}" x2="${f2(sQpt.x)}" y2="${f2(sQpt.y)}" stroke="${cBlue}" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.4"/>`;
+  o+=`<line x1="${f2(sO.x)}" y1="${f2(sZ.y)}" x2="${f2(sO.x)}" y2="${f2(sN.y)}" stroke="${cMut}" stroke-width="0.6" stroke-dasharray="3,4" opacity="0.5"/>`;
+  for(let i=0;i<allPoints.length;i++){
+    const p=allPoints[i];
+    const baseR=p.group==='cardinal'?4.5:p.group==='lobe'?3.5:p.group==='cross'?2.5:3;
+    o+=`<circle id="gpt${i}" cx="${f2(p.pt.x)}" cy="${f2(p.pt.y)}" r="${baseR}" fill="${p.col}" stroke="none" stroke-width="0" cursor="pointer" onclick="geoClick(${i})"/>`;
   }
-  // Clickable dots — cross-line points
-  const off = namedPoints.length;
-  for (let i = 0; i < crossPoints.length; i++) {
-    const p = crossPoints[i], gid = off+i;
-    o += `<circle id="gpt${gid}" cx="${f2(p.pt.x)}" cy="${f2(p.pt.y)}" r="2.5" fill="${p.col}" stroke="${cBg}" stroke-width="0.7" style="cursor:pointer" onclick="geoClick(${gid})"/>`;
-    o += `<circle cx="${f2(p.pt.x)}" cy="${f2(p.pt.y)}" r="9" fill="transparent" style="cursor:pointer" onclick="geoClick(${gid})"/>`;
+  o+=txt(sZ.x,sZ.y-12,'Z',cInk,11);o+=txt(sZ.x,sZ.y-22,'Zenith',cMut,9.5,'middle','italic');
+  o+=txt(sN.x,sN.y+18,'N',cInk,11);o+=txt(sN.x,sN.y+29,'Nadir',cMut,9.5,'middle','italic');
+  o+=txt(sE.x+14,sE.y-9,'A',cInk,11,'start');o+=txt(sE.x+14,sE.y+4,'East',cMut,9.5,'start','italic');
+  o+=txt(sW.x-16,CY-9,'W',cInk,11,'end');o+=txt(sW.x-16,CY+4,'West',cMut,9.5,'end','italic');
+  o+=txt(sO.x+13,sO.y+5,'O',cInk,11,'start');
+  o+=txt(sC1.x-12,sC1.y+4,'C1',cBlue,10,'end');o+=txt(sC2.x-12,sC2.y+4,'C2',cGrn,10,'end');
+  [[sP2,'P2'],[sP4,'P4'],[sP6,'P6'],[sP8,'P8']].forEach(([p,l])=>{ o+=txt(p.x+9,p.y+4,l,cMut,9.5,'start'); });
+  if(sSpt)o+=txt(sSpt.x-8,sSpt.y-7,'S',cGld,10,'end');
+  if(sRpt)o+=txt(sRpt.x-8,sRpt.y-7,'R',cBlue,10,'end');
+  if(sTpt)o+=txt(sTpt.x+8,sTpt.y+13,'T',cGrn,10,'start');
+  if(sUpt)o+=txt(sUpt.x-8,sUpt.y+13,'U',cGld,10,'end');
+  if(sVpt) o+=txt(sVpt.x+8,  sVpt.y-5,  'V', cRed,10,'start');
+  if(sWpt) o+=txt(sWpt.x+8,  sWpt.y+12, 'W', cRed,10,'start');
+  if(sV2pt)o+=txt(sV2pt.x-8, sV2pt.y-5, 'V2',cBlue,10,'end');
+  if(sW2pt)o+=txt(sW2pt.x-8, sW2pt.y-7, 'W2',cBlue,10,'end');
+  o+=txt(sXpt.x-8,sXpt.y+13,'X',cInk,10,'end');
+  if(sQpt)o+=txt(sQpt.x-8,sQpt.y-7,'Q',cMut,10,'end');
+  for(const p of crossPoints){
+    const isH=p.lineKind==='H',above=isH&&p.lineVal<=CY;
+    const lx=isH?p.pt.x:p.pt.x+(p.mx<CX?-8:8),ly=isH?p.pt.y+(above?-7:11):p.pt.y+4;
+    const anc=isH?'middle':(p.mx<CX?'end':'start');
+    o+=`<text x="${f2(lx)}" y="${f2(ly)}" font-size="8" fill="${p.col}" font-family="${fam}" text-anchor="${anc}" pointer-events="none">${p.label}</text>`;
   }
-
-  // Labels — named points
-  // Cardinal labels placed clear of each other using the full FG_PAD margin.
-  // Z - Zenith: label ABOVE the dot, just outside the symbol boundary.
-  // The title pill sits at sZ.y-60; place label at sZ.y-14 between dot and pill.
-  o += txt(sZ.x, sZ.y - 14, 'Z - Zenith', cInk, 11, 'middle');
-  // N - Nadir: below the dot
-  o += txt(sN.x, sN.y + 22, 'N - Nadir', cInk, 11, 'middle');
-  // A - East: two lines above/below the equator, right of dot, clear of cross-line labels
-  o += txt(sE.x + 16, CY - 9,  'A', cInk, 11, 'start');
-  o += txt(sE.x + 16, CY + 4,  'East', cMut, 9.5, 'start', 'italic');
-  // W - West: name to the left; "Horizon" inside the Ear below the equator
-  o += txt(sW.x - 16, CY - 9,  'W', cInk, 11, 'end');
-  o += txt(sW.x - 16, CY + 4,  'West', cMut, 9.5, 'end', 'italic');
-  o += txt(sW.x + 26,  CY + 17, 'Horizon', cMut, 9, 'start', 'italic');
-
-  o += txt(sO.x+13,  sO.y+5,  'O',  cInk,  11, 'start');
-  o += txt(sC1.x-12, sC1.y+4, 'C1', cBlue, 10, 'end');
-  o += txt(sC2.x-12, sC2.y+4, 'C2', cGrn,  10, 'end');
-  [[sP2,'P2'],[sP4,'P4'],[sP6,'P6'],[sP8,'P8']].forEach(([p,l])=>{
-    o += txt(p.x+9, p.y+4, l, cMut, 9.5, 'start');
-  });
-  if (sSpt) o += txt(sSpt.x-8, sSpt.y-7, 'S', cGld,  10, 'end');
-  if (sRpt) o += txt(sRpt.x-8, sRpt.y-7, 'R', cBlue, 10, 'end');
-  if (sTpt) o += txt(sTpt.x+8, sTpt.y+13,'T', cGrn,  10, 'start');
-  if (sUpt) o += txt(sUpt.x-8, sUpt.y+13,'U', cGld,  10, 'end');
-  if (sVpt)  o += txt(sVpt.x+8,   sVpt.y-5,  'V',  cRed,  10, 'start');
-  if (sWpt)  o += txt(sWpt.x+8,   sWpt.y+12, 'W',  cRed,  10, 'start');
-  if (sV2pt) o += txt(sV2pt.x-8,  sV2pt.y-5, 'V2', cBlue, 10, 'end');
-  if (sW2pt) o += txt(sW2pt.x-8,  sW2pt.y-7, 'W2', cBlue, 10, 'end');
-  o += txt(sXpt.x-8, sXpt.y+13,'X', cInk, 10, 'end');
-  if (sQpt) o += txt(sQpt.x-8, sQpt.y-7, 'Q', cMut, 10, 'end');
-
-  // Cross-line point labels (tiny)
-  for (const p of crossPoints) {
-    const isH = p.lineKind==='H';
-    const above = isH && p.lineVal <= CY;
-    const lx = isH ? p.pt.x : p.pt.x+(p.mx<CX?-8:8);
-    const ly = isH ? p.pt.y+(above?-7:11) : p.pt.y+4;
-    const anc = isH?'middle':(p.mx<CX?'end':'start');
-    o += `<text x="${f2(lx)}" y="${f2(ly)}" font-size="8" fill="${p.col}" font-family="${fam}" font-style="normal" text-anchor="${anc}" pointer-events="none">${p.label}</text>`;
-  }
-
-  // Title pill — pushed up toward viewBox top edge, single combined line
-  const titleY = sZ.y - 60;
-  o += `<rect x="${CX-270}" y="${titleY}" width="540" height="22" rx="4" fill="${cBg}" opacity="0.93"/>`;
-  o += txt(CX, titleY+15, 'Click To Measure  ·  1 pt: identify  ·  2 pts: distance  ·  3 pts: angle + ratio', cInk, 10.5, 'middle');
-
-  // Instructions strip — below Nadir label
-  const instrY = sN.y + 36;
-  o += `<rect x="${CX-200}" y="${instrY}" width="400" height="17" rx="3" fill="${cBg}" opacity="0.87"/>`;
-  o += txt(CX, instrY+11, 'Click a selected point again to deselect  ·  Use Clear in the panel to reset', cMut, 8.5, 'middle', 'italic');
-
+  const titleY=sZ.y-60;
+  o+=`<rect x="${CX-270}" y="${titleY}" width="540" height="22" rx="4" fill="${cBg}" opacity="0.93"/>`;
+  o+=txt(CX,titleY+15,'Click To Measure  ·  1 pt: identify  ·  2 pts: distance  ·  3 pts: angle + ratio',cInk,10.5,'middle');
+  const instrY=sN.y+36;
+  o+=`<rect x="${CX-200}" y="${instrY}" width="400" height="17" rx="3" fill="${cBg}" opacity="0.87"/>`;
+  o+=txt(CX,instrY+11,'Click a selected point again to deselect  ·  Use Clear in the panel to reset',cMut,8.5,'middle','italic');
   initGeoMeasure(mR);
   return o;
 }
 
 // ── GEO MEASURE SYSTEM ───────────────────────────────────────────
-(function() {
-  let sel = [];  // up to 3 selected point IDs (indices into _geoPoints)
-  let _mR = 1;
+(function(){
+  let sel=[];
+  let _mR=1;
+  let measureHistory=[];
 
-  window.initGeoMeasure = function(radius) {
-    _mR = radius;
-    sel = [];
-    showGeoFloat();
-    renderGeoPanel();
-  };
+  window.initGeoMeasure=function(radius){_mR=radius;sel=[];showGeoFloat();renderGeoPanel();};
 
-  window.geoClick = function(id) {
-    const idx = sel.indexOf(id);
-    if (idx !== -1) {
-      sel.splice(idx, 1);
-    } else {
-      if (sel.length >= 3) sel.shift();
+  window.geoClick=function(id){
+    const idx=sel.indexOf(id);
+    if(idx!==-1){sel.splice(idx,1);}
+    else{
+      if(sel.length>=3){
+        recordHistory();
+        sel.shift();
+      }
       sel.push(id);
     }
-    updateGeoHighlights();
-    renderGeoPanel();
+    updateGeoHighlights();renderGeoPanel();
   };
 
-  window.geoClear = function() {
-    sel = [];
-    updateGeoHighlights();
-    renderGeoPanel();
-  };
+  window.geoClear=function(){sel=[];updateGeoHighlights();renderGeoPanel();};
+  window.clearMeasureHistory=function(){measureHistory=[];window._measureHistory=measureHistory;renderGeoPanel();};
 
-  function getDotRadius(p) {
-    if (p.group==='cardinal') return 4.5;
-    if (p.group==='lobe')     return 3.5;
-    if (p.group==='cross')    return 2.5;
-    return 3;
+  function recordHistory(){
+    if(sel.length<2)return;
+    const pts=window._geoPoints||[];
+    const PHI=BIG_PHI,phi=LIT_phi;
+    const entry={ts:new Date().toLocaleTimeString(),pts:sel.map(id=>{const p=pts[id];return{lbl:p.label,mx:p.mx.toFixed(3),my:p.my.toFixed(3)};})};
+    if(sel.length>=2){
+      const p0=pts[sel[0]],p1=pts[sel[1]];
+      const dist=Math.hypot(p1.mx-p0.mx,p1.my-p0.my)/_mR;
+      entry.dist=dist.toFixed(5);entry.distPhi=(dist/phi).toFixed(5);entry.distPHI=(dist/PHI).toFixed(5);
+    }
+    if(sel.length===3){
+      const pA=pts[sel[0]],pB=pts[sel[1]],pC=pts[sel[2]];
+      const bax=pA.mx-pB.mx,bay=pA.my-pB.my,bcx=pC.mx-pB.mx,bcy=pC.my-pB.my;
+      const cosA=Math.max(-1,Math.min(1,(bax*bcx+bay*bcy)/(Math.hypot(bax,bay)*Math.hypot(bcx,bcy))));
+      entry.angle=(Math.acos(cosA)*180/Math.PI).toFixed(3);
+    }
+    measureHistory.unshift(entry);
+    if(measureHistory.length>12)measureHistory.pop();
+    window._measureHistory=measureHistory;
   }
+  window._measureHistory=measureHistory;
 
-  function updateGeoHighlights() {
-    const pts = window._geoPoints || [];
-    pts.forEach((p, i) => {
-      const el = document.getElementById('gpt'+i);
-      if (!el) return;
-      const isSel = sel.includes(i);
-      el.setAttribute('stroke', isSel ? '#f9f964' : 'none');
-      el.setAttribute('stroke-width', isSel ? '3' : '0');
-      el.setAttribute('r', isSel ? '6.5' : getDotRadius(p));
+  function getDotRadius(p){if(p.group==='cardinal')return 4.5;if(p.group==='lobe')return 3.5;if(p.group==='cross')return 2.5;return 3;}
+
+  function updateGeoHighlights(){
+    const pts=window._geoPoints||[];
+    pts.forEach((p,i)=>{
+      const el=document.getElementById('gpt'+i);if(!el)return;
+      const isSel=sel.includes(i);
+      el.setAttribute('stroke',isSel?'#f9f964':'none');
+      el.setAttribute('stroke-width',isSel?'3':'0');
+      el.setAttribute('r',isSel?'6.5':getDotRadius(p));
     });
-    // Remove previous measure lines
-    document.querySelectorAll('.geo-mline').forEach(e => e.remove());
-    const pts2 = window._geoPoints || [];
-    const svgEl = document.querySelector('#svgWrap svg, #svgOut svg, svg');
-    if (!svgEl || sel.length < 2) return;
-    // Draw segment line(s)
-    for (let i = 0; i < sel.length-1; i++) {
-      const pa = pts2[sel[i]], pb = pts2[sel[i+1]];
-      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-      line.setAttribute('x1',pa.sx); line.setAttribute('y1',pa.sy);
-      line.setAttribute('x2',pb.sx); line.setAttribute('y2',pb.sy);
-      line.setAttribute('stroke','#f9f964');
-      line.setAttribute('stroke-width','1.4');
-      line.setAttribute('stroke-dasharray','5,3');
-      line.setAttribute('pointer-events','none');
-      line.setAttribute('class','geo-mline');
-      svgEl.appendChild(line);
+    document.querySelectorAll('.geo-mline').forEach(e=>e.remove());
+    const pts2=window._geoPoints||[];
+    const svgEl=document.querySelector('#svgwrap svg');
+    if(!svgEl||sel.length<2)return;
+    for(let i=0;i<sel.length-1;i++){
+      const pa=pts2[sel[i]],pb=pts2[sel[i+1]];
+      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1',pa.sx);line.setAttribute('y1',pa.sy);
+      line.setAttribute('x2',pb.sx);line.setAttribute('y2',pb.sy);
+      line.setAttribute('stroke','#f9f964');line.setAttribute('stroke-width','1.4');
+      line.setAttribute('stroke-dasharray','5,3');line.setAttribute('pointer-events','none');
+      line.setAttribute('class','geo-mline');svgEl.appendChild(line);
     }
   }
 
-  function renderGeoPanel() {
-    const body = document.getElementById('geoFloatBody');
-    if (!body) return;
-    const pts = window._geoPoints || [];
-    const f4  = v => v.toFixed(4);
-    const f2  = v => v.toFixed(2);
-    const PHI = 1.6180339887, phi = 0.6180339887;
-    let html = '';
-
-    // Instruction header
-    html += `<div style="font-size:10px;color:var(--mute);line-height:1.65;border-bottom:1px solid var(--bdr);padding-bottom:8px;margin-bottom:8px">
+  function renderGeoPanel(){
+    const body=document.getElementById('geoFloatBody');if(!body)return;
+    const pts=window._geoPoints||[];
+    const f4=v=>v.toFixed(4),f2=v=>v.toFixed(2);
+    const PHI=BIG_PHI,phi=LIT_phi;
+    let html='';
+    // Instructions
+    html+=`<div style="font-size:10px;color:var(--mute);line-height:1.65;border-bottom:1px solid var(--bdr);padding-bottom:8px;margin-bottom:8px">
       <b style="color:var(--txt);font-size:11px">Click To Measure</b><br>
-      <b>1</b> point &rarr; identify &nbsp;&nbsp;
-      <b>2</b> points &rarr; distance &nbsp;&nbsp;
-      <b>3</b> points &rarr; angle &amp; ratio<br>
-      <span style="font-size:9px">Click a highlighted dot again to deselect.</span>
+      <b>1</b> pt &rarr; identify &nbsp; <b>2</b> pts &rarr; distance &nbsp; <b>3</b> pts &rarr; angle &amp; ratio<br>
+      <span style="font-size:9px">Click a highlighted dot again to deselect.</span></div>`;
+    if(sel.length===0){
+      html+=`<div style="color:var(--mute);font-size:10.5px;text-align:center;padding:16px 0 8px">No point selected.<br><span style="font-size:9.5px">Click any dot on the diagram.</span></div>`;
+    }
+    if(sel.length>=1){
+      const p=pts[sel[0]];const xR=(p.mx-CX)/_mR,yR=(p.my-CY)/_mR,dO=Math.hypot(p.mx-CX,p.my-CY)/_mR;
+      html+=`<div class="geo-section"><div class="geo-sec-title">Point 1 — <b>${p.label}</b> (${p.group})</div>
+        <table><tr><td>x</td><td>${(xR>=0?'+':'')+f4(xR)} R</td></tr>
+        <tr><td>y</td><td>${(yR>=0?'+':'')+f4(yR)} R</td></tr>
+        <tr><td>|O|</td><td>${f4(dO)} R</td></tr>
+        <tr><td>/ phi</td><td>${f4(dO/phi)} &times; &phi;</td></tr>
+        <tr><td>/ Phi</td><td>${f4(dO/PHI)} &times; &Phi;</td></tr></table></div>`;
+    }
+    if(sel.length>=2){
+      const p0=pts[sel[0]],p1=pts[sel[1]];
+      const dist=Math.hypot(p1.mx-p0.mx,p1.my-p0.my)/_mR;
+      const angDeg=Math.atan2(-(p1.my-p0.my),p1.mx-p0.mx)*180/Math.PI;
+      html+=`<div class="geo-section"><div class="geo-sec-title">Segment ${p0.label} &rarr; ${p1.label}</div>
+        <table><tr><td>Length</td><td><b>${f4(dist)}</b> R</td></tr>
+        <tr><td>Angle</td><td>${f2(angDeg)}&deg;</td></tr>
+        <tr><td>/ phi</td><td>${f4(dist/phi)} &times; &phi;</td></tr>
+        <tr><td>/ Phi</td><td>${f4(dist/PHI)} &times; &Phi;</td></tr></table></div>`;
+    }
+    if(sel.length===3){
+      const pA=pts[sel[0]],pB=pts[sel[1]],pC=pts[sel[2]];
+      const bax=pA.mx-pB.mx,bay=pA.my-pB.my,bcx=pC.mx-pB.mx,bcy=pC.my-pB.my;
+      const mA=Math.hypot(bax,bay),magBC=Math.hypot(bcx,bcy);
+      const cosA=Math.max(-1,Math.min(1,(bax*bcx+bay*bcy)/(mA*magBC)));
+      const angDeg=Math.acos(cosA)*180/Math.PI;
+      const dAB=mA/_mR,dBC=magBC/_mR,ratio=dBC>0?dAB/dBC:null;
+      html+=`<div class="geo-section"><div class="geo-sec-title">Angle at ${pB.label}  (${pA.label}-${pB.label}-${pC.label})</div>
+        <table><tr><td>Angle</td><td><b>${f2(angDeg)}&deg;</b></td></tr>
+        <tr><td>${pA.label}-${pB.label}</td><td>${f4(dAB)} R</td></tr>
+        <tr><td>${pB.label}-${pC.label}</td><td>${f4(dBC)} R</td></tr>
+        ${ratio!=null?`<tr><td>Ratio</td><td>${f4(dAB)} : ${f4(dBC)}</td></tr>
+        <tr><td>=</td><td>${f4(ratio)}</td></tr>
+        <tr><td>/ phi</td><td>${f4(ratio/phi)}</td></tr>
+        <tr><td>/ Phi</td><td>${f4(ratio/PHI)}</td></tr>`:''}</table></div>`;
+    }
+    // Clear + history count
+    html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:8px;border-top:1px solid var(--bdr)">
+      <button onclick="geoClear()" style="font-size:10px;padding:4px 14px;background:var(--surf2);border:1px solid var(--bdr);border-radius:5px;color:var(--txt);cursor:pointer">Clear</button>
+      <span style="font-size:9.5px;color:var(--mute)">History: ${measureHistory.length}/12</span>
+      <button onclick="exportMeasureCSV()" style="font-size:10px;padding:4px 10px;background:var(--surf2);border:1px solid var(--bdr);border-radius:5px;color:var(--gold);cursor:pointer;font-weight:600">⬇ CSV</button>
     </div>`;
-
-    if (sel.length === 0) {
-      html += `<div style="color:var(--mute);font-size:10.5px;text-align:center;padding:20px 0 12px">No point selected.<br><span style="font-size:9.5px">Click any dot on the diagram.</span></div>`;
+    // Measurement history table
+    if(measureHistory.length>0){
+      html+=`<div class="geo-section" style="margin-top:10px">
+        <div class="geo-sec-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>Measurement History (last ${measureHistory.length})</span>
+          <button onclick="clearMeasureHistory()" style="font-size:9px;padding:2px 8px;background:var(--surf2);border:1px solid var(--bdr);border-radius:4px;color:var(--mute);cursor:pointer;letter-spacing:.04em">Clear History</button>
+        </div>
+        <table class="hist-table">
+          <tr><th>#</th><th>Time</th><th>Points</th><th>Dist (R)</th><th>Angle°</th></tr>`;
+      measureHistory.forEach((h,i)=>{
+        const ptLabels=h.pts.map(p=>p.lbl).join('→');
+        html+=`<tr>
+          <td>${measureHistory.length-i}</td>
+          <td>${h.ts}</td>
+          <td>${ptLabels}</td>
+          <td>${h.dist||'—'}</td>
+          <td>${h.angle||'—'}</td>
+        </tr>`;
+      });
+      html+=`</table></div>`;
     }
-
-    // ── 1 point: identify ───────────────────────────────────
-    if (sel.length >= 1) {
-      const p = pts[sel[0]];
-      const xR = (p.mx - CX) / _mR, yR = (p.my - CY) / _mR;
-      const dO = Math.hypot(p.mx-CX, p.my-CY) / _mR;
-      html += `<div class="geo-section">
-        <div class="geo-sec-title">Point 1 &mdash; <b>${p.label}</b> (${p.group})</div>
-        <table>
-          <tr><td>x</td><td>${(xR>=0?'+':'')+f4(xR)} R</td></tr>
-          <tr><td>y</td><td>${(yR>=0?'+':'')+f4(yR)} R</td></tr>
-          <tr><td>|O|</td><td>${f4(dO)} R from origin</td></tr>
-          <tr><td>/ phi</td><td>${f4(dO/phi)} &times; &phi;</td></tr>
-          <tr><td>/ Phi</td><td>${f4(dO/PHI)} &times; &Phi;</td></tr>
-        </table></div>`;
-    }
-
-    // ── 2 points: distance ──────────────────────────────────
-    if (sel.length >= 2) {
-      const p0=pts[sel[0]], p1=pts[sel[1]];
-      const dx=p1.mx-p0.mx, dy=p1.my-p0.my;
-      const dist = Math.hypot(dx,dy) / _mR;
-      const angDeg = Math.atan2(-dy,dx)*180/Math.PI;
-      html += `<div class="geo-section">
-        <div class="geo-sec-title">Segment ${p0.label} &rarr; ${p1.label}</div>
-        <table>
-          <tr><td>Length</td><td><b>${f4(dist)}</b> R</td></tr>
-          <tr><td>Angle</td><td>${f2(angDeg)}&deg; from horizontal</td></tr>
-          <tr><td>/ phi</td><td>${f4(dist/phi)} &times; &phi;</td></tr>
-          <tr><td>/ Phi</td><td>${f4(dist/PHI)} &times; &Phi;</td></tr>
-        </table></div>`;
-    }
-
-    // ── 3 points: angle at middle + ratios ──────────────────
-    if (sel.length === 3) {
-      const pA=pts[sel[0]], pB=pts[sel[1]], pC=pts[sel[2]];
-      const bax=pA.mx-pB.mx, bay=pA.my-pB.my;
-      const bcx=pC.mx-pB.mx, bcy=pC.my-pB.my;
-      const dot2 = bax*bcx + bay*bcy;
-      const mA = Math.hypot(bax,bay), mC = Math.hypot(bcx,bcy);
-      const cosA = Math.max(-1,Math.min(1, dot2/(mA*mC)));
-      const angDeg = Math.acos(cosA)*180/Math.PI;
-      const dAB = mA/_mR, dBC = mC/_mR;
-      const ratio = dBC > 0 ? dAB/dBC : null;
-      html += `<div class="geo-section">
-        <div class="geo-sec-title">Angle at ${pB.label}  (${pA.label}-${pB.label}-${pC.label})</div>
-        <table>
-          <tr><td>Angle</td><td><b>${f2(angDeg)}&deg;</b></td></tr>
-          <tr><td>${pA.label}-${pB.label}</td><td>${f4(dAB)} R</td></tr>
-          <tr><td>${pB.label}-${pC.label}</td><td>${f4(dBC)} R</td></tr>
-          ${ratio!=null?`<tr><td>Ratio</td><td>${f4(dAB)} : ${f4(dBC)}</td></tr>`:''}
-          ${ratio!=null?`<tr><td>=</td><td>${f4(ratio)}</td></tr>`:''}
-          ${ratio!=null?`<tr><td>/ phi</td><td>${f4(ratio/phi)}</td></tr>`:''}
-          ${ratio!=null?`<tr><td>/ Phi</td><td>${f4(ratio/PHI)}</td></tr>`:''}
-        </table></div>`;
-    }
-
-    // Clear button
-    html += `<div style="text-align:center;margin-top:12px;padding-top:8px;border-top:1px solid var(--bdr)">
-      <button onclick="geoClear()" style="font-size:10px;padding:4px 20px;background:var(--surf2);border:1px solid var(--bdr);border-radius:5px;color:var(--txt);cursor:pointer;letter-spacing:.04em">Clear</button>
-    </div>`;
-
-    body.innerHTML = html;
+    body.innerHTML=html;
   }
 
-  window.updateGeoFloat = function() {}; // legacy no-op
+  window.updateGeoFloat=function(){};
 })();
 
-function buildVerticalOverlay() {
-  // ── Local diagram scale — independent of the live symbol's CX/CY/R,
-  //    sized to always leave room for side-panel labels. ──────────
-  const panelW = 112;                       // reserved label-panel width, each side
-  const gutter = 10;
-  const oR  = (SZ - 2 * panelW - 2 * gutter) / 2;   // diagram circle radius
-  const oCX = SZ / 2;
-  const oCY = SZ / 2;
-  const oLR = oR / 2;                       // diagram Lobe radius
+// ── OVERLAY THEME PALETTE ─────────────────────────────────────────────────
+// Colour tokens for SVG overlays — adapts automatically to light/dark theme.
+function overlayPalette(){
+  return isLight
+    ?{cBg:'#FAF7EF',cBgSeg:'rgba(250,247,239,0.975)',cBgPnl:'rgba(194,180,146,0.16)',
+      cInk:'#28200E',cMut:'#9C8C6A',cGld:'#7C5C2A',cRed:'#962A20',cBlue:'#1A4A80',cGrn:'#2A6030',
+      cYin:'#4A3A20',cYang:'#C2B492'}
+    :{cBg:'#141420',cBgSeg:'rgba(14,14,26,0.975)',cBgPnl:'rgba(28,26,40,0.85)',
+      cInk:'#D0C8B8',cMut:'#706878',cGld:'#B09050',cRed:'#C04848',cBlue:'#4878C0',cGrn:'#3A8858',
+      cYin:'#28203C',cYang:'#585078'};
+}
 
-  const ratio = S.eyeRatio;
-  const oER = oLR * ratio;                  // diagram Eye radius (scaled, same ratio as live)
-
-  const tY  = oCY - oR;        // apex
-  const bY  = oCY + oR;        // base
-
-  // ── Cumulative y-landmarks from apex ─────────────────────────
-  const y1  = oCY - oLR - oER;   // top of upper eye
-  const y2  = oCY - oLR + oER;   // bottom of upper eye
-  const y3  = oCY;               // centre
-  const y4  = oCY + oLR - oER;   // top of lower eye
-  const y5  = oCY + oLR + oER;   // bottom of lower eye
-
-  // ── Palette (warm parchment — legible in both app themes) ─────
-  const cBg  = '#FAF7EF';
-  const cInk = '#28200E';
-  const cMut = '#9C8C6A';
-  const cGld = '#7C5C2A';
-  const cPnl = 'rgba(194,180,146,0.16)';
-  const fam  = "Georgia,'Times New Roman',serif";
-  const fs   = 14.5;   // base font-size for panel labels
-
-  const leftX  = gutter + panelW;             // right edge of left panel (bracket sits here)
-  const rightX = SZ - gutter - panelW;        // left edge of right panel (bracket sits here)
-
-  let o = '';
-
-  // 1 · Full warm background
-  o += `<rect width="${SZ}" height="${SZ}" fill="${cBg}"/>`;
-
-  // 2 · Side-panel containers (subtle boxes framing the label columns)
-  o += `<rect x="0" y="0" width="${(gutter+panelW).toFixed(1)}" height="${SZ}" fill="${cPnl}"/>`;
-  o += `<rect x="${rightX.toFixed(1)}" y="0" width="${(panelW+gutter).toFixed(1)}" height="${SZ}" fill="${cPnl}"/>`;
-  o += `<line x1="${(gutter+panelW).toFixed(1)}" y1="0" x2="${(gutter+panelW).toFixed(1)}" y2="${SZ}" stroke="${cMut}" stroke-width="0.6" opacity="0.5"/>`;
-  o += `<line x1="${rightX.toFixed(1)}" y1="0" x2="${rightX.toFixed(1)}" y2="${SZ}" stroke="${cMut}" stroke-width="0.6" opacity="0.5"/>`;
-  o += `<text x="${((gutter+panelW)/2).toFixed(1)}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">SEGMENT LENGTH</text>`;
-  o += `<text x="${(rightX + (panelW+gutter)/2).toFixed(1)}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">FROM APEX</text>`;
-
-  // 3 · Faint yin-yang silhouette — orientation context only
-  o += `<g opacity="0.18">`;
-  o += `<clipPath id="ocOverlay"><circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}"/></clipPath>`;
-  o += `<g clip-path="url(#ocOverlay)">`;
-  o += `<circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}" fill="#4A3A20"/>`;
-  o += `<rect x="${(oCX-oR).toFixed(2)}" y="${tY.toFixed(2)}" width="${oR.toFixed(3)}" height="${(2*oR).toFixed(2)}" fill="#C2B492"/>`;
-  o += `<circle cx="${oCX}" cy="${(oCY-oLR).toFixed(2)}" r="${oLR.toFixed(3)}" fill="#C2B492"/>`;
-  o += `<circle cx="${oCX}" cy="${(oCY+oLR).toFixed(2)}" r="${oLR.toFixed(3)}" fill="#4A3A20"/>`;
-  o += `<circle cx="${oCX}" cy="${(oCY-oLR).toFixed(2)}" r="${oER.toFixed(4)}" fill="#4A3A20"/>`;
-  o += `<circle cx="${oCX}" cy="${(oCY+oLR).toFixed(2)}" r="${oER.toFixed(4)}" fill="#C2B492"/>`;
-  o += `</g></g>`;
-
-  // 4 · Circle outline
-  o += `<circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}" fill="none" stroke="${cMut}" stroke-width="0.65" opacity="0.45"/>`;
-
-  // 5 · Vertical centre axis (dashed, between the panels only)
-  o += `<line x1="${oCX}" y1="${tY.toFixed(2)}" x2="${oCX}" y2="${bY.toFixed(2)}" stroke="${cMut}" stroke-width="0.55" stroke-dasharray="3,4"/>`;
-
-  // 6 · Apex reference line + label
-  o += `<line x1="${leftX.toFixed(1)}" y1="${tY.toFixed(2)}" x2="${rightX.toFixed(1)}" y2="${tY.toFixed(2)}" stroke="${cMut}" stroke-width="0.4" stroke-dasharray="2,6" opacity="0.45"/>`;
-  o += `<text x="${oCX}" y="${(tY - 9).toFixed(2)}" font-size="13" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">apex</text>`;
-
-  // 7 · Horizontal measurement lines (span only the diagram column, between panels)
-  [
-    { y: y1, heavy: false }, { y: y2, heavy: false }, { y: y3, heavy: true  },
-    { y: y4, heavy: false }, { y: y5, heavy: false },
-  ].forEach(({ y, heavy }) => {
-    const yf = y.toFixed(3);
-    o += `<line x1="${leftX.toFixed(1)}" y1="${yf}" x2="${rightX.toFixed(1)}" y2="${yf}" ` +
-         `stroke="${cInk}" stroke-width="${heavy ? 0.85 : 0.6}" ` +
-         `stroke-dasharray="${heavy ? '7,4' : '5,3'}" opacity="${heavy ? 0.55 : 0.46}"/>`;
+// ── VERTICAL LINE RATIOS OVERLAY ──────────────────────────────────
+function buildVerticalOverlay(){
+  const panelW=112,gutter=10,oR=(SZ-2*panelW-2*gutter)/2,oCX=SZ/2,oCY=SZ/2,oLR=oR/2;
+  const ratio=S.eyeRatio,oER=oLR*ratio,tY=oCY-oR,bY=oCY+oR;
+  const y1=oCY-oLR-oER,y2=oCY-oLR+oER,y3=oCY,y4=oCY+oLR-oER,y5=oCY+oLR+oER;
+  const{cBg,cBgPnl:cPnl,cInk,cMut,cGld,cYin,cYang}=overlayPalette();
+  const fam="Georgia,'Times New Roman',serif",fs=14.5;
+  const leftX=gutter+panelW,rightX=SZ-gutter-panelW;
+  let o='';
+  o+=`<rect width="${SZ}" height="${SZ}" fill="${cBg}"/>`;
+  o+=`<rect x="0" y="0" width="${(gutter+panelW).toFixed(1)}" height="${SZ}" fill="${cPnl}"/>`;
+  o+=`<rect x="${rightX.toFixed(1)}" y="0" width="${(panelW+gutter).toFixed(1)}" height="${SZ}" fill="${cPnl}"/>`;
+  o+=`<line x1="${(gutter+panelW).toFixed(1)}" y1="0" x2="${(gutter+panelW).toFixed(1)}" y2="${SZ}" stroke="${cMut}" stroke-width="0.6" opacity="0.5"/>`;
+  o+=`<line x1="${rightX.toFixed(1)}" y1="0" x2="${rightX.toFixed(1)}" y2="${SZ}" stroke="${cMut}" stroke-width="0.6" opacity="0.5"/>`;
+  o+=`<text x="${((gutter+panelW)/2).toFixed(1)}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">SEGMENT LENGTH</text>`;
+  o+=`<text x="${(rightX+(panelW+gutter)/2).toFixed(1)}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">FROM APEX</text>`;
+  o+=`<g opacity="0.18"><clipPath id="ocOverlay"><circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}"/></clipPath>`;
+  o+=`<g clip-path="url(#ocOverlay)">`;
+  o+=`<circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}" fill="${cYin}"/>`;
+  o+=`<rect x="${(oCX-oR).toFixed(2)}" y="${tY.toFixed(2)}" width="${oR.toFixed(3)}" height="${(2*oR).toFixed(2)}" fill="${cYang}"/>`;
+  o+=`<circle cx="${oCX}" cy="${(oCY-oLR).toFixed(2)}" r="${oLR.toFixed(3)}" fill="${cYang}"/>`;
+  o+=`<circle cx="${oCX}" cy="${(oCY+oLR).toFixed(2)}" r="${oLR.toFixed(3)}" fill="${cYin}"/>`;
+  o+=`<circle cx="${oCX}" cy="${(oCY-oLR).toFixed(2)}" r="${oER.toFixed(4)}" fill="${cYin}"/>`;
+  o+=`<circle cx="${oCX}" cy="${(oCY+oLR).toFixed(2)}" r="${oER.toFixed(4)}" fill="${cYang}"/>`;
+  o+=`</g></g>`;
+  o+=`<circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}" fill="none" stroke="${cMut}" stroke-width="0.65" opacity="0.45"/>`;
+  o+=`<line x1="${oCX}" y1="${tY.toFixed(2)}" x2="${oCX}" y2="${bY.toFixed(2)}" stroke="${cMut}" stroke-width="0.55" stroke-dasharray="3,4"/>`;
+  o+=`<line x1="${leftX.toFixed(1)}" y1="${tY.toFixed(2)}" x2="${rightX.toFixed(1)}" y2="${tY.toFixed(2)}" stroke="${cMut}" stroke-width="0.4" stroke-dasharray="2,6" opacity="0.45"/>`;
+  o+=`<text x="${oCX}" y="${(tY-9).toFixed(2)}" font-size="13" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">apex</text>`;
+  [{y:y1,heavy:false},{y:y2,heavy:false},{y:y3,heavy:true},{y:y4,heavy:false},{y:y5,heavy:false}].forEach(({y,heavy})=>{
+    o+=`<line x1="${leftX.toFixed(1)}" y1="${y.toFixed(3)}" x2="${rightX.toFixed(1)}" y2="${y.toFixed(3)}" stroke="${cInk}" stroke-width="${heavy?0.85:0.6}" stroke-dasharray="${heavy?'7,4':'5,3'}" opacity="${heavy?0.55:0.46}"/>`;
   });
-
-  // 8 · Right-panel cumulative labels — distance from apex, as a decimal
-  //     multiple of R (always accurate, regardless of eye ratio chosen).
-  const rBase = `font-size="${fs}" fill="${cGld}" font-family="${fam}" ` +
-                `font-style="italic" dominant-baseline="middle" text-anchor="start"`;
-  const rTextX = rightX + 14;
-  [tY, y1, y2, y3, y4, y5, bY].forEach((y) => {
-    const mult = ((y - tY) / oR).toFixed(4);
-    o += `<line x1="${rightX.toFixed(1)}" y1="${y.toFixed(2)}" x2="${(rightX+8).toFixed(1)}" y2="${y.toFixed(2)}" stroke="${cInk}" stroke-width="0.7"/>`;
-    o += `<text x="${rTextX.toFixed(1)}" y="${y.toFixed(2)}" ${rBase}>${mult}·R</text>`;
+  const rBase=`font-size="${fs}" fill="${cGld}" font-family="${fam}" font-style="italic" dominant-baseline="middle" text-anchor="start"`;
+  const rTextX=rightX+14;
+  [tY,y1,y2,y3,y4,y5,bY].forEach(y=>{
+    const mult=((y-tY)/oR).toFixed(4);
+    o+=`<line x1="${rightX.toFixed(1)}" y1="${y.toFixed(2)}" x2="${(rightX+8).toFixed(1)}" y2="${y.toFixed(2)}" stroke="${cInk}" stroke-width="0.7"/>`;
+    o+=`<text x="${rTextX.toFixed(1)}" y="${y.toFixed(2)}" ${rBase}>${mult}·R</text>`;
   });
-
-  // 9 · Left-panel span brackets — live segment lengths as fraction of R
-  const bBase = `font-size="${fs}" fill="${cGld}" font-family="${fam}" ` +
-                `font-style="italic" dominant-baseline="middle" text-anchor="end"`;
-
-  function lenLbl(ya, yb) { return ((yb - ya) / oR).toFixed(4) + 'R'; }
-
-  function brkt(ya, yb, label) {
-    const x0 = leftX, x1 = leftX - 8;
-    const ym  = ((ya + yb) / 2).toFixed(2);
-    const yaf = ya.toFixed(2), ybf = yb.toFixed(2);
-    return (
-      `<line x1="${x1}" y1="${yaf}" x2="${x0}" y2="${yaf}" stroke="${cInk}" stroke-width="0.7"/>` +
-      `<line x1="${x0}" y1="${yaf}" x2="${x0}" y2="${ybf}" stroke="${cInk}" stroke-width="0.7"/>` +
-      `<line x1="${x0}" y1="${ybf}" x2="${x1}" y2="${ybf}" stroke="${cInk}" stroke-width="0.7"/>` +
-      `<text x="${(x0 - 14).toFixed(1)}" y="${ym}" ${bBase}>${label}</text>`
-    );
+  const bBase=`font-size="${fs}" fill="${cGld}" font-family="${fam}" font-style="italic" dominant-baseline="middle" text-anchor="end"`;
+  function lenLbl(ya,yb){return((yb-ya)/oR).toFixed(4)+'R';}
+  function brkt(ya,yb,label){
+    const x0=leftX,x1=leftX-8,ym=((ya+yb)/2).toFixed(2),yaf=ya.toFixed(2),ybf=yb.toFixed(2);
+    return`<line x1="${x1}" y1="${yaf}" x2="${x0}" y2="${yaf}" stroke="${cInk}" stroke-width="0.7"/><line x1="${x0}" y1="${yaf}" x2="${x0}" y2="${ybf}" stroke="${cInk}" stroke-width="0.7"/><line x1="${x0}" y1="${ybf}" x2="${x1}" y2="${ybf}" stroke="${cInk}" stroke-width="0.7"/><text x="${(x0-14).toFixed(1)}" y="${ym}" ${bBase}>${label}</text>`;
   }
-
-  o += brkt(tY, y1, lenLbl(tY, y1));            // apex → top of upper eye
-  o += brkt(y1, y2, '2r ' + lenLbl(y1, y2));     // upper eye diameter
-  o += brkt(y2, y3, lenLbl(y2, y3));             // bottom of upper eye → centre
-  o += brkt(y3, y4, lenLbl(y3, y4));             // centre → top of lower eye
-  o += brkt(y4, y5, '2r ' + lenLbl(y4, y5));     // lower eye diameter
-  o += brkt(y5, bY, lenLbl(y5, bY));             // bottom of lower eye → base
-
-  // 10 · Eye∶Lobe and Eye∶Ear ratio footer notes, inside the diagram column only
-  const eyeToEar = (oER / oR).toFixed(6);
-  o += `<text x="${oCX}" y="${(bY+22).toFixed(2)}" font-size="11.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">` +
-       `Eye ∶ Lobe radius = ${ratio.toFixed(6)}</text>`;
-  o += `<text x="${oCX}" y="${(bY+38).toFixed(2)}" font-size="11.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">` +
-       `Eye ∶ Ear radius = ${eyeToEar}</text>`;
-
+  o+=brkt(tY,y1,lenLbl(tY,y1));o+=brkt(y1,y2,'2r '+lenLbl(y1,y2));o+=brkt(y2,y3,lenLbl(y2,y3));
+  o+=brkt(y3,y4,lenLbl(y3,y4));o+=brkt(y4,y5,'2r '+lenLbl(y4,y5));o+=brkt(y5,bY,lenLbl(y5,bY));
+  o+=`<text x="${oCX}" y="${(bY+22).toFixed(2)}" font-size="11.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">Eye ∶ Lobe radius = ${ratio.toFixed(6)}</text>`;
+  o+=`<text x="${oCX}" y="${(bY+38).toFixed(2)}" font-size="11.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">Eye ∶ Ear radius = ${(oER/oR).toFixed(6)}</text>`;
   return o;
 }
 
 // ── OTHER SEGMENTS OVERLAY ────────────────────────────────────────
-// R is the SYMBOL RADIUS (the Ear radius). A is the FIXED point where
-// the right midline (equator) meets the Ear (outer circle), at (CX+R,
-// CY), and O is the symbol's centre (CX, CY). AO is therefore simply
-// length R — a fixed reference segment lying along the equator,
-// independent of both eye size and the Lobe construction below.
-//
-// A line from A through the LOWER Lobe's centre is extended to the far
-// edge of the Ear — this is segment A→H, with H also fixed (it does not
-// depend on eye size). A mirrored line from A through the UPPER Lobe's
-// centre gives A→D. Along the lower line the Lobe boundary circle is
-// crossed at two points and the Eye circle at two further points:
-//
-//   A → O  (symbol centre)                            length = R         (fixed)
-//   A → B  (upper line, near Lobe-circle crossing)    length = R·φ       (fixed)
-//   A → G  (lower line, far Lobe-circle crossing)      length = R·Φ       (fixed)
-//   A → E, A → F  (lower line, Eye-circle crossings)   variable — depend on the live eye ratio
-//   A → H  (lower line, far edge of Ear)                length ≈ 1.7889·R (fixed)
-//
-// AB = φ·R and AG = Φ·R are EXACT, independent of eye radius, because A
-// sits at distance R·√5⁄2 from either Lobe centre (Pythagoras: √(R² +
-// R_lobe²) = R√5⁄2) and the Lobe radius is exactly R⁄2 — so the near/far
-// crossings of that Lobe circle are that distance minus/plus R_lobe,
-// i.e. R(√5⁄2 − 1⁄2) = R·φ and R(√5⁄2 + 1⁄2) = R·Φ. B sits on the upper
-// line (A→D) and G sits on the lower line (A→H) — both are the SAME
-// fixed-ratio construction, just mirrored above/below the equator.
-//
-// TWO ANGLES, ONE LINE: the line A→H makes an angle tan⁻¹φ ≈ 26.565°
-// with the equator AND, equivalently, an angle tan⁻¹Φ ≈ 63.435° with
-// the vertical — these are complementary angles of the SAME line, not
-// two different lines (tan⁻¹φ + tan⁻¹Φ = 90° always, since Φ = 1/φ).
-// To make both legible, a vertical reference tick is drawn at A (to
-// match the equator already drawn there), and each angle gets its own
-// small arc measured against its respective axis.
-//
-// The Φ²⁄10 preset (available in the Eye Ratio Presets panel) is notable
-// because it makes Φ itself emerge as a clean segment length along
-// A→E→F→H — independent of the constant AB = φ·R and AG = Φ·R
-// relationships above, which hold for ANY eye ratio.
-
-function buildSegmentOverlay() {
-  const ER = getER();
-
-  const A     = { x: CX + R, y: CY };           // fixed: right equator edge
-  const O     = { x: CX, y: CY };                // symbol centre — R is the Symbol Radius, AO = R
-  const lower = { x: CX, y: CY + LR };           // lower Lobe centre
-  const upper = { x: CX, y: CY - LR };           // upper Lobe centre
-
-  // Unit direction from A through a given centre, plus far-edge (Ear) point
-  function lineToFarEdge(through) {
-    const dx = through.x - A.x, dy = through.y - A.y;
-    const len = Math.hypot(dx, dy);
-    const ux = dx / len, uy = dy / len;
-    const ax = A.x - CX, ay = A.y - CY;
-    const b = 2 * (ax * ux + ay * uy);
-    const c = ax * ax + ay * ay - R * R;
-    const t = (-b + Math.sqrt(b * b - 4 * c)) / 2;   // distance from A to far edge
-    return { ux, uy, farX: A.x + t * ux, farY: A.y + t * uy, farT: t };
+function buildSegmentOverlay(){
+  const ER=getER();
+  const A={x:CX+R,y:CY},O={x:CX,y:CY},lower={x:CX,y:CY+LR},upper={x:CX,y:CY-LR};
+  function lineToFarEdge(through){
+    const dx=through.x-A.x,dy=through.y-A.y,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len;
+    const ax=A.x-CX,ay=A.y-CY,b=2*(ax*ux+ay*uy),c=ax*ax+ay*ay-R*R;
+    const t=(-b+Math.sqrt(b*b-4*c))/2;return{ux,uy,farX:A.x+t*ux,farY:A.y+t*uy,farT:t};
   }
-
-  // Distance from A to where the line crosses a circle of radius rad
-  // centred at `through` — returns [near, far] distances along the line.
-  function crossings(through, rad, ux, uy) {
-    const ax = A.x - through.x, ay = A.y - through.y;
-    const b = 2 * (ax * ux + ay * uy);
-    const c = ax * ax + ay * ay - rad * rad;
-    const disc = b * b - 4 * c;
-    if (disc < 0) return null;
-    const sq = Math.sqrt(disc);
-    return [(-b - sq) / 2, (-b + sq) / 2];
+  function crossings(through,rad,ux,uy){
+    const ax=A.x-through.x,ay=A.y-through.y,b=2*(ax*ux+ay*uy),c=ax*ax+ay*ay-rad*rad;
+    const disc=b*b-4*c;if(disc<0)return null;const sq=Math.sqrt(disc);return[(-b-sq)/2,(-b+sq)/2];
   }
+  const G=lineToFarEdge(lower),Dp=lineToFarEdge(upper);
+  const lobeC=crossings(lower,LR,G.ux,G.uy),eyeC=crossings(lower,ER,G.ux,G.uy),lobeCu=crossings(upper,LR,Dp.ux,Dp.uy);
+  const Bd=lobeCu[0],Gd=lobeC[1],Ed=eyeC?eyeC[0]:null,Fd=eyeC?eyeC[1]:null;
+  const pt=(t)=>({x:A.x+t*G.ux,y:A.y+t*G.uy}),ptU=(t)=>({x:A.x+t*Dp.ux,y:A.y+t*Dp.uy});
+  const Bpt=ptU(Bd),Gpt=pt(Gd),Ept=Ed!=null?pt(Ed):null,Fpt=Fd!=null?pt(Fd):null;
+  const{cBgSeg:cBg,cInk,cMut,cGld,cRed,cYin,cYang}=overlayPalette();
+  const fam="Georgia,'Times New Roman',serif";
+  let o='';
+  o+=`<rect width="${SZ}" height="${SZ}" fill="${cBg}"/>`;
+  o+=`<g clip-path="url(#oc)" opacity="0.14"><circle cx="${CX}" cy="${CY}" r="${R.toFixed(3)}" fill="${cYin}"/>`;
+  o+=`<rect x="${(CX-R).toFixed(2)}" y="${(CY-R).toFixed(2)}" width="${R.toFixed(3)}" height="${(2*R).toFixed(2)}" fill="${cYang}"/>`;
+  o+=`<circle cx="${CX}" cy="${(CY-LR).toFixed(2)}" r="${LR.toFixed(3)}" fill="${cYang}"/>`;
+  o+=`<circle cx="${CX}" cy="${(CY+LR).toFixed(2)}" r="${LR.toFixed(3)}" fill="${cYin}"/>`;
+  o+=`<circle cx="${CX}" cy="${(CY-LR).toFixed(2)}" r="${ER.toFixed(4)}" fill="${cYin}"/>`;
+  o+=`<circle cx="${CX}" cy="${(CY+LR).toFixed(2)}" r="${ER.toFixed(4)}" fill="${cYang}"/></g>`;
+  o+=`<circle cx="${CX}" cy="${CY}" r="${R.toFixed(3)}" fill="none" stroke="${cMut}" stroke-width="0.65" opacity="0.4"/>`;
+  o+=`<line x1="${(CX-R-6).toFixed(2)}" y1="${CY}" x2="${(CX+R+6).toFixed(2)}" y2="${CY}" stroke="${cMut}" stroke-width="0.5" stroke-dasharray="2,6" opacity="0.5"/>`;
+  o+=`<line x1="${A.x.toFixed(2)}" y1="${A.y.toFixed(2)}" x2="${O.x.toFixed(2)}" y2="${O.y.toFixed(2)}" stroke="${cInk}" stroke-width="1" stroke-dasharray="6,3" opacity="0.7"/>`;
+  o+=`<circle cx="${O.x.toFixed(2)}" cy="${O.y.toFixed(2)}" r="2.6" fill="${cInk}"/>`;
+  o+=`<text x="${O.x.toFixed(2)}" y="${(O.y+18).toFixed(2)}" font-size="14" fill="${cInk}" font-family="${fam}" font-style="italic" text-anchor="middle">O</text>`;
+  o+=`<text x="${((A.x+O.x)/2).toFixed(2)}" y="${(O.y-10).toFixed(2)}" font-size="12.5" fill="${cInk}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">AO = R</text>`;
+  o+=`<line x1="${A.x.toFixed(2)}" y1="${A.y.toFixed(2)}" x2="${Dp.farX.toFixed(2)}" y2="${Dp.farY.toFixed(2)}" stroke="${cMut}" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.55"/>`;
+  o+=`<text x="${(Dp.farX-8).toFixed(2)}" y="${(Dp.farY+4).toFixed(2)}" font-size="13" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="end">D</text>`;
+  o+=`<line x1="${A.x.toFixed(2)}" y1="${A.y.toFixed(2)}" x2="${G.farX.toFixed(2)}" y2="${G.farY.toFixed(2)}" stroke="${cRed}" stroke-width="1.3"/>`;
+  function dot(p,r,fill){return`<circle cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r="${r}" fill="${fill}"/>`;}
+  o+=dot(A,2.8,cInk);o+=dot(Bpt,2.2,cGld);o+=dot(upper,2.4,cInk);o+=dot(Gpt,2.2,cGld);
+  if(Ept)o+=dot(Ept,2.0,cRed);if(Fpt)o+=dot(Fpt,2.0,cRed);o+=dot({x:G.farX,y:G.farY},2.8,cInk);
+  const lbl=(p,text,dx,dy,color,fs)=>`<text x="${(p.x+dx).toFixed(2)}" y="${(p.y+dy).toFixed(2)}" font-size="${fs||13}" fill="${color}" font-family="${fam}" font-style="italic" text-anchor="middle">${text}</text>`;
+  o+=lbl(A,'A',12,-10,cInk,15);o+=lbl(Bpt,'B',-12,-6,cGld,13);o+=lbl(upper,'C',14,4,cInk,13);
+  o+=lbl(Gpt,'G',-12,-10,cGld,13);o+=lbl({x:G.farX,y:G.farY},'H',-12,14,cInk,15);
+  if(Ept)o+=lbl(Ept,'E',13,4,cRed,12);if(Fpt)o+=lbl(Fpt,'F',13,14,cRed,12);
+  const segLab=`font-size="13" fill="${cGld}" font-family="${fam}" font-style="italic"`;
+  const mid=(p,q)=>({x:(p.x+q.x)/2,y:(p.y+q.y)/2});const mAB=mid(A,Bpt);
+  o+=`<text x="${(mAB.x+10).toFixed(2)}" y="${(mAB.y-8).toFixed(2)}" ${segLab}>AB = φ·R</text>`;
+  const phiMarkLower=pt(Bd);
+  o+=`<text x="${(phiMarkLower.x+10).toFixed(2)}" y="${(phiMarkLower.y+20).toFixed(2)}" ${segLab}>AG = Φ·R</text>`;
+  const ACd=Math.hypot(upper.x-A.x,upper.y-A.y);
+  o+=`<text x="${CX}" y="20" font-size="14" fill="${cInk}" font-family="${fam}" text-anchor="middle">Radius OA is set to 1, therefore &nbsp;·&nbsp; AB = φ &nbsp;·&nbsp; AC = √5 ⁄2 &nbsp;·&nbsp; AG = Φ</text>`;
+  o+=`<text x="${CX}" y="37" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">AB ≈ ${(Bd/R).toFixed(4)} &nbsp;·&nbsp; AC ≈ ${(ACd/R).toFixed(4)} &nbsp;·&nbsp; AG ≈ ${(Gd/R).toFixed(4)} &nbsp;·&nbsp; AH ≈ ${(G.farT/R).toFixed(4)}</text>`;
+  if(Ed!=null)o+=`<text x="${CX}" y="${SZ-12}" font-size="12" fill="${cGld}" font-family="${fam}" font-style="italic" text-anchor="middle">A→E ≈ ${(Ed/R).toFixed(4)}·R &nbsp;·&nbsp; A→F ≈ ${(Fd/R).toFixed(4)}·R &nbsp;·&nbsp; (vary with Eye∶Lobe ratio)</text>`;
 
-  const G  = lineToFarEdge(lower);   // lower line: A → H (far Ear edge)
-  const Dp = lineToFarEdge(upper);   // upper line: A → D (mirror, for context)
-
-  const lobeC = crossings(lower, LR, G.ux, G.uy);   // [near, far] distances from A on A→H
-  const eyeC  = crossings(lower, ER, G.ux, G.uy);   // [E, F] distances from A
-  const lobeCu = crossings(upper, LR, Dp.ux, Dp.uy); // [near, far] distances from A on A→D — near one is B
-
-  const Bd  = lobeCu[0];           // B sits on the UPPER line (A→D), at φ·R from A
-  const Gd  = lobeC[1];            // new G: far Lobe-circle crossing on A→H, at Φ·R from A
-  const Ed  = eyeC ? eyeC[0] : null, Fd = eyeC ? eyeC[1] : null;
-
-  const pt  = (t) => ({ x: A.x + t * G.ux, y: A.y + t * G.uy });
-  const ptU = (t) => ({ x: A.x + t * Dp.ux, y: A.y + t * Dp.uy });
-  const Bpt = ptU(Bd), Gpt = pt(Gd);
-  const Ept = Ed != null ? pt(Ed) : null, Fpt = Fd != null ? pt(Fd) : null;
-
-  const cBg  = 'rgba(250,247,239,0.975)';
-  const cInk = '#28200E';
-  const cMut = '#9C8C6A';
-  const cGld = '#7C5C2A';
-  const cRed = '#A23A2E';
-  const fam  = "Georgia,'Times New Roman',serif";
-
-  let o = '';
-  o += `<rect width="${SZ}" height="${SZ}" fill="${cBg}"/>`;
-
-  // Faint silhouette for orientation
-  const ERx = ER.toFixed(4), LRx = LR.toFixed(3);
-  o += `<g clip-path="url(#oc)" opacity="0.14">`;
-  o += `<circle cx="${CX}" cy="${CY}" r="${R.toFixed(3)}" fill="#4A3A20"/>`;
-  o += `<rect x="${(CX-R).toFixed(2)}" y="${(CY-R).toFixed(2)}" width="${R.toFixed(3)}" height="${(2*R).toFixed(2)}" fill="#C2B492"/>`;
-  o += `<circle cx="${CX}" cy="${(CY-LR).toFixed(2)}" r="${LRx}" fill="#C2B492"/>`;
-  o += `<circle cx="${CX}" cy="${(CY+LR).toFixed(2)}" r="${LRx}" fill="#4A3A20"/>`;
-  o += `<circle cx="${CX}" cy="${(CY-LR).toFixed(2)}" r="${ERx}" fill="#4A3A20"/>`;
-  o += `<circle cx="${CX}" cy="${(CY+LR).toFixed(2)}" r="${ERx}" fill="#C2B492"/>`;
-  o += `</g>`;
-
-  o += `<circle cx="${CX}" cy="${CY}" r="${R.toFixed(3)}" fill="none" stroke="${cMut}" stroke-width="0.65" opacity="0.4"/>`;
-
-  // Horizontal axis (equator)
-  o += `<line x1="${(CX-R-6).toFixed(2)}" y1="${CY}" x2="${(CX+R+6).toFixed(2)}" y2="${CY}" stroke="${cMut}" stroke-width="0.5" stroke-dasharray="2,6" opacity="0.5"/>`;
-
-  // Fixed segment A → O (symbol centre). R is the Symbol Radius, so this
-  // segment is simply length R, lying along the equator — independent of
-  // both eye size AND the lower/upper-lobe construction above.
-  o += `<line x1="${A.x.toFixed(2)}" y1="${A.y.toFixed(2)}" x2="${O.x.toFixed(2)}" y2="${O.y.toFixed(2)}" stroke="${cInk}" stroke-width="1" stroke-dasharray="6,3" opacity="0.7"/>`;
-  o += `<circle cx="${O.x.toFixed(2)}" cy="${O.y.toFixed(2)}" r="2.6" fill="${cInk}"/>`;
-  o += `<text x="${O.x.toFixed(2)}" y="${(O.y+18).toFixed(2)}" font-size="14" fill="${cInk}" font-family="${fam}" font-style="italic" text-anchor="middle">O</text>`;
-  o += `<text x="${((A.x+O.x)/2).toFixed(2)}" y="${(O.y-10).toFixed(2)}" font-size="12.5" fill="${cInk}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">AO = R</text>`;
-
-  // Upper context line A → D (lighter — shown for reference, mirrors lower)
-  o += `<line x1="${A.x.toFixed(2)}" y1="${A.y.toFixed(2)}" x2="${Dp.farX.toFixed(2)}" y2="${Dp.farY.toFixed(2)}" stroke="${cMut}" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.55"/>`;
-  o += `<text x="${(Dp.farX-8).toFixed(2)}" y="${(Dp.farY+4).toFixed(2)}" font-size="13" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="end">D</text>`;
-
-  // Main line A → G (through lower Lobe centre)
-  o += `<line x1="${A.x.toFixed(2)}" y1="${A.y.toFixed(2)}" x2="${G.farX.toFixed(2)}" y2="${G.farY.toFixed(2)}" stroke="${cRed}" stroke-width="1.3"/>`;
-
-
-  // Point markers: A, B (on AD), C (upper lobe centre), E, F, G, H
-  function dot(p, r, fill) { return `<circle cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r="${r}" fill="${fill}"/>`; }
-  o += dot(A, 2.8, cInk);
-  o += dot(Bpt, 2.2, cGld);
-  o += dot(upper, 2.4, cInk);
-  o += dot(Gpt, 2.2, cGld);
-  if (Ept) o += dot(Ept, 2.0, cRed);
-  if (Fpt) o += dot(Fpt, 2.0, cRed);
-  o += dot({x:G.farX, y:G.farY}, 2.8, cInk);
-
-  // Labels for A, B, C, E, F, G, H
-  const lbl = (p, text, dx, dy, color, fs) =>
-    `<text x="${(p.x+dx).toFixed(2)}" y="${(p.y+dy).toFixed(2)}" font-size="${fs||13}" fill="${color}" font-family="${fam}" font-style="italic" text-anchor="middle">${text}</text>`;
-  o += lbl(A, 'A', 12, -10, cInk, 15);
-  o += lbl(Bpt, 'B', -12, -6, cGld, 13);
-  o += lbl(upper, 'C', 14, 4, cInk, 13);
-  o += lbl(Gpt, 'G', -12, -10, cGld, 13);
-  o += lbl({x:G.farX,y:G.farY}, 'H', -12, 14, cInk, 15);
-  if (Ept) o += lbl(Ept, 'E', 13, 4, cRed, 12);
-  if (Fpt) o += lbl(Fpt, 'F', 13, 14, cRed, 12);
-
-
-
-  // Fixed-ratio segment labels (independent of eye size)
-  const segLab = `font-size="13" fill="${cGld}" font-family="${fam}" font-style="italic"`;
-  const mid = (p, q) => ({ x: (p.x+q.x)/2, y: (p.y+q.y)/2 });
-  const mAB = mid(A, Bpt);
-  o += `<text x="${(mAB.x+10).toFixed(2)}" y="${(mAB.y-8).toFixed(2)}" ${segLab}>AB = φ·R</text>`;
-  // Place "AG = Φ·R" at the φ·R mark along the lower line (same distance from A as B is on the upper line),
-  // offset below the line so it mirrors where "AB = φ·R" sits above its line.
-  const phiMarkLower = pt(Bd);
-  o += `<text x="${(phiMarkLower.x+10).toFixed(2)}" y="${(phiMarkLower.y+20).toFixed(2)}" ${segLab}>AG = Φ·R</text>`;
-
-  // Header info block (top strip) — three short lines, each safely
-  // under the canvas width regardless of digit count.
-  // AC = distance from A to upper lobe centre
-  const ACd = Math.hypot(upper.x - A.x, upper.y - A.y);
-  o += `<text x="${CX}" y="20" font-size="14" fill="${cInk}" font-family="${fam}" text-anchor="middle">` +
-       `Radius OA is set to 1, therefore &nbsp;·&nbsp; AB = φ &nbsp;·&nbsp; AC = √5 ⁄2 &nbsp;·&nbsp; AG = Φ</text>`;
-  o += `<text x="${CX}" y="37" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">` +
-       `AB ≈ ${(Bd/R).toFixed(4)} &nbsp;·&nbsp; AC ≈ ${(ACd/R).toFixed(4)} &nbsp;·&nbsp; AG ≈ ${(Gd/R).toFixed(4)} &nbsp;·&nbsp; AH ≈ ${(G.farT/R).toFixed(4)}</text>`;
-
-
-  if (Ed != null) {
-    o += `<text x="${CX}" y="${SZ-12}" font-size="12" fill="${cGld}" font-family="${fam}" font-style="italic" text-anchor="middle">` +
-         `Select Variables: A→E ≈ ${(Ed/R).toFixed(4)}·R &nbsp;·&nbsp; A→F ≈ ${(Fd/R).toFixed(4)}·R &nbsp;·&nbsp; Active calculations dependent upon Eye∶Lobe ratio</text>`;
-  }
-
+  // arctan(LR/R)=arctan(½): exact for any R, verified from direction vector
+  const diagAngleDeg=(Math.atan2(Math.abs(G.uy),Math.abs(G.ux))*180/Math.PI).toFixed(4);
+  o+=`<text x="${CX}" y="${SZ-28}" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">∠ diagonal AH from horizontal = arctan(½) ≈ ${diagAngleDeg}°  ·  AH = 4R⁄√5 ≈ ${(G.farT/R).toFixed(4)}·R</text>`;
   return o;
 }
 
 // ── MAIN SVG BUILD ────────────────────────────────────────────────
 function buildSVG(dlSize=SZ){
-  const f = effFills();
-  const withStars = !!(PRESETS[S.preset] && PRESETS[S.preset].stars);
-  const withGlow  = S.style === 'glow';
-
-  const defs = [
+  const f=effFills(),withStars=!!(PRESETS[S.preset]&&PRESETS[S.preset].stars),withGlow=S.style==='glow';
+  const defs=[
     `<clipPath id="oc"><circle cx="${CX}" cy="${CY}" r="${R.toFixed(3)}"/></clipPath>`,
-    withGlow ? `<filter id="gf" x="-18%" y="-18%" width="136%" height="136%">` +
-      `<feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>` +
-      `<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>` : '',
-    gradDef('globe1',f.lobe1), gradDef('globe2',f.lobe2),
-    gradDef('geye1',f.eye1),   gradDef('geye2',f.eye2)
+    withGlow?`<filter id="gf" x="-18%" y="-18%" width="136%" height="136%"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`:'',
+    gradDef('globe1',f.lobe1),gradDef('globe2',f.lobe2),gradDef('geye1',f.eye1),gradDef('geye2',f.eye2)
   ].filter(Boolean).join('');
-
-  const fl1=fref('lobe1',f.lobe1), fl2=fref('lobe2',f.lobe2);
-  const fe1=fref('eye1',f.eye1),   fe2=fref('eye2',f.eye2);
-
-  const rx=R.toFixed(3), lrx=LR.toFixed(3), erx=getER().toFixed(4);
-  const core = `
-<circle cx="${CX}" cy="${CY}" r="${rx}" fill="${fl2}"/>
+  const fl1=fref('lobe1',f.lobe1),fl2=fref('lobe2',f.lobe2),fe1=fref('eye1',f.eye1),fe2=fref('eye2',f.eye2);
+  const rx=R.toFixed(3),lrx=LR.toFixed(3),erx=getER().toFixed(4);
+  const core=`<circle cx="${CX}" cy="${CY}" r="${rx}" fill="${fl2}"/>
 <rect x="${(CX-R).toFixed(3)}" y="${(CY-R).toFixed(3)}" width="${rx}" height="${(2*R).toFixed(3)}" fill="${fl1}"/>
 <circle cx="${CX}" cy="${(CY-LR).toFixed(3)}" r="${lrx}" fill="${fl1}"/>
 <circle cx="${CX}" cy="${(CY+LR).toFixed(3)}" r="${lrx}" fill="${fl2}"/>
-${withStars ? genStars() : ''}
+${withStars?genStars():''}
 <circle cx="${CX}" cy="${(CY-LR).toFixed(3)}" r="${erx}" fill="${fe1}"/>
 <circle cx="${CX}" cy="${(CY+LR).toFixed(3)}" r="${erx}" fill="${fe2}"/>`;
-
-  const rT  = S.rot   ? `<g transform="rotate(${S.rot} ${CX} ${CY})">` : '';
-  const rE  = S.rot   ? '</g>' : '';
-  const vT  = S.flipV ? `<g transform="translate(0 ${2*CY}) scale(1 -1)">` : '';
-  const vE  = S.flipV ? '</g>' : '';
-  const hT  = S.flipH ? `<g transform="translate(${2*CX} 0) scale(-1 1)">` : '';
-  const hE  = S.flipH ? '</g>' : '';
-  const ga  = withGlow ? ' filter="url(#gf)"' : '';
-
-  // Overlay renders on top of everything; excluded from downloads
-  let overlay = '';
-  let fgMode = false;
-  if (dlSize === SZ) {
-    if (measureMode === 'vertical') overlay = buildVerticalOverlay();
-    else if (measureMode === 'segments') overlay = buildSegmentOverlay();
-    else if (measureMode === 'fullgeometry') { overlay = buildFullGeometryOverlay(); fgMode = true; }
+  const rT=S.rot?`<g transform="rotate(${S.rot} ${CX} ${CY})">`:'' ,rE=S.rot?'</g>':'';
+  const vT=S.flipV?`<g transform="translate(0 ${2*CY}) scale(1 -1)">`:'' ,vE=S.flipV?'</g>':'';
+  const hT=S.flipH?`<g transform="translate(${2*CX} 0) scale(-1 1)">`:'' ,hE=S.flipH?'</g>':'';
+  const ga=withGlow?' filter="url(#gf)"':'';
+  let overlay='',fgMode=false;
+  if(dlSize===SZ){
+    if(measureMode==='vertical')overlay=buildVerticalOverlay();
+    else if(measureMode==='segments')overlay=buildSegmentOverlay();
+    else if(measureMode==='measure'){overlay=buildFullGeometryOverlay();fgMode=true;}
     else hideGeoFloat();
   }
-
-  // Full-geometry gets an expanded viewBox so labels outside the Ear have room
-  const FG_PAD = 88;  // px of breathing space on each side
-  const vbStr = fgMode
-    ? `${-FG_PAD} ${-FG_PAD} ${SZ + 2*FG_PAD} ${SZ + 2*FG_PAD}`
-    : `0 0 ${SZ} ${SZ}`;
-  const dimW = fgMode ? dlSize + Math.round(2*FG_PAD * dlSize/SZ) : dlSize;
-  const dimH = dimW;
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vbStr}" width="${dimW}" height="${dimH}">
+  const FG_PAD=88;
+  const vbStr=fgMode?`${-FG_PAD} ${-FG_PAD} ${SZ+2*FG_PAD} ${SZ+2*FG_PAD}`:`0 0 ${SZ} ${SZ}`;
+  const dimW=fgMode?dlSize+Math.round(2*FG_PAD*dlSize/SZ):dlSize,dimH=dimW;
+  return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vbStr}" width="${dimW}" height="${dimH}">
 <defs>${defs}</defs>
-<rect ${fgMode ? `x="${-FG_PAD}" y="${-FG_PAD}" width="${SZ+2*FG_PAD}" height="${SZ+2*FG_PAD}"` : `width="${SZ}" height="${SZ}"`} fill="${S.bg}"/>
+<rect ${fgMode?`x="${-FG_PAD}" y="${-FG_PAD}" width="${SZ+2*FG_PAD}" height="${SZ+2*FG_PAD}"`:`width="${SZ}" height="${SZ}"`} fill="${S.bg}"/>
 <g clip-path="url(#oc)"${ga}>${hT}${vT}${rT}${core}${rE}${vE}${hE}</g>
 ${overlay}
 </svg>`;
@@ -1795,284 +1044,237 @@ ${overlay}
 
 // ── RENDER ────────────────────────────────────────────────────────
 function render(){
-  document.getElementById('svgwrap').innerHTML = buildSVG(SZ);
-  document.querySelectorAll('.pbtn').forEach(b => b.classList.toggle('on', b.dataset.p === S.preset));
-  document.querySelectorAll('.sbtn').forEach(b => b.classList.toggle('on', b.dataset.s === S.style));
-  document.querySelectorAll('[data-flip]').forEach(b =>
-    b.classList.toggle('on', b.dataset.flip==='H' ? S.flipH : S.flipV));
-  const rl = {0:'0° — Default', 90:'90° CW', 180:'180°', 270:'270° CW'};
-  document.getElementById('rinfo').textContent = 'Rotation: ' + (rl[S.rot] || S.rot + '°');
+  document.getElementById('svgwrap').innerHTML=buildSVG(SZ);
+  document.querySelectorAll('.pbtn').forEach(b=>b.classList.toggle('on',b.dataset.p===S.preset));
+  document.querySelectorAll('.sbtn').forEach(b=>b.classList.toggle('on',b.dataset.s===S.style));
+  document.querySelectorAll('[data-flip]').forEach(b=>b.classList.toggle('on',b.dataset.flip==='H'?S.flipH:S.flipV));
+  const rl={0:'0° — Default',90:'90° CW',180:'180°',270:'270° CW'};
+  document.getElementById('rinfo').textContent='Rotation: '+(rl[S.rot]||S.rot+'°');
   syncSwatches();
 }
-
-function swatchBg(fill){
-  if(!fill || fill.type==='solid') return fill ? fill.color : '#888';
-  const s = fill.stops.map(st=>`${st.c} ${st.p}%`).join(',');
-  return fill.type==='lg'
-    ? `linear-gradient(135deg,${s})`
-    : `radial-gradient(circle,${s})`;
-}
-
+function swatchBg(fill){if(!fill||fill.type==='solid')return fill?fill.color:'#888';const s=fill.stops.map(st=>`${st.c} ${st.p}%`).join(',');return fill.type==='lg'?`linear-gradient(135deg,${s})`:`radial-gradient(circle,${s})`;}
 function syncSwatches(){
-  const ef = effFills();
-  [['sw-bg',null,S.bg],['sw-l1',ef.lobe1,null],['sw-l2',ef.lobe2,null],
-   ['sw-e1',ef.eye1,null],['sw-e2',ef.eye2,null]].forEach(([id,fill,dir])=>{
-    const el=document.getElementById(id); if(!el) return;
-    el.style.background = dir !== null ? dir : swatchBg(fill);
+  const ef=effFills();
+  [['sw-bg',null,S.bg],['sw-l1',ef.lobe1,null],['sw-l2',ef.lobe2,null],['sw-e1',ef.eye1,null],['sw-e2',ef.eye2,null]].forEach(([id,fill,dir])=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.style.background=dir!==null?dir:swatchBg(fill);
   });
 }
 
 // ── ACTIONS ───────────────────────────────────────────────────────
-function applyPreset(name){
-  const p = PRESETS[name]; if(!p) return;
-  S.preset=name; S.bg=p.bg; S.fills=dc(p.f);
-  syncPickers(); render();
-}
-function setStyle(st){ S.style=st; render(); }
-function rotBy(d){ S.rot=((S.rot+d)%360+360)%360; render(); }
-function toggleFlip(dir){ if(dir==='H') S.flipH=!S.flipH; else S.flipV=!S.flipV; render(); }
-function setColor(key,color){
-  if(key==='bg') S.bg=color; else S.fills[key]=solid(color);
-  S.preset='custom'; render();
-}
+function applyPreset(name){const p=PRESETS[name];if(!p)return;S.preset=name;S.bg=p.bg;S.fills=clone(p.f);syncPickers();render();}
+function setStyle(st){S.style=st;render();}
+function rotBy(d){S.rot=((S.rot+d)%360+360)%360;render();}
+function toggleFlip(dir){if(dir==='H')S.flipH=!S.flipH;else S.flipV=!S.flipV;render();}
+function setColor(key,color){if(key==='bg')S.bg=color;else S.fills[key]=solid(color);S.preset='custom';render();}
 function syncPickers(){
-  [['pb',S.bg],['pl1',repC(S.fills.lobe1)],['pl2',repC(S.fills.lobe2)],
-   ['pe1',repC(S.fills.eye1)],['pe2',repC(S.fills.eye2)]]
-  .forEach(([id,c])=>{ const el=document.getElementById(id); if(el) el.value=c; });
+  [['pb',S.bg],['pl1',getFillColor(S.fills.lobe1)],['pl2',getFillColor(S.fills.lobe2)],['pe1',getFillColor(S.fills.eye1)],['pe2',getFillColor(S.fills.eye2)]].forEach(([id,c])=>{const el=document.getElementById(id);if(el)el.value=c;});
 }
 
-// ── DOWNLOAD ─────────────────────────────────────────────────────
-function setDlState(busy){
-  ['btn-png','btn-jpg'].forEach(id=>{
-    const b=document.getElementById(id);
-    if(b){ b.disabled=busy; b.style.opacity=busy?0.5:1; }
-  });
-}
-function showNote(msg, isErr){
-  const n=document.getElementById('dlnote');
-  n.textContent=msg;
-  n.style.color=isErr?'#C06060':'var(--mute)';
-}
-
+// ── DOWNLOAD (1000×1000) ──────────────────────────────────────────
+const DL_SIZE=1000;
+function setDlState(busy){['btn-png','btn-jpg'].forEach(id=>{const b=document.getElementById(id);if(b){b.disabled=busy;b.style.opacity=busy?0.5:1;}});}
+function showNote(msg,isErr,elId='dlnote'){const n=document.getElementById(elId);if(!n)return;n.textContent=msg;n.style.color=isErr?'#C06060':'var(--mute)';}
 function dlAs(fmt){
-  setDlState(true);
-  showNote('Preparing…', false);
+  setDlState(true);showNote('Preparing…',false);
   setTimeout(()=>{
-    try {
-      const svgStr = buildSVG(1000);
-      const svgDataUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
-      const img = new Image();
-      img.onload = ()=>{
-        try {
-          const canvas = document.createElement('canvas');
-          canvas.width = canvas.height = 1000;
-          const ctx = canvas.getContext('2d');
-          if(fmt === 'jpg'){
-            ctx.fillStyle = S.bg;
-            ctx.fillRect(0, 0, 1000, 1000);
-          }
-          ctx.drawImage(img, 0, 0, 1000, 1000);
-          const mime    = fmt === 'jpg' ? 'image/jpeg' : 'image/png';
-          const quality = fmt === 'jpg' ? 0.96 : undefined;
-          const dataUri = canvas.toDataURL(mime, quality);
-          triggerDownload(dataUri, 'yinyang.' + fmt);
-          showNote(fmt.toUpperCase() + ' saved.', false);
-        } catch(e){
-          showNote('Canvas export failed.', true);
-          console.error('Canvas export error:', e);
-        }
+    try{
+      const svgStr=buildSVG(DL_SIZE);
+      const uri='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgStr);
+      const img=new Image();
+      img.onload=()=>{
+        try{
+          const canvas=document.createElement('canvas');canvas.width=canvas.height=DL_SIZE;
+          const ctx=canvas.getContext('2d');
+          if(fmt==='jpg'){ctx.fillStyle=S.bg;ctx.fillRect(0,0,DL_SIZE,DL_SIZE);}
+          ctx.drawImage(img,0,0,DL_SIZE,DL_SIZE);
+          triggerDownload(canvas.toDataURL(fmt==='jpg'?'image/jpeg':'image/png',fmt==='jpg'?0.96:undefined),'yinyang-1000px.'+fmt);
+          showNote(fmt.toUpperCase()+' saved (1000×1000 px).',false);
+        }catch(e){showNote('Canvas export failed.',true);}
         setDlState(false);
       };
-      img.onerror = ()=>{
-        showNote('Image render failed.', true);
-        setDlState(false);
-      };
-      img.src = svgDataUri;
-    } catch(e){
-      showNote('Download failed: ' + e.message, true);
-      console.error('dlAs error:', e);
-      setDlState(false);
-    }
-  }, 20);
+      img.onerror=()=>{showNote('Image render failed.',true);setDlState(false);};
+      img.src=uri;
+    }catch(e){showNote('Download failed: '+e.message,true);setDlState(false);}
+  },20);
+}
+function triggerDownload(dataUriOrBlob,filename){
+  const a=document.createElement('a');
+  if(typeof dataUriOrBlob==='string'&&dataUriOrBlob.startsWith('data:text/')){
+    // Use Blob URL for text files to avoid atob/encoding issues
+    const [header,body]=dataUriOrBlob.split(',');
+    const text=decodeURIComponent(body);
+    const blob=new Blob([text],{type:'text/csv;charset=utf-8'});
+    a.href=URL.createObjectURL(blob);
+    a.download=filename;a.rel='noopener';
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);if(a.parentNode)a.parentNode.removeChild(a);},400);
+  } else {
+    a.href=dataUriOrBlob;a.download=filename;a.rel='noopener';
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{if(a.parentNode)a.parentNode.removeChild(a);},300);
+  }
 }
 
-function triggerDownload(dataUri, filename){
-  const a = document.createElement('a');
-  a.href     = dataUri;
-  a.download = filename;
-  a.rel      = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(()=>{ if(a.parentNode) a.parentNode.removeChild(a); }, 300);
+// ── SCREENSHOT ────────────────────────────────────────────────────
+function snapScreenshot(){
+  const svgEl=document.querySelector('#svgwrap svg');
+  if(!svgEl){alert('No SVG to capture.');return;}
+  const vb=svgEl.getAttribute('viewBox')||`0 0 ${SZ} ${SZ}`;
+  const W=DL_SIZE,H=DL_SIZE;
+  const fullSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" width="${W}" height="${H}">${svgEl.innerHTML}</svg>`;
+  const uri='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(fullSvg);
+  const img=new Image();
+  img.onload=()=>{
+    const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+    const ctx=canvas.getContext('2d');ctx.fillStyle=S.bg;ctx.fillRect(0,0,W,H);
+    ctx.drawImage(img,0,0,W,H);
+    triggerDownload(canvas.toDataURL('image/png'),'yinyang-screenshot.png');
+  };
+  img.onerror=()=>alert('Screenshot failed.');
+  img.src=uri;
 }
+
+// ── CSV EXPORT ────────────────────────────────────────────────────
+function exportConfigCSV(){
+  const ERd=getER(); // SZ=DL=1000, so px values = viewBox values directly
+  const rows=[['Field','Value'],
+    ['Preset',S.preset],['Background',S.bg],['Style',S.style],
+    ['Rotation_deg',S.rot],['FlipH',S.flipH],['FlipV',S.flipV],
+    ['Eye_Radius_Formula',(()=>{const prox=classifyRatio(S.eyeRatio);return prox?`${prox.sym} · ${prox.base} ${prox.tier.charAt(0).toUpperCase()+prox.tier.slice(1)}`:'Custom';})()],
+    ['Eye_Lobe_Ratio',S.eyeRatio.toFixed(9)],
+    ['Ear_Radius_R_px',R.toFixed(4)],
+    ['Lobe_Radius_LR_px',LR.toFixed(4)],
+    ['Eye_Radius_ER_px',ERd.toFixed(4)],
+    ['Symbol_Area_px2',(Math.PI*R*R).toFixed(2)],
+    ['Lobe_Area_px2',(Math.PI*LR*LR).toFixed(2)],
+    ['Eye_Area_px2',(Math.PI*ERd*ERd).toFixed(2)],
+    ['Fill_EarA_Lobe1',getFillColor(S.fills.lobe1)],['Fill_EarB_Lobe2',getFillColor(S.fills.lobe2)],
+    ['Fill_EyeA',getFillColor(S.fills.eye1)],['Fill_EyeB',getFillColor(S.fills.eye2)],
+    ['Timestamp',new Date().toISOString()]];
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  triggerDownload('data:text/csv;charset=utf-8,'+encodeURIComponent(csv),'yinyang-config.csv');
+  showNote('Config CSV saved.',false,'csvnote');
+}
+function exportMeasureCSV(){
+  const hist=window._measureHistory||[];
+  if(!hist.length){showNote('No measurements yet — use Click To Measure mode.',false,'csvnote');return;}
+  const rows=[['#','Time','Pt1','Pt1_x','Pt1_y','Pt2','Pt2_x','Pt2_y','Pt3','Pt3_x','Pt3_y','Distance_R','Dist/phi','Dist/Phi','Angle_deg']];
+  hist.forEach((h,i)=>{
+    const g=(j,k)=>h.pts[j]?h.pts[j][k]:'';
+    rows.push([hist.length-i,h.ts,g(0,'lbl'),g(0,'mx'),g(0,'my'),g(1,'lbl'),g(1,'mx'),g(1,'my'),g(2,'lbl'),g(2,'mx'),g(2,'my'),h.dist||'',h.distPhi||'',h.distPHI||'',h.angle||'']);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  triggerDownload('data:text/csv;charset=utf-8,'+encodeURIComponent(csv),'yinyang-measurements.csv');
+  showNote(`Measure CSV saved (${hist.length} entries).`,false,'csvnote');
+}
+
+// ── UI SCALE — panel & footer font scaling ────────────────────────
+// Scales the control panel text and footer text for readability.
+// The SVG canvas is intentionally untouched — it scales with its container.
+// CSS zoom on .panel gives true layout scaling (buttons, gaps, inputs all grow).
+// The phifooter uses font-size scaling since it's flex and doesn't need relayout.
+let _uiScale=1;
+function setUIScale(val){
+  _uiScale=parseFloat(val)||1;
+  const panel=document.querySelector('.panel');
+  const footer=document.querySelector('.phifooter');
+  const sel=document.getElementById('scaleSel');
+  if(panel){
+    // CSS zoom scales everything — text, padding, button size — proportionally
+    panel.style.zoom=_uiScale;
+    // Also widen the panel column slightly for larger scales so text doesn't wrap
+    const grid=document.querySelector('.layout');
+    if(grid){
+      grid.style.gridTemplateColumns=`1fr ${Math.round(PANEL_W*Math.max(1,_uiScale))}px`;
+    }
+  }
+  if(footer){
+    // Footer: scale font-size so the maths readout grows with the setting
+    footer.style.fontSize=(_uiScale*11)+'px';
+    footer.style.lineHeight=(_uiScale*1.9)+'';
+  }
+  if(sel) sel.classList.toggle('on',_uiScale!==1);
+}
+
+// ── FLOAT PANELS ──────────────────────────────────────────────────
+(function(){
+  const panel=document.getElementById('proxFloat'),bar=document.getElementById('proxFloatBar'),btn=document.getElementById('proxInfoBtn');
+  let visible=false;
+  function defaultPos(){panel.style.left='20px';panel.style.top=Math.max(60,Math.round(window.innerHeight*0.15))+'px';panel.style.right='auto';panel.style.bottom='auto';}
+  window.toggleProxInfo=function(){visible=!visible;panel.style.display=visible?'block':'none';btn.classList.toggle('on',visible);if(visible)defaultPos();};
+  let drag=null;
+  bar.addEventListener('pointerdown',e=>{if(e.target===document.getElementById('proxFloatClose'))return;bar.setPointerCapture(e.pointerId);const rect=panel.getBoundingClientRect();drag={ox:e.clientX-rect.left,oy:e.clientY-rect.top};});
+  bar.addEventListener('pointermove',e=>{if(!drag)return;panel.style.left=Math.max(4,Math.min(window.innerWidth-(PANEL_W+1)-panel.offsetWidth-4,e.clientX-drag.ox))+'px';panel.style.top=Math.max(4,Math.min(window.innerHeight-panel.offsetHeight-4,e.clientY-drag.oy))+'px';});
+  bar.addEventListener('pointerup',()=>{drag=null;});bar.addEventListener('pointercancel',()=>{drag=null;});
+})();
+
+(function(){
+  const panel=document.getElementById('geoFloat'),bar=document.getElementById('geoFloatBar');
+  let geoFloatPositioned=false;
+  function defaultPos(){panel.style.right='300px';panel.style.top=Math.max(60,Math.round(window.innerHeight*0.08))+'px';panel.style.left='auto';panel.style.bottom='auto';}
+  window.hideGeoFloat=function(){panel.style.display='none';};
+  window.showGeoFloat=function(){
+    panel.style.display='block';
+    if(!geoFloatPositioned){defaultPos();geoFloatPositioned=true;}
+  };
+  let drag=null;
+  bar.addEventListener('pointerdown',e=>{if(e.target===document.getElementById('geoFloatClose'))return;bar.setPointerCapture(e.pointerId);const rect=panel.getBoundingClientRect();drag={ox:e.clientX-rect.left,oy:e.clientY-rect.top};});
+  bar.addEventListener('pointermove',e=>{if(!drag)return;panel.style.left=Math.max(4,Math.min(window.innerWidth-panel.offsetWidth-4,e.clientX-drag.ox))+'px';panel.style.top=Math.max(4,Math.min(window.innerHeight-panel.offsetHeight-4,e.clientY-drag.oy))+'px';panel.style.right='auto';});
+  bar.addEventListener('pointerup',()=>{drag=null;});bar.addEventListener('pointercancel',()=>{drag=null;});
+})();
 
 // ── UI BUILD ──────────────────────────────────────────────────────
 function buildUI(){
-  // Eye-size slider
-  const slider = document.getElementById('eyeSlider');
-  if (slider) slider.addEventListener('input', e=>setEyeSlider(e.target.value));
-
-  // Equation input — Apply on Enter
-  const eq = document.getElementById('eyeEq');
-  if (eq) eq.addEventListener('keydown', e=>{ if(e.key==='Enter') applyEyeEquation(); });
-
-  // Eye ratio presets
-  const epg = document.getElementById('epg');
+  const slider=document.getElementById('eyeSlider');
+  if(slider)slider.addEventListener('input',e=>setEyeSlider(e.target.value));
+  const eq=document.getElementById('eyeEq');
+  if(eq)eq.addEventListener('keydown',e=>{if(e.key==='Enter')applyEyeEquation();});
+  const epg=document.getElementById('epg');
   EYE_PRESETS.forEach(p=>{
-    const b=document.createElement('button');
-    b.className='epbtn'; b.dataset.k=p.key;
-    b.innerHTML = `<b>${p.label}</b><small>${p.sub ? p.sub : (p.val*100).toFixed(2)+'%'}</small>`;
-    b.title = 'Eye = Lobe radius × ' + p.val.toFixed(6);
-    b.onclick=()=>setEyeRatio(p.val);
-    epg.appendChild(b);
+    const b=document.createElement('button');b.className='epbtn';b.dataset.k=p.key;
+    b.innerHTML=`<b>${p.label}</b><small>${p.sub?p.sub:(p.val*100).toFixed(2)+'%'}</small>`;
+    b.title='Eye = Lobe radius × '+p.val.toFixed(6);b.onclick=()=>setEyeRatio(p.val);epg.appendChild(b);
   });
-
-  // Presets
-  const pg = document.getElementById('pg');
+  const pg=document.getElementById('pg');
   Object.entries(PRESETS).forEach(([k,p])=>{
-    const b=document.createElement('button');
-    b.className='pbtn'; b.dataset.p=k; b.textContent=p.label;
-    b.onclick=()=>applyPreset(k); pg.appendChild(b);
+    const b=document.createElement('button');b.className='pbtn';b.dataset.p=k;b.textContent=p.label;
+    b.onclick=()=>applyPreset(k);pg.appendChild(b);
   });
-
-  // Color controls
-  const cc = document.getElementById('cc');
-  [
-    {key:'bg',    swId:'sw-bg',pkId:'pb',  label:'Background', note:''},
-    {key:'lobe1', swId:'sw-l1',pkId:'pl1', label:'Ear A',      note:'Yang · upper'},
-    {key:'lobe2', swId:'sw-l2',pkId:'pl2', label:'Ear B',      note:'Yin · lower'},
-    {key:'eye1',  swId:'sw-e1',pkId:'pe1', label:'Eye A',      note:'Dot in Ear A'},
-    {key:'eye2',  swId:'sw-e2',pkId:'pe2', label:'Eye B',      note:'Dot in Ear B'},
-  ].forEach(({key,swId,pkId,label,note})=>{
-    const row=document.createElement('div'); row.className='crow';
-    const nm=document.createElement('div'); nm.className='cnm';
-    nm.innerHTML = label + (note ? `<small>${note}</small>` : '');
-    const sw=document.createElement('div'); sw.className='csw'; sw.id=swId;
-    const pk=document.createElement('input'); pk.type='color'; pk.id=pkId;
-    pk.value = key==='bg' ? S.bg : (repC(S.fills[key]) || '#000000');
-    pk.addEventListener('input', e=>{ sw.style.background=e.target.value; setColor(key,e.target.value); });
-    sw.appendChild(pk); row.appendChild(nm); row.appendChild(sw); cc.appendChild(row);
+  const cc=document.getElementById('cc');
+  [{key:'bg',swId:'sw-bg',pkId:'pb',label:'Background',note:''},
+   {key:'lobe1',swId:'sw-l1',pkId:'pl1',label:'Ear A',note:'Yang · upper'},
+   {key:'lobe2',swId:'sw-l2',pkId:'pl2',label:'Ear B',note:'Yin · lower'},
+   {key:'eye1', swId:'sw-e1',pkId:'pe1',label:'Eye A',note:'Dot in Ear A'},
+   {key:'eye2', swId:'sw-e2',pkId:'pe2',label:'Eye B',note:'Dot in Ear B'}]
+  .forEach(({key,swId,pkId,label,note})=>{
+    const row=document.createElement('div');row.className='crow';
+    const nm=document.createElement('div');nm.className='cnm';nm.innerHTML=label+(note?`<small>${note}</small>`:'');
+    const sw=document.createElement('div');sw.className='csw';sw.id=swId;
+    const pk=document.createElement('input');pk.type='color';pk.id=pkId;
+    pk.value=key==='bg'?S.bg:(getFillColor(S.fills[key])||'#000000');
+    pk.addEventListener('input',e=>{sw.style.background=e.target.value;setColor(key,e.target.value);});
+    sw.appendChild(pk);row.appendChild(nm);row.appendChild(sw);cc.appendChild(row);
   });
-
-  // Style buttons
-  const sg = document.getElementById('sg');
+  const sg=document.getElementById('sg');
   [{s:'flat',l:'Flat'},{s:'gradient',l:'Gradient'},{s:'glow',l:'Glow'}].forEach(({s,l})=>{
-    const b=document.createElement('button');
-    b.className='tbtn sbtn'; b.dataset.s=s; b.textContent=l;
-    b.onclick=()=>setStyle(s); sg.appendChild(b);
+    const b=document.createElement('button');b.className='tbtn sbtn';b.dataset.s=s;b.textContent=l;b.onclick=()=>setStyle(s);sg.appendChild(b);
   });
-
-  // Transform buttons
-  const tg = document.getElementById('tg');
-  [{l:'↺ 90° CCW',fn:()=>rotBy(-90)},
-   {l:'↻ 90° CW', fn:()=>rotBy(90)},
-   {l:'⇄ Flip H', fn:()=>toggleFlip('H'), flip:'H'},
-   {l:'⇅ Flip V', fn:()=>toggleFlip('V'), flip:'V'}]
+  const tg=document.getElementById('tg');
+  [{l:'↺ 90° CCW',fn:()=>rotBy(-90)},{l:'↻ 90° CW',fn:()=>rotBy(90)},
+   {l:'⇄ Flip H',fn:()=>toggleFlip('H'),flip:'H'},{l:'⇅ Flip V',fn:()=>toggleFlip('V'),flip:'V'}]
   .forEach(({l,fn,flip})=>{
-    const b=document.createElement('button'); b.className='tbtn';
-    if(flip) b.dataset.flip=flip;
-    b.textContent=l; b.onclick=fn; tg.appendChild(b);
+    const b=document.createElement('button');b.className='tbtn';if(flip)b.dataset.flip=flip;
+    b.textContent=l;b.onclick=fn;tg.appendChild(b);
   });
 }
 
-// ── PROXIMITY INFO FLOAT PANEL ────────────────────────────────────
-(function(){
-  const panel = document.getElementById('proxFloat');
-  const bar   = document.getElementById('proxFloatBar');
-  const btn   = document.getElementById('proxInfoBtn');
-  let visible = false;
-
-  // Default position: top-left of canvas area, away from panel
-  function defaultPos(){
-    const vw = window.innerWidth, vh = window.innerHeight;
-    const pw = 292; // control panel width
-    panel.style.left = '20px';
-    panel.style.top  = Math.max(60, Math.round(vh * 0.15)) + 'px';
-    panel.style.right = 'auto';
-    panel.style.bottom = 'auto';
-  }
-
-  window.toggleProxInfo = function(){
-    visible = !visible;
-    panel.style.display = visible ? 'block' : 'none';
-    btn.classList.toggle('on', visible);
-    if (visible) defaultPos();
-  };
-
-  // Drag logic — constrain so panel can't enter the right control panel
-  let drag = null;
-  bar.addEventListener('pointerdown', e=>{
-    if (e.target === document.getElementById('proxFloatClose')) return;
-    bar.setPointerCapture(e.pointerId);
-    const rect = panel.getBoundingClientRect();
-    drag = { ox: e.clientX - rect.left, oy: e.clientY - rect.top };
-  });
-  bar.addEventListener('pointermove', e=>{
-    if (!drag) return;
-    const vw = window.innerWidth, vh = window.innerHeight;
-    const pw = 292 + 1; // control panel left edge
-    const maxX = vw - pw - panel.offsetWidth - 4;
-    const maxY = vh - panel.offsetHeight - 4;
-    let x = Math.max(4, Math.min(maxX, e.clientX - drag.ox));
-    let y = Math.max(4, Math.min(maxY, e.clientY - drag.oy));
-    panel.style.left = x + 'px';
-    panel.style.top  = y + 'px';
-  });
-  bar.addEventListener('pointerup',   ()=>{ drag = null; });
-  bar.addEventListener('pointercancel',()=>{ drag = null; });
-})();
-
-// ── FULL GEOMETRY FLOAT PANEL ─────────────────────────────────────
-(function(){
-  const panel = document.getElementById('geoFloat');
-  const bar   = document.getElementById('geoFloatBar');
-
-  function defaultPos() {
-    const vw = window.innerWidth, vh = window.innerHeight;
-    panel.style.right  = '300px';
-    panel.style.top    = Math.max(60, Math.round(vh * 0.08)) + 'px';
-    panel.style.left   = 'auto';
-    panel.style.bottom = 'auto';
-  }
-
-  window.hideGeoFloat = function() {
-    panel.style.display = 'none';
-  };
-
-  window.showGeoFloat = function() {
-    panel.style.display = 'block';
-    defaultPos();
-  };
-
-  // Drag logic — same pattern as proxFloat
-  let drag = null;
-  bar.addEventListener('pointerdown', e => {
-    if (e.target === document.getElementById('geoFloatClose')) return;
-    bar.setPointerCapture(e.pointerId);
-    const rect = panel.getBoundingClientRect();
-    drag = { ox: e.clientX - rect.left, oy: e.clientY - rect.top };
-  });
-  bar.addEventListener('pointermove', e => {
-    if (!drag) return;
-    const vw = window.innerWidth, vh = window.innerHeight;
-    const maxX = vw - panel.offsetWidth - 4;
-    const maxY = vh - panel.offsetHeight - 4;
-    let x = Math.max(4, Math.min(maxX, e.clientX - drag.ox));
-    let y = Math.max(4, Math.min(maxY, e.clientY - drag.oy));
-    panel.style.left  = x + 'px';
-    panel.style.top   = y + 'px';
-    panel.style.right = 'auto';
-  });
-  bar.addEventListener('pointerup',    () => { drag = null; });
-  bar.addEventListener('pointercancel',() => { drag = null; });
-})();
-
-// Populate the geometry float panel with live data.
-// Called as a side-effect from buildFullGeometryOverlay().
-window.updateGeoFloat = window.updateGeoFloat || function(){}; // replaced above
 buildUI();
 applyPreset('classic');
 syncEyeUI();
+// Publish PANEL_W as CSS custom property — single source of truth
+document.documentElement.style.setProperty('--panel-w', PANEL_W + 'px');
+setUIScale('1'); // default: normal scale
 </script>
 </body>
 </html>
