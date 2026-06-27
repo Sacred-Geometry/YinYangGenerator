@@ -1000,7 +1000,7 @@ function buildSegmentOverlay(){
   // arctan(LR/R)=arctan(½): derived from direction vector, exact for any R
   const diagAngleDeg=(Math.atan2(Math.abs(G.uy),Math.abs(G.ux))*180/Math.PI).toFixed(4);
   // ── top 3 lines (fit within CY−R ≈ 63 px above the circle) ──
-  o+=`<text x="${CX}" y="17" font-size="13" fill="${cInk}" font-family="${fam}" text-anchor="middle">Radius OA is set to 1, therefore  ·  AB = φ  ·  AC = √5⁄2  ·  AG = Φ  ·  AH = 4R⁄√5</text>`;
+  o+=`<text x="${CX}" y="17" font-size="13" fill="${cInk}" font-family="${fam}" text-anchor="middle">Radius OA is set to 1, therefore  ·  AB = φ  ·  AC = √5 ⁄2  ·  AG = Φ  ·  AH = 4R⁄ √5</text>`;
   o+=`<text x="${CX}" y="34" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">AB ≈ ${(Bd/R).toFixed(4)}  ·  AC ≈ ${(ACd/R).toFixed(4)}  ·  AG ≈ ${(Gd/R).toFixed(4)}  ·  AH ≈ ${(G.farT/R).toFixed(4)}</text>`;
   o+=`<text x="${CX}" y="51" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">∠ diagonal AH from horizontal = arctan(½) ≈ ${diagAngleDeg}°</text>`;
   // ── bottom 3 lines (fit within SZ−(CY+R) ≈ 63 px below the circle) ──
