@@ -907,6 +907,7 @@ function buildVerticalOverlay(){
   o+=`<line x1="${rightX.toFixed(1)}" y1="0" x2="${rightX.toFixed(1)}" y2="${SZ}" stroke="${cMut}" stroke-width="0.6" opacity="0.5"/>`;
   o+=`<text x="${((gutter+panelW)/2).toFixed(1)}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">SEGMENT LENGTH</text>`;
   o+=`<text x="${(rightX+(panelW+gutter)/2).toFixed(1)}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">FROM APEX</text>`;
+  o+=`<text x="${oCX}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">R = Symbol / Ear Radius (set to 1)  ·  r = Eye Radius (adjustable)</text>`;
   o+=`<g opacity="0.18"><clipPath id="ocOverlay"><circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}"/></clipPath>`;
   o+=`<g clip-path="url(#ocOverlay)">`;
   o+=`<circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}" fill="${cYin}"/>`;
@@ -993,13 +994,19 @@ function buildSegmentOverlay(){
   const phiMarkLower=pt(Bd);
   o+=`<text x="${(phiMarkLower.x+10).toFixed(2)}" y="${(phiMarkLower.y+20).toFixed(2)}" ${segLab}>AG = Φ·R</text>`;
   const ACd=Math.hypot(upper.x-A.x,upper.y-A.y);
-  o+=`<text x="${CX}" y="20" font-size="14" fill="${cInk}" font-family="${fam}" text-anchor="middle">Radius OA is set to 1, therefore &nbsp;·&nbsp; AB = φ &nbsp;·&nbsp; AC = √5 ⁄2 &nbsp;·&nbsp; AG = Φ</text>`;
-  o+=`<text x="${CX}" y="37" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">AB ≈ ${(Bd/R).toFixed(4)} &nbsp;·&nbsp; AC ≈ ${(ACd/R).toFixed(4)} &nbsp;·&nbsp; AG ≈ ${(Gd/R).toFixed(4)} &nbsp;·&nbsp; AH ≈ ${(G.farT/R).toFixed(4)}</text>`;
-  if(Ed!=null)o+=`<text x="${CX}" y="${SZ-12}" font-size="12" fill="${cGld}" font-family="${fam}" font-style="italic" text-anchor="middle">A→E ≈ ${(Ed/R).toFixed(4)}·R &nbsp;·&nbsp; A→F ≈ ${(Fd/R).toFixed(4)}·R &nbsp;·&nbsp; (vary with Eye∶Lobe ratio)</text>`;
-
-  // arctan(LR/R)=arctan(½): exact for any R, verified from direction vector
+  // arctan(LR/R)=arctan(½): derived from direction vector, exact for any R
   const diagAngleDeg=(Math.atan2(Math.abs(G.uy),Math.abs(G.ux))*180/Math.PI).toFixed(4);
-  o+=`<text x="${CX}" y="${SZ-28}" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">∠ diagonal AH from horizontal = arctan(½) ≈ ${diagAngleDeg}°  ·  AH = 4R⁄√5 ≈ ${(G.farT/R).toFixed(4)}·R</text>`;
+  // ── top 3 lines (fit within CY−R ≈ 63 px above the circle) ──
+  o+=`<text x="${CX}" y="17" font-size="13" fill="${cInk}" font-family="${fam}" text-anchor="middle">Radius OA is set to 1, therefore  ·  AB = φ  ·  AC = √5⁄2  ·  AG = Φ  ·  AH = 4R⁄√5</text>`;
+  o+=`<text x="${CX}" y="34" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">AB ≈ ${(Bd/R).toFixed(4)}  ·  AC ≈ ${(ACd/R).toFixed(4)}  ·  AG ≈ ${(Gd/R).toFixed(4)}  ·  AH ≈ ${(G.farT/R).toFixed(4)}</text>`;
+  o+=`<text x="${CX}" y="51" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">∠ diagonal AH from horizontal = arctan(½) ≈ ${diagAngleDeg}°</text>`;
+  // ── bottom 3 lines (fit within SZ−(CY+R) ≈ 63 px below the circle) ──
+  o+=`<text x="${CX}" y="${SZ-50}" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">Select segments that vary with Eye∶Lobe ratio</text>`;
+  if(Ed!=null){
+    const GFd=Gd-Fd,GEd=Gd-Ed;
+    o+=`<text x="${CX}" y="${SZ-32}" font-size="12" fill="${cGld}" font-family="${fam}" font-style="italic" text-anchor="middle">A→E ≈ ${(Ed/R).toFixed(4)}·R  ·  A→F ≈ ${(Fd/R).toFixed(4)}·R</text>`;
+    o+=`<text x="${CX}" y="${SZ-14}" font-size="12" fill="${cGld}" font-family="${fam}" font-style="italic" text-anchor="middle">G→F ≈ ${(GFd/R).toFixed(4)}·R  ·  G→E ≈ ${(GEd/R).toFixed(4)}·R</text>`;
+  }
   return o;
 }
 
