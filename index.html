@@ -159,7 +159,10 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
    and font-size scaling on the phifooter. The SVG canvas is untouched.
    The scale select in the header drives these. */
 .panel{transition:font-size .15s;}
-.phifooter{transition:font-size .15s;}
+.phifooter{transition:font-size .15s,opacity .22s,max-height .25s,padding .22s,border-color .22s;overflow:hidden}
+.phifooter.footer-hidden{max-height:0!important;opacity:0;padding-top:0;padding-bottom:0;border-color:transparent;pointer-events:none}
+#footerExpandBtn{position:fixed;bottom:10px;left:10px;z-index:200;display:none;align-items:center;gap:5px;padding:4px 10px 4px 8px;border-radius:12px;border:1px solid var(--bdr);background:var(--surf);color:var(--mute);font-family:'SF Mono','Fira Code','Courier New',monospace;font-size:10px;cursor:pointer;letter-spacing:.03em;transition:border-color .15s,color .15s,background .15s}
+#footerExpandBtn:hover{border-color:var(--gold);color:var(--gold);background:var(--goldA)}
 
 @media(max-width:680px){
   html,body{overflow:auto}
@@ -217,7 +220,7 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
       <div class="f2" id="ftLabel">Eye Radius = Lobe Radius × φ³</div>
       <div class="f3" id="ftRatio">Eye∶Lobe Radii Ratio &nbsp;~&nbsp; 0.236067977 &nbsp;·&nbsp; ≈ frac</div>
       <div class="f3" id="ftAreas" style="margin-top:1px">Eye∶Lobe area = — &nbsp;·&nbsp; Eye∶Symbol area = —</div>
-      <div class="f4"><a href="https://github.com/Sacred-Geometry/YinYangGenerator" target="_blank" rel="noopener">github.com/Sacred-Geometry/YinYangGenerator</a></div>
+      <div class="f4" style="display:flex;align-items:center;justify-content:center;gap:10px"><a href="https://github.com/Sacred-Geometry/YinYangGenerator" target="_blank" rel="noopener">github.com/Sacred-Geometry/YinYangGenerator</a><button onclick="toggleFooter()" title="Minimise footer" style="padding:0 6px;height:15px;border-radius:8px;border:1px solid var(--bdr);background:transparent;color:var(--mute);font-size:9px;cursor:pointer;letter-spacing:.04em;transition:border-color .15s,color .15s;line-height:1">▲ minimise</button></div>
     </div>
   </div>
   <div class="panel">
@@ -1282,6 +1285,14 @@ syncEyeUI();
 // Publish PANEL_W as CSS custom property — single source of truth
 document.documentElement.style.setProperty('--panel-w', PANEL_W + 'px');
 setUIScale('1'); // default: normal scale
+
+function toggleFooter(){
+  const footer=document.querySelector('.phifooter');
+  const btn=document.getElementById('footerExpandBtn');
+  const minimised=footer.classList.toggle('footer-hidden');
+  btn.style.display=minimised?'flex':'none';
+}
 </script>
+<button id="footerExpandBtn" onclick="toggleFooter()"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polyline points="1,6.5 5,2.5 9,6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>&#9660; expand footer</button>
 </body>
 </html>
