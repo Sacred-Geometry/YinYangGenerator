@@ -910,7 +910,7 @@ function buildVerticalOverlay(){
   o+=`<line x1="${rightX.toFixed(1)}" y1="0" x2="${rightX.toFixed(1)}" y2="${SZ}" stroke="${cMut}" stroke-width="0.6" opacity="0.5"/>`;
   o+=`<text x="${((gutter+panelW)/2).toFixed(1)}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">SEGMENT LENGTH</text>`;
   o+=`<text x="${(rightX+(panelW+gutter)/2).toFixed(1)}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">FROM APEX</text>`;
-  o+=`<text x="${oCX}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">R = Symbol / Ear Radius (set to 1)  ·  r = Eye Radius (adjustable)</text>`;
+  o+=`<text x="${oCX}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">R = Symbol / Ear Radius (set to 1)  |  r = Eye Radius (adjustable)</text>`;
   o+=`<defs><clipPath id="ocOverlay"><circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}"/></clipPath></defs>`;
   o+=`<g opacity="0.18"><g clip-path="url(#ocOverlay)">`;
   o+=`<circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}" fill="${cYin}"/>`;
