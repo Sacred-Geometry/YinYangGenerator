@@ -493,7 +493,7 @@ function updateFooter(){
     const proxTier=proximity?proximity.tier:'';
     ftLabel.innerHTML=`${expr}   ·   <span class="prox-inline" data-tier="${proxTier}">${proxTxt}</span>`;
   }
-  if(ftRatio){const frac=toFraction(r,999);ftRatio.textContent=`Eye∶Lobe Radii Ratio = ρ  ~  ${r.toFixed(9)}   ·   ≈ ${frac?`${frac.num}⁄${frac.den}`:'—'}`;}
+  if(ftRatio){const frac=toFraction(r,999);ftRatio.textContent=`Eye∶Lobe Radii Ratio = ρ ≈ ${r.toFixed(9)}   ≈ ${frac?`${frac.num}⁄${frac.den}`:'—'}`;}
   // erNorm = ER/R (eye radius normalised to symbol radius R = 1 unit)
   const erNorm=r*0.5,aLobe=Math.PI*0.25,aEye=Math.PI*erNorm*erNorm;
   const f6=v=>v.toFixed(6);
@@ -501,7 +501,7 @@ function updateFooter(){
   const symPx=Math.PI*R*R,lobePx=Math.PI*LR*LR;
   const boxPx=SZ*SZ;
   const fmtPx=v=>Math.round(v).toLocaleString();
-  if(ftAreas)ftAreas.textContent=`Eye∶Lobe area = ${f6(aEye/aLobe)}  (= ρ²)   ·   Eye∶Symbol area = ${f6(aEye/Math.PI)}  (= ρ²/4)`;
+  if(ftAreas)ftAreas.textContent=`Eye∶Lobe area = ρ² ≈ ${f6(aEye/aLobe)}   ·   Eye∶Symbol area = ρ²/4 ≈ ${f6(aEye/Math.PI)}`;
   const hSym=document.getElementById('hSymPx');
   const hLobe=document.getElementById('hLobePx');
   const hBox=document.getElementById('hBoxPx');
