@@ -900,7 +900,7 @@ function buildVerticalOverlay(){
   const ratio=S.eyeRatio,oER=oLR*ratio,tY=oCY-oR,bY=oCY+oR;
   const y1=oCY-oLR-oER,y2=oCY-oLR+oER,y3=oCY,y4=oCY+oLR-oER,y5=oCY+oLR+oER;
   const{cBg,cBgPnl:cPnl,cInk,cMut,cGld,cYin,cYang}=overlayPalette();
-  const fam="Georgia,'Times New Roman',serif",fs=14.5;
+  const fam="Georgia,'Times New Roman',serif",fs=20.5;
   const leftX=gutter+panelW,rightX=SZ-gutter-panelW;
   let o='';
   o+=`<rect width="${SZ}" height="${SZ}" fill="${cBg}"/>`;
@@ -908,9 +908,11 @@ function buildVerticalOverlay(){
   o+=`<rect x="${rightX.toFixed(1)}" y="0" width="${(panelW+gutter).toFixed(1)}" height="${SZ}" fill="${cPnl}"/>`;
   o+=`<line x1="${(gutter+panelW).toFixed(1)}" y1="0" x2="${(gutter+panelW).toFixed(1)}" y2="${SZ}" stroke="${cMut}" stroke-width="0.6" opacity="0.5"/>`;
   o+=`<line x1="${rightX.toFixed(1)}" y1="0" x2="${rightX.toFixed(1)}" y2="${SZ}" stroke="${cMut}" stroke-width="0.6" opacity="0.5"/>`;
-  o+=`<text x="${((gutter+panelW)/2).toFixed(1)}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">SEGMENT LENGTH</text>`;
-  o+=`<text x="${(rightX+(panelW+gutter)/2).toFixed(1)}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">FROM APEX</text>`;
-  o+=`<text x="${oCX}" y="18" font-size="10.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">R = Symbol / Ear Radius (set to 1)  |  r = Eye Radius (adjustable)</text>`;
+  o+=`<text x="${((gutter+panelW)/2).toFixed(1)}" y="16" font-size="18" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">SEGMENT</text>`;
+  o+=`<text x="${((gutter+panelW)/2).toFixed(1)}" y="34" font-size="18" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">LENGTH</text>`;
+  o+=`<text x="${(rightX+(panelW+gutter)/2).toFixed(1)}" y="16" font-size="18" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">FROM</text>`;
+  o+=`<text x="${(rightX+(panelW+gutter)/2).toFixed(1)}" y="34" font-size="18" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">APEX</text>`;
+  o+=`<text x="${oCX}" y="24" font-size="18.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">R = Symbol / Ear Radius (set to 1)  |  r = Eye Radius (adjustable)</text>`;
   o+=`<defs><clipPath id="ocOverlay"><circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}"/></clipPath></defs>`;
   o+=`<g opacity="0.18"><g clip-path="url(#ocOverlay)">`;
   o+=`<circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}" fill="${cYin}"/>`;
@@ -923,12 +925,12 @@ function buildVerticalOverlay(){
   o+=`<circle cx="${oCX}" cy="${oCY}" r="${oR.toFixed(3)}" fill="none" stroke="${cMut}" stroke-width="0.65" opacity="0.45"/>`;
   o+=`<line x1="${oCX}" y1="${tY.toFixed(2)}" x2="${oCX}" y2="${bY.toFixed(2)}" stroke="${cMut}" stroke-width="0.55" stroke-dasharray="3,4"/>`;
   o+=`<line x1="${leftX.toFixed(1)}" y1="${tY.toFixed(2)}" x2="${rightX.toFixed(1)}" y2="${tY.toFixed(2)}" stroke="${cMut}" stroke-width="0.4" stroke-dasharray="2,6" opacity="0.45"/>`;
-  o+=`<text x="${oCX}" y="${(tY-9).toFixed(2)}" font-size="13" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">apex</text>`;
+  o+=`<text x="${oCX}" y="${(tY-10).toFixed(2)}" font-size="18" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.75">apex</text>`;
   [{y:y1,heavy:false},{y:y2,heavy:false},{y:y3,heavy:true},{y:y4,heavy:false},{y:y5,heavy:false}].forEach(({y,heavy})=>{
     o+=`<line x1="${leftX.toFixed(1)}" y1="${y.toFixed(3)}" x2="${rightX.toFixed(1)}" y2="${y.toFixed(3)}" stroke="${cInk}" stroke-width="${heavy?0.85:0.6}" stroke-dasharray="${heavy?'7,4':'5,3'}" opacity="${heavy?0.55:0.46}"/>`;
   });
   const rBase=`font-size="${fs}" fill="${cGld}" font-family="${fam}" font-style="italic" dominant-baseline="middle" text-anchor="start"`;
-  const rTextX=rightX+14;
+  const rTextX=rightX+13;
   [tY,y1,y2,y3,y4,y5,bY].forEach(y=>{
     const mult=((y-tY)/oR).toFixed(4);
     o+=`<line x1="${rightX.toFixed(1)}" y1="${y.toFixed(2)}" x2="${(rightX+8).toFixed(1)}" y2="${y.toFixed(2)}" stroke="${cInk}" stroke-width="0.7"/>`;
@@ -938,16 +940,14 @@ function buildVerticalOverlay(){
   function lenLbl(ya,yb){return((yb-ya)/oR).toFixed(4)+'R';}
   function brkt(ya,yb,label){
     const x0=leftX,x1=leftX-8,ym=((ya+yb)/2).toFixed(2),yaf=ya.toFixed(2),ybf=yb.toFixed(2);
-    return`<line x1="${x1}" y1="${yaf}" x2="${x0}" y2="${yaf}" stroke="${cInk}" stroke-width="0.7"/><line x1="${x0}" y1="${yaf}" x2="${x0}" y2="${ybf}" stroke="${cInk}" stroke-width="0.7"/><line x1="${x0}" y1="${ybf}" x2="${x1}" y2="${ybf}" stroke="${cInk}" stroke-width="0.7"/><text x="${(x0-14).toFixed(1)}" y="${ym}" ${bBase}>${label}</text>`;
+    return`<line x1="${x1}" y1="${yaf}" x2="${x0}" y2="${yaf}" stroke="${cInk}" stroke-width="0.7"/><line x1="${x0}" y1="${yaf}" x2="${x0}" y2="${ybf}" stroke="${cInk}" stroke-width="0.7"/><line x1="${x0}" y1="${ybf}" x2="${x1}" y2="${ybf}" stroke="${cInk}" stroke-width="0.7"/><text x="${(x0-13).toFixed(1)}" y="${ym}" ${bBase}>${label}</text>`;
   }
   o+=brkt(tY,y1,lenLbl(tY,y1));o+=brkt(y1,y2,'2r '+lenLbl(y1,y2));o+=brkt(y2,y3,lenLbl(y2,y3));
   o+=brkt(y3,y4,lenLbl(y3,y4));o+=brkt(y4,y5,'2r '+lenLbl(y4,y5));o+=brkt(y5,bY,lenLbl(y5,bY));
-  o+=`<text x="${oCX}" y="${(bY+22).toFixed(2)}" font-size="11.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">Eye ∶ Lobe radius = ${ratio.toFixed(6)}</text>`;
-  o+=`<text x="${oCX}" y="${(bY+38).toFixed(2)}" font-size="11.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">Eye ∶ Ear radius = ${(oER/oR).toFixed(6)}</text>`;
+  o+=`<text x="${oCX}" y="${(bY+28).toFixed(2)}" font-size="19.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">Eye ∶ Lobe radius = ${ratio.toFixed(6)}</text>`;
+  o+=`<text x="${oCX}" y="${(bY+51).toFixed(2)}" font-size="19.5" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">Eye ∶ Ear radius = ${(oER/oR).toFixed(6)}</text>`;
   return o;
 }
-
-// ── OTHER SEGMENTS OVERLAY ────────────────────────────────────────
 function buildSegmentOverlay(){
   const ER=getER();
   const A={x:CX+R,y:CY},O={x:CX,y:CY},lower={x:CX,y:CY+LR},upper={x:CX,y:CY-LR};
@@ -978,37 +978,48 @@ function buildSegmentOverlay(){
   o+=`<circle cx="${CX}" cy="${CY}" r="${R.toFixed(3)}" fill="none" stroke="${cMut}" stroke-width="0.65" opacity="0.4"/>`;
   o+=`<line x1="${(CX-R-6).toFixed(2)}" y1="${CY}" x2="${(CX+R+6).toFixed(2)}" y2="${CY}" stroke="${cMut}" stroke-width="0.5" stroke-dasharray="2,6" opacity="0.5"/>`;
   o+=`<line x1="${A.x.toFixed(2)}" y1="${A.y.toFixed(2)}" x2="${O.x.toFixed(2)}" y2="${O.y.toFixed(2)}" stroke="${cInk}" stroke-width="1" stroke-dasharray="6,3" opacity="0.7"/>`;
-  o+=`<circle cx="${O.x.toFixed(2)}" cy="${O.y.toFixed(2)}" r="2.6" fill="${cInk}"/>`;
-  o+=`<text x="${O.x.toFixed(2)}" y="${(O.y+18).toFixed(2)}" font-size="14" fill="${cInk}" font-family="${fam}" font-style="italic" text-anchor="middle">O</text>`;
-  o+=`<text x="${((A.x+O.x)/2).toFixed(2)}" y="${(O.y-10).toFixed(2)}" font-size="12.5" fill="${cInk}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">AO = R</text>`;
+  o+=`<circle cx="${O.x.toFixed(2)}" cy="${O.y.toFixed(2)}" r="4" fill="${cInk}"/>`;
+  o+=`<text x="${O.x.toFixed(2)}" y="${(O.y+34).toFixed(2)}" font-size="40" fill="${cInk}" font-family="${fam}" font-style="italic" text-anchor="middle">O</text>`;
+  o+=`<text x="${((A.x+O.x)/2).toFixed(2)}" y="${(O.y-18).toFixed(2)}" font-size="36" fill="${cInk}" font-family="${fam}" font-style="italic" text-anchor="middle" opacity="0.8">AO = R</text>`;
   o+=`<line x1="${A.x.toFixed(2)}" y1="${A.y.toFixed(2)}" x2="${Dp.farX.toFixed(2)}" y2="${Dp.farY.toFixed(2)}" stroke="${cMut}" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.55"/>`;
-  o+=`<text x="${(Dp.farX-8).toFixed(2)}" y="${(Dp.farY+4).toFixed(2)}" font-size="13" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="end">D</text>`;
+  o+=`<text x="${(Dp.farX-15).toFixed(2)}" y="${(Dp.farY+10).toFixed(2)}" font-size="36" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="end">D</text>`;
   o+=`<line x1="${A.x.toFixed(2)}" y1="${A.y.toFixed(2)}" x2="${G.farX.toFixed(2)}" y2="${G.farY.toFixed(2)}" stroke="${cRed}" stroke-width="1.3"/>`;
   function dot(p,r,fill){return`<circle cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r="${r}" fill="${fill}"/>`;}
-  o+=dot(A,2.8,cInk);o+=dot(Bpt,2.2,cGld);o+=dot(upper,2.4,cInk);o+=dot(Gpt,2.2,cGld);
-  if(Ept)o+=dot(Ept,2.0,cRed);if(Fpt)o+=dot(Fpt,2.0,cRed);o+=dot({x:G.farX,y:G.farY},2.8,cInk);
-  const lbl=(p,text,dx,dy,color,fs)=>`<text x="${(p.x+dx).toFixed(2)}" y="${(p.y+dy).toFixed(2)}" font-size="${fs||13}" fill="${color}" font-family="${fam}" font-style="italic" text-anchor="middle">${text}</text>`;
-  o+=lbl(A,'A',12,-10,cInk,15);o+=lbl(Bpt,'B',-12,-6,cGld,13);o+=lbl(upper,'C',14,4,cInk,13);
-  o+=lbl(Gpt,'G',-12,-10,cGld,13);o+=lbl({x:G.farX,y:G.farY},'H',-12,14,cInk,15);
-  if(Ept)o+=lbl(Ept,'E',13,4,cRed,12);if(Fpt)o+=lbl(Fpt,'F',13,14,cRed,12);
-  const segLab=`font-size="13" fill="${cGld}" font-family="${fam}" font-style="italic"`;
+  o+=dot(A,4,cInk);o+=dot(Bpt,3.4,cGld);o+=dot(upper,3.6,cInk);o+=dot(Gpt,3.4,cGld);
+  if(Ept)o+=dot(Ept,3.2,cRed);if(Fpt)o+=dot(Fpt,3.2,cRed);o+=dot({x:G.farX,y:G.farY},4,cInk);
+  const lbl=(p,text,dx,dy,color,fs)=>`<text x="${(p.x+dx).toFixed(2)}" y="${(p.y+dy).toFixed(2)}" font-size="${fs||16}" fill="${color}" font-family="${fam}" font-style="italic" text-anchor="middle">${text}</text>`;
+  o+=lbl(A,'A',24,-20,cInk,44);o+=lbl(Bpt,'B',-24,-14,cGld,40);o+=lbl(upper,'C',26,8,cInk,40);
+  o+=lbl(Gpt,'G',-24,-20,cGld,40);o+=lbl({x:G.farX,y:G.farY},'H',-24,28,cInk,44);
+  if(Ept)o+=lbl(Ept,'E',26,8,cRed,36);if(Fpt)o+=lbl(Fpt,'F',26,28,cRed,36);
+  const segLab=`font-size="38" fill="${cGld}" font-family="${fam}" font-style="italic"`;
   const mid=(p,q)=>({x:(p.x+q.x)/2,y:(p.y+q.y)/2});const mAB=mid(A,Bpt);
-  o+=`<text x="${(mAB.x+10).toFixed(2)}" y="${(mAB.y-8).toFixed(2)}" ${segLab}>AB = φ·R</text>`;
+  o+=`<text x="${mAB.x.toFixed(2)}" y="${(mAB.y-50).toFixed(2)}" font-size="38" fill="${cGld}" font-family="${fam}" font-style="italic" text-anchor="middle">AB = φ·R</text>`;
   const phiMarkLower=pt(Bd);
-  o+=`<text x="${(phiMarkLower.x+10).toFixed(2)}" y="${(phiMarkLower.y+20).toFixed(2)}" ${segLab}>AG = Φ·R</text>`;
+  o+=`<text x="${(phiMarkLower.x+18).toFixed(2)}" y="${(phiMarkLower.y+38).toFixed(2)}" ${segLab}>AG = Φ·R</text>`;
   const ACd=Math.hypot(upper.x-A.x,upper.y-A.y);
   // arctan(LR/R)=arctan(½): derived from direction vector, exact for any R
   const diagAngleDeg=(Math.atan2(Math.abs(G.uy),Math.abs(G.ux))*180/Math.PI).toFixed(4);
-  // ── top 3 lines (fit within CY−R ≈ 63 px above the circle) ──
-  o+=`<text x="${CX}" y="17" font-size="13" fill="${cInk}" font-family="${fam}" text-anchor="middle">Radius OA is set to 1, therefore  ·  AB = φ  ·  AC = √5 ⁄2  ·  AG = Φ  ·  AH = 4R⁄ √5</text>`;
-  o+=`<text x="${CX}" y="34" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">AB ≈ ${(Bd/R).toFixed(4)}  ·  AC ≈ ${(ACd/R).toFixed(4)}  ·  AG ≈ ${(Gd/R).toFixed(4)}  ·  AH ≈ ${(G.farT/R).toFixed(4)}</text>`;
-  o+=`<text x="${CX}" y="51" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">∠ diagonal AH from horizontal = arctan(½) ≈ ${diagAngleDeg}°</text>`;
-  // ── bottom 3 lines (fit within SZ−(CY+R) ≈ 63 px below the circle) ──
-  o+=`<text x="${CX}" y="${SZ-50}" font-size="12" fill="${cMut}" font-family="${fam}" font-style="italic" text-anchor="middle">Select segments that vary with Eye∶Lobe ratio</text>`;
+  // ── corner caption blocks: use the generous empty margins around the symbol ──
+  const capFs=20,capLH=27,capFsB=23,capLHB=30;
+  const tlBase=`font-size="${capFs}" font-family="${fam}" text-anchor="start"`;
+  const tlBaseI=`font-size="${capFs}" font-family="${fam}" font-style="italic" text-anchor="start"`;
+  const trBaseI=`font-size="${capFs}" font-family="${fam}" font-style="italic" text-anchor="end"`;
+  const blBaseI=`font-size="${capFsB}" font-family="${fam}" font-style="italic" text-anchor="start"`;
+  const brBaseI=`font-size="${capFsB}" font-family="${fam}" font-style="italic" text-anchor="end"`;
+  o+=`<text x="14" y="26" fill="${cInk}" ${tlBase}>Radius OA is set to 1,</text>`;
+  o+=`<text x="14" y="${26+capLH}" fill="${cInk}" ${tlBase}>therefore:</text>`;
+  o+=`<text x="14" y="${26+2*capLH}" fill="${cInk}" ${tlBase}>AB = φ  ·  AC = √5⁄2</text>`;
+  o+=`<text x="14" y="${26+3*capLH}" fill="${cInk}" ${tlBase}>AG = Φ  ·  AH = 4R⁄√5</text>`;
+  o+=`<text x="${SZ-14}" y="26" fill="${cMut}" ${trBaseI}>AB ≈ ${(Bd/R).toFixed(4)}  ·  AC ≈ ${(ACd/R).toFixed(4)}</text>`;
+  o+=`<text x="${SZ-14}" y="${26+capLH}" fill="${cMut}" ${trBaseI}>AG ≈ ${(Gd/R).toFixed(4)}  ·  AH ≈ ${(G.farT/R).toFixed(4)}</text>`;
+  o+=`<text x="${SZ-14}" y="${26+2*capLH}" fill="${cMut}" ${trBaseI}>∠ diagonal AH from horizontal</text>`;
+  o+=`<text x="${SZ-14}" y="${26+3*capLH}" fill="${cMut}" ${trBaseI}>= arctan(½) ≈ ${diagAngleDeg}°</text>`;
+  o+=`<text x="14" y="${SZ-28-capLHB}" fill="${cMut}" ${blBaseI}>Select segments that vary</text>`;
+  o+=`<text x="14" y="${SZ-28}" fill="${cMut}" ${blBaseI}>with Eye∶Lobe ratio</text>`;
   if(Ed!=null){
     const GFd=Gd-Fd,GEd=Gd-Ed;
-    o+=`<text x="${CX}" y="${SZ-32}" font-size="12" fill="${cGld}" font-family="${fam}" font-style="italic" text-anchor="middle">A→E ≈ ${(Ed/R).toFixed(4)}·R  ·  A→F ≈ ${(Fd/R).toFixed(4)}·R</text>`;
-    o+=`<text x="${CX}" y="${SZ-14}" font-size="12" fill="${cGld}" font-family="${fam}" font-style="italic" text-anchor="middle">G→F ≈ ${(GFd/R).toFixed(4)}·R  ·  G→E ≈ ${(GEd/R).toFixed(4)}·R</text>`;
+    o+=`<text x="${SZ-14}" y="${SZ-28-capLHB}" fill="${cGld}" ${brBaseI}>A→E ≈ ${(Ed/R).toFixed(4)}·R  ·  A→F ≈ ${(Fd/R).toFixed(4)}·R</text>`;
+    o+=`<text x="${SZ-14}" y="${SZ-28}" fill="${cGld}" ${brBaseI}>G→F ≈ ${(GFd/R).toFixed(4)}·R  ·  G→E ≈ ${(GEd/R).toFixed(4)}·R</text>`;
   }
   return o;
 }
