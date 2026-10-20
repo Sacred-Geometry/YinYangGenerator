@@ -9,10 +9,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Yin Yang Generator</title>
-<!-- Favicon: the Phi-box yin yang (center → corner = 1, R = φ), Eye = Lobe × Φ²⁄10. Inline so GitHub Pages never falls back to the org root /favicon.ico -->
-<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAADfklEQVR42mO8+eAmAy0BEwONAQt+6d+/fz97+uzfn78iwsKCAgKCAoI/fv64dfvO3fv3rt++ZWRkoKejy8rKiscERlxB9OfPnwf3H+poaIqJimJV8OLly6KK8uu3biXFx3l7ebKwsBBrwb9//y5cuGCsZygrI0MwBGKSkw4dPSorK5OalOToYM/IyEjYgkcPHpkYGHJwcBATxC9evnTy9vry5QsXN1dtZaWtjTWBSL59+461uQWRpjMwMEiIiwf5+jIwMHz7+q2qtm7f/gP4LHjx/IW1qTmmNyHg8dMntU2NtU2Nj58+QRY3MTKGMP7//9/a3nn7zh3sFvz9+1dKXAKP2/unTF64bNnCZcv6p0xGtcAIzv7562dza/vfv3+xWHD/3gMZKWk8ofHj50/sKR01/dy7f3/T1q3o+eDbt28GOjr4g7u8sEhYQJCBgSEtORlZ/Mq1a2gq581f4ObkzM3DjbDg6dNnGkqq+C2Ql5VrrqvHFL+KYcH79x+Onzrp4uSECCIONnbySoKPnz4uXbUSUxzuLagFQvwC5FmQW1z84uVLTPE7d+6iWMDLy0Oq0S9evoxPTT1w+DBW2bfv3qJEMj/RPnj15s31GzfOXTg/a/78r1+/4lL27t171NL0/388hn76/GnG3HlXrl65cOnyh48fyCmuP3z6yMvLi1XF/kMHS6oqX795S5K5QkKCKBZ8/vwZq7oDRw7Hp6WREfnCQsIokfzuAxaPf/j4obCslLzUpa2liWIBMxuWWmntxo1vYXFFKrC1sUEJIilJiQePHirIySMrOnPuHDJXRlo6LSmZgYFh1ry5T54+xWO6kpKijpYWigWMjIwPnj7Bb0FhTm5oYCADAwM3F1dxZQUeC1KSErGUpgoK8rfv3kVW9///P2QuBztRxYmero4dLHxQWhWMjIxvPryV/SENrxK0NDRfvUZk1M6+vrfv30OCCJfpXNxchfl5+Ork2zdvO9lB6+6Ovt5ps2YRH7GMjIzdne0WZmb46mRVddVDx499//6dgYEhLjKam5ubSNO5uLk6WlvQTMfeslNUUrh47crTZ0+lJCV629uJMV1WVmb29GnWVpakNbwe3n+oraF59fo1PEWFsLBwQnysr5cXCQ0vtKbj82fPvnz5dvDQoecvXhw/eZKBgUFQUFBERFhLU9PSwkJPV4fMpuOQaV0DAJk6YmQ55ZZzAAAAAElFTkSuQmCC">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%23D9E0D9%22/%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2243.7016%22 fill=%22%2315201B%22/%3E%3Cpath d=%22M50,6.2984A43.7016,43.7016 0 0 0 50,93.7016A21.8508,21.8508 0 0 1 50,50A21.8508,21.8508 0 0 0 50,6.2984Z%22 fill=%22%23F7F8F4%22/%3E%3Ccircle cx=%2250%22 cy=%2228.1492%22 r=%225.7206%22 fill=%22%2315201B%22/%3E%3Ccircle cx=%2250%22 cy=%2271.8508%22 r=%225.7206%22 fill=%22%23F7F8F4%22/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
+<!-- Favicon: the Phi-box yin yang (center → corner = 1, R = φ), Eye = Lobe × Φ⁵⁄37, no rim or eye ring. Light: Ear A #FFFFFF, Ear B #151537, Eye A #151537, Eye B #FFFFFF on #E9E9E9; the SVG swaps ears and eyes in a dark browser theme. Inline so GitHub Pages never falls back to the org root /favicon.ico -->
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,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">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cstyle%3E.b{fill:%23151537}.a{fill:%23FFFFFF}.ea{fill:%23151537}.eb{fill:%23FFFFFF}@media (prefers-color-scheme:dark){.b{fill:%23FFFFFF}.a{fill:%23151537}.ea{fill:%23FFFFFF}.eb{fill:%23151537}}%3C/style%3E%3Crect width='100' height='100' fill='%23E9E9E9'/%3E%3Cpath d='M50,6.2984A43.7016,43.7016 0 0 1 50,93.7016A21.8508,21.8508 0 0 1 50,50A21.8508,21.8508 0 0 0 50,6.2984Z' class='b'/%3E%3Cpath d='M50,6.2984A43.7016,43.7016 0 0 0 50,93.7016A21.8508,21.8508 0 0 1 50,50A21.8508,21.8508 0 0 0 50,6.2984Z' class='a'/%3E%3Ccircle cx='50' cy='28.1492' r='6.5494' class='ea'/%3E%3Ccircle cx='50' cy='71.8508' r='6.5494' class='eb'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAkA0lEQVR42u19eXwV1fn3nHNm5s52tywEjLKoLCIUIUURFEXAikKpFWnRH/p7KxUEq31VbNEXBVurRaVVbF2g1pYCBbUstVgEqyKCLLI0VhRZEpJIgJDk7neWc877xyG3EZG7zU3mhvv8Yfmkydw7c77zffbnAUePHuUKUpDTCSw8goIUwFGQAjgKUgBHQQrgKEgBHAUpgKMgBXAUpIMIX3gEXxcAOI4DlFJKOY47+T+A/RSAAjg6rLCTbv3vU847gQgIIUIQIZ7neYQgIcQ0sWWZlkU4jnIcAABACArgyG8oUEpBiyCEYIuArwmlFGNsmpZhGKZp1dYeDYUioVCEUup2K6WlRaWlRcXFPgiBaVq6bhiGiTHhOHZ92MFoBXS83AqlNIEGhBBi7z7Ps3+zn6d4KcvCsVi8qSlw6FDtJ5/s27v34JEjRyGEvXt3HzCgT+/ePbp0KdU0BUJgGFY8rluWxXEcg10BHI5TFgAAnucFQRAEgQEis3Ni8Pr6z2tq6tev3/TGG+u2bNmt63qfPudXVFzcr1+v/v179u7dw+/3AMDFYrquG0wx5TVK8hscCZJACImiKAiCKIoIoVx8yimHXVNzZNmyNxcuXLF//z6Oc5WWFnXt2mXQoL7Dhg289NJvde3aBSEUi8XjcaOFSwrgaFuqYJhwuVyiKLbNO0opJYQAACCEHMcFg+Hly9cuWrRi9+69oihSSjAmnTuXXHpp/1Gjhg4bNrB793KO4yKRmGVZeUckeQYOhgkIoSiKkiS1GSa+LoRQSgljqWg09sILy5599tUTJwJ+vyceNyKRKMdxZWUlV15Z8d3vjhg6dGBJiT8Wi8di8QSwCuCwnypkWZYkyXbdkQ2RsC9z4MDhxx57fsWKt1RVliQXxtgwrGg0hhDs2bPb2LEjJkz4Tu/e3UwTM+g4HyJ5AA4GC1EUZVl2uVwOZObWEFmyZPXMmfMCgbDXq2FMIISU0nhcj8XinToVjxlz5aRJNwwe3J/jaCgUBcDREHE0OBKwUBTF5XI5HMSEUEopQvDTT/dPn/7oli27i4t9loWZD4UQNAwzHI4qijR69LBp035w2WXfsiwciUQda4s4FBzMO2CwkCQpj6wiy8I8j3TdmD59zp/+tLJTpyKGDwYRCCEhJBgMy7J0/fXDp0+fVFHRNxKJxeMGzyOn3QuaOXOm815BwvO8pmkej4fn8yyGCyHEmAgCP378yObm0L/+9ZGmKYkwDPuHosgQgl279q5cueHYsRMXX9yzS5eSeNyglDiKQpwFDvbsVFX1er2iKOZp9AVClrSj1103nBC6fv2Hqqp8PaejKDKlZNOmXW+++S6EsKKiryS54nHdOWF4B4GDECKKos/nk2U538PP7PsTQq+5Zkg8rr/99ia3WyWEfu1NAJomh0LRtWs/2LHjkz59zu/Zs6uuGxgTJ6T0HAEOFuVkesQhPqot+ACAw5iMHj3syJHjmzZ97HYrp+CDAQghpCjyF19Uv/HG27puDBkyQJJc8bjR7o5M+xukjDDcbrcgCFyHk5bIOzdx4j1r177v93tZcu40rymCGJPm5uCVV1Y88cR9Awb0aWoKpJUm7GjgoJQqiqJpWgcuoiGEQAhPnGgePnxSXd1RSZIIId9ENgjBQCDs8WgPPzz1Rz/6fiwWNwwLofahENiOsAAAeL1et9vdscurIIQY4+Ji38sv/7IlU/iNz8SysMejmqZ1//2/njHjF7puapqScIbPCpsjYXvmr0uSLj4sC3fvXi6K4ptvvqtppzE+WkMEQqgo8rZtle+/v72iom+PHuWRSLztTZB2UCuEEFmWPR7PWVWPSSklhHIcHTny9h07PnG7FYzJmf+E51EoFNE0df78n9100+gTJwKseK3DqhVKKQtjnFXISDi3CKHHH78PgK+Usn6TWBbWNNUwzDvvfGTBgiV+v4fjUvrDvFQrlFK3261pGndWCoQAY9ytW3ltbf3mzbs1TT6Dckk8MZ6HgiCsXbsxGAxfe+0wjDErKOlQaoVS6vV68ytRkguVCgCorq4bMmQixjjFM2ZJmYaGpttuGz9//s9M07Qs3AYmSNupFZ/Pd5Yjg1mmhNDu3c+dMOE7wWA4xWQbq4kvLS1avHjNjBmPQYh4nv8mfzj/wOH1ep2fc28r44OjlJs+/VZNU9PyUS3LKinxr1jxz2nTHoUQ8DyfVCs5HRxMmxSQ0Zo8KCV9+144btyIYDCcVrrAsqySkqJVq/51zz2Pi6KAEMypfQoLyGjlahJCSBu4AywUNnny9zI43Rb+WHf//b+WJFdO/ZccgoMQ4vF4HG5nYEwwxgmjL1GUhTFOGofI3EVECABwxRUVF110YSwWTzcBa1lWSYnv1VdXzZnzvNfrzp1ygblDhqqqsiw72XFgVX2M2BsbAwcP1hw8WNPYGGDnx17rHNl9GGOXSxw58vJYLJPQp2XhkhLf73639MUX/1pc7M1RfD0nriylVJIkr9frZMJg2ayNG7evWrVhz569hw8fiURiHMepqty1a5cBAy763vdGDR8+uPUv2wsOhNB7720dO3aqpikZQJB19sbj+iuvPD527FWNjQHbq+bsBwellOf5oqIix8ZAWZp0587/zJmz4N13PzIMUxAEZt8xKBiGaZqmKAojRgyZM+cngwZdbDs+WN4xGAxfeulNx46dEAQhA9MBQmgYpixLq1Yt6NOnRzgctbcaxn61wnKtjkUGaxd46aW/jh79vxs2fKiqSnGxT9MUQeCZzSEIvKYpxcU+VVU2bPhw9Oj/XbhwOSu2sPcpEUI9Hu3ii3vGYnpmdV+EEJdLDAZDP/nJ4+FwVBQFe41TaDttOLkqGGOMEHzqqUUzZsxFCPl8HkKIZWFmfyQk8UOfzwMhmj59zjPPvIIQZKarjQTGcdxllw1IPVR62jtyu9Vdu/bOmvUbSXI5FxyEECd3EmBMEEIrVrz18MPzS0v9AICkdpxlYQhBcbF/1qynV6x4CyFkI38wPPTv3wshlM2hWhYuKvIuW/aPRYte9/vtNE5tszkopYIg+P1+ZyoUQigA3JEjx4cO/UEwGBZFIXUbkKl2r1fbvHl5586llHK2VP8y06ey8vMRIyazNvyMEQIAIIQgBFeufL5fvwsjkZgtmRdo33sAnFzTxVpCFixYXFdXL0mutLwDQogkuWpr6xcsWAwAoJTY9cQ4jisv7+z1ujHGHAeyeTN5HoXDsVmz5sfjRpZUZDM4WFTDsRXClFKEUGNj4PXX/+nxaBmYDhhjt1t7/fV1jY0Bux49A4fX6z7nnDLDsLJ8rzAmHo+2efOuZ59d7PFotqg/aMujZ32LTo53cRz3/vvbamqOiKKYwdFSSl0usabmyKZNOxIXtEXZIQT9fjfGOHvOtSzL5/O89NLy7dsr3W41+y9pD3M4vEiYgWHr1j2EkGy+JsZky5bdiQva8tW4k7MY7LkiQjAajf/iF7+3LCv7E4HZ04aiKA5vOWH2Y3V1XXYagSIEq6pqExe0SxRFtssFxZh4vdp7721fvHiNz+fO0veGWT93qKoq53QBHMeFw9EsXyYAQDgcTVzQFo3McVxRkZcQatc1MSaqKj///NKamqMul5gN7LICByFE07R8GGJEOY4TBD5r9qaCwCcuaBdq2SwoG61vSXJVV9e9+OJfVVXJxvKA2XwJNpiLcz40KOU4rkuXThiTLF5QgDE555xOnH0lFAwSTU1BAIB9gOMsC3u97sWL1+za9amqyhnjI6uXXlXVvOgwYEfZv3+vM3SbpXKQlNJ+/XrZapCeVAS2P0aEUCAQeuGFvwoCnzGUYcbvoiAI+VL8x+zHESOGeL2ejKPLloV9Ps8111xuo0HKNDKr97EbcNjr1f7xj/d37PiPpmXo1sJsaIPLE2HDlnr37jF8+LdDoUgGeW2EUCgUGT58cK9e3VnY2y5lFw5HamrqM0vZJ7trFInEFi58DSGY2bVhh6eN1prl/vvvyKwol9WM3Xffj2zUKew69fUNzc0Bnkc22hwJ8nC71bVrN3788X80LRPLI0NwODke+k3RIULI0KED77rr1mPHTohiGoEZURSOHTsxY8b/DB06kOW3bAIH4TiutrY+GIwghHJRJowQCoWiS5a8mWExUQYfyfN8PrYasNTlL35x77hxI+rrjwsCn9QMBAAIAl9ff3zcuGsee+xee/sQ2WF98UWVaZo5GvJECHa7lbVrN37xRbUsS+niA6b/eSRPZ3axKTmS5Fq6dP7NN4+pr2/AGPM8Ou3BQAh4HmGM6+sbbr75+qVLn3G5RHvn7LBLbd26BwCQo+4CSjlBEI4ebXj99XWyLKWrWdIGB4Qwf7saWVGuqirLlv1m3ryZLperoaEpFtMTm1kSO1liMb2hoUmSXE899eCyZfPZOEB7aYONrd2z5zNJctlVBvANL7O0atU7x483CoKQFgrTK/Zxfll56m4CAKCqqu7ll5evW/fBoUM1sVicNYBACGRZOv/8rtdeO2zq1B9261Z+2m1f2Z8ZhLCyct/VV9+KEG+7NXqKvRUIhBcufOz73x/d3BxM3VlLGxw+n69j9Day5gCO40zT+uSTfVVVdU1NAY7j/H5v9+7l/fr1YpHyxK/ZK2zQ8fz5f/zZz54qLfXndLATA8e4cVe/8srjoVAkdT88vUpgnuc7zKAmhBBbiyEI/MCBfQcO7Pt19AAAczT6krk869d/aHvJ+GlZSlGkLVt2HzxYc955XXTdSJEFYVqf0Y77TXITHAMsiU8IwRhbFrYszKajsOKxnDkRBADw+ecHd+yoVFU5d32Xrc3SY8ca33tve1olkmmAAwDQIZvlWZcsQojnEVsTmOs1Bsy4WbHirebmYNvMw2dBvPXrN5ummfqtpQEOhFCHnCPb9uYwQjAQCC1b9qamqbmmjcSHyrK0e/dnVVV1Lleq7S0w9at3MJ3SXsJ0ytKlf//iiypZdrXNADhKqSDwx483bttWKcupapY0mOMsmRma60MCAMbj+ssvL8+m0iIz/Ukp3bx5NxvIbyc4IIQFnWJTeAP8+c8rP/10v6LIuZ7b9FVcEkly7dz5aWNjgOdTSuXAFPHOFvgWTjdLOxQAeOTI8SeeeFnTlLaxNlp/usslVlfXffbZwRRjsqmCo0AbdtHGY489X1eXbelvpq47jETiu3btTTG4khI42A7wwulmIyzJ969/fbR48aqiIm97zbqHEOzZ83mK3ZepgqPAHFlSOoTw+PHGGTPm8HxuMylnNjtEUdi792AgEEolvgJTuCJlucrCGWd6JCfd17vvnnvwYK2iSG1ph56CUVEUa2uPHD5cn8qcgZSYo6BTslMoFs+jp5/+w9/+tj6xaba9BCEYCkUPHaoVRT6p1ZEqcxTOODOxLMzz/LJlbz7yyG+Li33ftMOr7WIdAFgWPnDgMITJq1ZhKpcrMEemyLB4Hr3zzpZp0x45ZXtoOwqEYP/+w4Qk7+9KSa0UmCNjzti27d+33TaTGW1OAAcb81JV9WUqw3FhCkCDBXCkewCMM9at+2D8+GnRaNzlEto2Up4EHA0NjWwu5ZnxCpNeq323V+ah10qYCb906d8nTrzXMEyXS2zjYGhSPRAIhAKBUNJ3HqZyrQI4UlclrLvukUee/fGP/58oCoLgFM5o7V6Ew7Hjx5sEIQlzJLc082HCgkMIA/A8OniwZsaMORs2bC4u9ududHqWDouuGw0NTRAmaZNMyVspnP2ZYYExZgsX/vKX1aNG3f7ee9s6dSpum+0cGYGDo5QEAqGkcx/4pCxUYI4zwIK1n3Ac9/HHn8yd+/zbb29SVdnn85im5eAvDjCmgUA46cnyBebIQG2zrhP2cPfuPfDSS3/9y19WR6Mxv9/LiMTJ358NGmluDiX9TT4pMgrMwbXsViKEQggSvv3Onf958cVlq1e/09wc9HrdXq/H4bBouRcOQhAOR5NqvULo87/H3/rxtfyAUsoBABCCAAD2mtTVHX377U0rV67fvHlnKBTxeDSWMckLZCTENK2k9YJno1pJbA5nB892gLe+TQC4U56arht79x7YunX3xo07Pvxw55dfHuN5pGlKUZGPENy+ubSMwZGtWulggGD2NYQAoVMRjzGOx3XDsEzTisVigUAoEAhXV9cdOlSzf//hysp9hw7VRiJRhJCiyCUlPkppYj9c3j0MAIBpmgW1ktjlhhKAaGxs/vzzQwcO1FRV1e7fX338eKNhmNFoLBAIx+M6IcQwzFhM13XdNDEhGCHkcomS5JJlPyvOyEeqyEA6MjgwJsx+5DjOMMyPPtq9ZcuurVv3VFbuq68/bhgmIYQt+mtpeoMAQAA4ACBCUNNUpm0o5SglhNCOggnAioKTGgzJweHMSE4yWGB22BzH7dnz2cqV6//xj3c/++xgPG4IAi9JLlVVNA20rDg5eYtftUmdGNy0UUSRP+uYgxXkMVfz7bc3vfjisvfe2xYOR2RZUlXF7VaZ8dGxDz4Vb7aFObKLkObLc2RflcFi1aoNL7yw9MMPPyaEut1qSYmfnJSCz34yCKZp8tmiVljIEiG0Z89nc+Y899ZbG3keaZoKAIfx2WI/pk4bAACv152tWmET+JxvYSCE4nH9iSde+v3vl0QiUb/fy3HUUVUUjoIHQsDrdSc92fxmDko55mpWVn4+Y8ZjmzfvLCry5ksYu12ZA3q97qQR0uR5E8cyB0t3IISWLFkzcuTtO3d+UlZWDABXQEbS5+ZyiSUlvqR7q5KDA2PsQPJgXwlCOHfugilTHiKEut2aaVp56He3sTUKMMaappSWFplmkmXHyW0OlpB0VIaFIQNjfNddj/7xj2+UlhYRQguEkbqJ5vO5W/aVZmdzJCqdnKRNKKX0tttmrljxVllZibMraxzHHJaFS0v9mqYknQ8GU8SakyxQCiGcMWPu8uUFZGQCDtO0unUrl2VX0pbdlNoh272J76teK3zooWcWLVrRuXMBGRm+YBde2DWVfaUpFRg7hDnY1N+XX14+b97CTp2KC8jITCnzPLrggq6pjOiAqZ2K5QDOIDyPdu78z89//lRRka8Q4Mr4MbrdSvfu51iWldTHSJU52pc8mLsUDIbvvHO2aeLMti0VBEJgGOa555add14XXTeTOhmpzgRrX/Jg07RmzXpmz569Ho9aoI1MrVFoGEafPhf4fO5U8k2pgsM0zXZkQoTQ++9ve/XVN0pK/AVTI7vXjH7rW70RgqmMnkp1Jlh7gYNtgtV14+GHf5O0fa8gSQlYlqWBA/uYppVKVDNVcFiW1S5JFhbVWLTota1bd7vdWqEiIxuDQ9eNbt26XHTRBfG4AQC0BxwMdIZhtD1tQAgCgdCCBX/WNLUQIM/S4NB1vaLi4uJin2laqaRD0giKtz04WM3fkiVrDhyoabMZ8h04xsFxYOjQS5JWB6YNDgCAYRhteTysxyQcjrbHDPmORxvANK1OnYqGDBkQi8VTzJSlwRwY47Y0SzEmAIA1a9759NP97Ti7s8MYHNFofPDg/t27l6e+xotP61XWdb3NFmuwcWZvvLGO5/mcMhb4r7Db/G/ityNxByFk1KjL03qYfDqnBXVd11i/R5s4KVVVdZs378rdFjS2rss0TV03TdNkmostD3G5BLbiuwOoM3aPZWUlV15ZkbpO4dLtW8EYG4bRBpveCCEQojVr3jlxoqmkJCebNXkeRSIxXTdKSvx9+lzQs2e3srISjuPq6xv276+uqqptaGhyuURVlfO9eB1CGAyGr7vuyh49zg0EwqzXy35wcBwXi8XaABzsBt55Z3MudAqb6XbiRHP//r3vuGPCmDFXde3apfX7RAg5fPjI2rXv/+EPr33yyT6v183+JH/9FITg+PHXpE05aS0dZlJcXJzTyaQszdbUFLjssgkNDc2CYCc+IISGYVJKH3xwyj333K6qcsL+bXHwQOLdikRizz77p6eeWgQASGWSvDN1iq4bPXqc++abL6S7wzbt4j9CSDwez7XBwXFcZeW+I0eO27uTF0JoGIYsu1577blZs6apqszKp9lor5ZV9pDZpBhjVZUfemjaa689J8suwzDyccgRhDAWi48bd3VJiT/d7CnM4MPi8XhOLXl28e3bK+Nx3ca1v6z2AEK4YsWzo0YNZaNt2JTVUyxsANg0H0QpNU1r1Kihy5c/CyHEGOfXKBsAONM0O3UqnjDhO2mZohmCg+M4y7J0Xc8pE3Ic9+mn+xFCNoIQQhgKRebNe3DYsArTtASBT3rSAABB4E3TuuKKiiefnJnWInhn0AYKh6Njxgzv1at7LBZPF9kZ3mo0Gs0pE1JKq6vrbLRGEYLBYOg737niRz+aYFlYENKwxAWBtyw8ZcrN1157RTAYSt3ab3chBCuKfMstN6S1iDorcLTEBnJCHixHHwxGamrqRdE2cFDKQQgfeGAKd3LkV9r8zHHcAw/ckUdlAwihYDBy3XVXDB7cLxKJZcB5mb8EkUgkdzcWiUTj8bhdHA4hjERil1zSd+jQQZntFmL2x7BhFZdcclFmD7qdaEOaOnVixpmHDG8yd+TBqILtfGD6xQ5wgHg8PmLEpQjBjIOtGBOE4NVXX2avmZw72ggEwjfccNXgwf3D4QxNpazegHA4bLvbwq7X3ByKx21zHSnlEEL9+/fOTKe01iz9+/divq7DxbKw1+uePv0Wy7Iy9rAyf/qMPHIQ86DcyWYIaiMb8TxfXl7GvnjGd8xxXHl551wnArMXnkfBYGjy5HEDB2alBLN6NSGE4XA4N3FDe3mbQght2VTH8whC0F6LYVN8aeNxvVu3c6ZNmxSJRLNh32x5mxBit2UKmPdoKz6AZVnhsA3fMxyOWha2G7v2WhswEonfffet551XlnrpRk7AAQCIRqM2FgGxe5Fll40pFQiBZVkHDtSwuHjGuolSeuDAYcuyHGuQIgQDgfBVV3178uTxqSzqyi04mIRCIXvVsNutSZIr6eiZ1A1SAMD27ZUsLp7xawAA2L793wAAx5ocGBNZlmbPvovnUfa1c9COdx0YhmFXzJQdnsejuVxC0qFVqes+RZE3btwWCIQgBBngmNXBNzcHN27c4diCVp7nm5uD06b94NJLv2VLpN/GKFPERuVSVOQtLS2yq7mNUipJroMHa5cvXwsAyCDUwQpaV6x469ChGklyYh08QjAYDF9++cB7750cDIZtifHbFumjlNqiXAAAhFCXSywv72yatml3SomqyvPn/7GxMYAQTItyCaEIwcbG5meeeUVVFQd26rJ5PZomP/nkfZLksit7DG38foZhhMNhWw6S47gePc61LNtS5IRQSXJVVdU+8MCTbLhqijhmZaQAgAce+HV1dZ0z22dYIeCsWXcOGtTXxtQxtPcrRqPR7MNi7OEPGNDHbmMN+/3eJUvWPPnkSzyPuJPVX0m0CYtt/OpXLy5Zssbv9zqwnpTnUWNjYNKkG6ZMmdDUFGC3Zo+qmjlzpr38puu6y+XKErysLG/Zsr/b+5ZSShVFXrduUywWv/rqyxBCpx2S31J0DhCChJCHH/7NvHkv+3xeB9qhCKFwODJgQO+FCx+zfe6j/dlFSmkwGMyGe1mPb8+e3bp3P1fXDXuDCpQSr9f99NN/GDNmygcf7IAQIIRgYpUXAC27VxCE4IMPdowZM2X+/Fe8Xo8DkQEh1HXD43E/99zDmqYYhmlvoZr9KzVYziUQCPh8vozjYBhjURQHDepbWfm5osgch+0DB0cpKS72bd68c+zYO0eMuGz8+FFDhw4655xOkuTiOC4e17/88tjmzTtXr97w7rtbMcZsv58DjVA2BfS55x7q169nU1PAlvzAVz4ig+rzFEMLqqq63e7M/pzNul+9+p0f/vBen8+bi/565rOEQhGMsd/vKSryud0ax3GhUPjEiebm5iBCyO1WIQSOdE84AGAgEJo374GpUyc2NDTbaGrkHBwMHx6PR1GUzHQTACAUigwZcvOXXx6ztwb9FIiwzItl4UTHG88jnuedvHeB51FDQ9N99/2fuXNnNDYGctQpksOKJghhKBSKxWKZcSbGxO1WR48eGolEc1e2yTY8QghEUZBllyy7RFGAkM3IczIymu+4Y8Ls2dOam0O5K0vLbbkbACAYDGbj3P7wh2MlyZXrFnuWkCPk5HpRJ1dr8Dzf0NA8adL18+bdH4nEuFwu/s15LSTDRwYFhcyNHDLkkhEjLrMrHpzvwvN8Q0PjjTeO/O1vZ8XjRq4XFrTREw8EAhngg73Cd989uQCLhJ0xceKYF16YgzFh6Z7cusptdm/Nzc3p6heEECFk5MjLhw0bFAxGzlryAAAgBI8fb7r99vG/+91sQnDb1JTAtrzDQCCQbmaf9ZvMnj2jZQfsWScMBE1NwXvu+Z/5839uGIZlkbbpjYBt/AaEQqFQKJSW5YExGT588KRJY+1NHOSFIIRME8di8V/96v8+/vhPo9EYIbTN6tByGOc4Q/xDlmWPx5OiymRJ0dra+ssvvzkeN1h/0VliZIRCUU2T58//+U03jT5xIsCi/G1HWu3BkzAWizU1NaU4EQBCSAg977wuc+f+NK3BNHltZLBca+/ePd5447kbbxzZ0NCMEGzjHv/2edAQQtM0m5qaUnRhEIIY4zvumHDbbePZOJcOrUogIaShofmmm65dtWpB//69GhuD7aJP20GtnOKsqqqqqmrSd4LFpkKh8FVX3XrgwOEOOdCYeSXBYERV5QcfvGPq1Im6bhqGkdM5Ss4FBzMpRFF0u92CICT9TQjh7t17x4yZoutGns5hOoPtaVk4EAgNGzbw8cd/WlFxcVNTgONAO7ZBtD84uJY0m6qqiqKcmUJYtvbddz+68cYZgsCnWw3qWMJgdX6qKk+fPunuu291uYRQKNrurpkjwNGaQjRNO/McXLbp7fXX/3nbbTM1Tc3rOX8AcAiheFyPRuPXXDNk9uxpgwZdHAiEWEd/+38954CDa4mXK4qiquoZ4jwMH4sXr546dbaiSILA5+PuJoQQxlYgEO7evfzeeyffeutYAGA4HEUIOWTwmLPAkaAQnucVRZFl+Zu0DMPH3/62btq0R3XdUFXFOftNU4MFCQZDXq82efJ377prUnl5WSAQYrsAHERsDgRHAiKCIKiqKknSGfCxfXvl5MkPVFXVFRX5HI4PZltgjEOhiKLI119/5fTptwwa1DcSicbjhgODv84FR0LLCIKgKMppIcLwUVtbP23aI+vWbSoq8jq1qg8gBA3DDIejmqZcd90VP/7xxMGD+1uWFQ5H2z661RHAcQpEZFmWJOmU58hsN0LoL3/5u6ee+gOllK2PdEKIHQAAIaCUi8f1WCxeVlZyww1X3XLL2IqKvhiTcDgKAOfk8WJ5AI7WEEEIMYi0jgux5AsAYNOmjx999NkPPtihaYokSWw6cXthguOAaZpssE7Pnl2/+91rbr75up49uxmGGYnEHA6LPANHa4hACEVRlCRJFMUEkbAQCMZk0aLlTz/9SnV1narKsiydtm0pFwIhAAByHDUMKxaLE0JLS/1XXDHoe98bOWxYRWmpLxbT2aTYfJl0m2fg+DqRuFwul8slCAIAIFE2d+zYiVdf/duf/7xy374ql0tUFJklLOyNmLG52KwFC2Os6wabpNO5c8m3v91v5Mghw4YNOv/8cyGEkUjUNC3WOpVPYZg8BUcCIgwQCCFRFAVBYChhSicQCC1d+velS/9eWbkvGo3JsiRJLjYLkHFJWkqHnWtioxOl1LKwYRiGYXIcp6pKjx7lFRUXDx16yeDB/bt2PYfnUSym67pOKdfGqfYCOE5DJNzJZDfP8zyESFVPBuO3b69cvXrDunUfHDhwmI03lSSR53nW89hqUk8CK6Dlaqz8jBJCMcaWhVmHC6WcIPBer9a16zl9+14wYECfAQN69+rV3e93M/NT1w0WtMhHTHQ0cJyWTriTDdmix+OGEEUi0c8+O7h9e+VHH+3+978/P3GiORAI6bqBMWHjoFofZGLTG4QQQuByiW63UlTkKysr7tGj/MILu51//nndu5efe24Z64ozDDMeN1igJd8x0ZHB8XWgEEIo5URRUBSZjRprbAw0NQXr6o4ePnykurpO181oNNbcHDRNi+cRQojnkaoqRUUen89TVOQtKyvp3LnY7/dqmiJJIgAQY2wYpmGYbIsPa8DuEJA4a8DxVaBwhBBKCccBQeB5HrH/QohaYYi2ti0gBKzNCWNsmphJi+8D8tSSSF147qwRAFhnLGSMYhgmswwoTcy8Bl+tcU/8XyAxhjBh7Z4NchaB43SOKOAKcobITeERFKQAjoIUwFGQAjgKUgBHQQrgKEgBHAUpgKMgHUT+P8g/+7uiuktfAAAAAElFTkSuQmCC">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Yin Yang Generator — an interactive golden-ratio (φ/Φ) construction tool with animated pattern fills, uploads, flow motion, fractal eyes, lightning, 3D coin and orb views, bagua ring, measurement overlays, and PNG/JPG/SVG/WebM export.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,6 +31,7 @@
   --f-body:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --f-mono:'Spline Sans Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
   --panel-w:356px; --r-sm:6px; --r-md:10px;
+  --lg-bg:#E9E9E9; --lg-a:#FFFFFF; --lg-b:#151537; --lg-ea:#151537; --lg-eb:#FFFFFF;   /* header logo: Ear A, Ear B, Eye A, Eye B; the dark theme swaps ears and eyes, never the background */
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
@@ -40,6 +41,7 @@
     --jade:#8DCAB0; --jade-soft:rgba(141,202,176,.11); --jade-line:rgba(141,202,176,.42);
     --brass:#D5B57A; --danger:#E5826E; --stage:#080B0A; --stage-ring:rgba(255,255,255,.05);
     --shadow:rgba(0,0,0,.55); --scrim:rgba(0,0,0,.6);
+    --lg-a:#151537; --lg-b:#FFFFFF; --lg-ea:#FFFFFF; --lg-eb:#151537;
     color-scheme:dark;
   }
 }
@@ -49,6 +51,7 @@
   --jade:#8DCAB0; --jade-soft:rgba(141,202,176,.11); --jade-line:rgba(141,202,176,.42);
   --brass:#D5B57A; --danger:#E5826E; --stage:#080B0A; --stage-ring:rgba(255,255,255,.05);
   --shadow:rgba(0,0,0,.55); --scrim:rgba(0,0,0,.6);
+  --lg-a:#151537; --lg-b:#FFFFFF; --lg-ea:#FFFFFF; --lg-eb:#151537;
   color-scheme:dark;
 }
 
@@ -285,6 +288,7 @@ input[type=range]::-moz-range-progress{background:var(--jade);height:4px;border-
 .const-tab td:last-child{color:var(--ink)}
 .const-tab .b{color:var(--brass)}
 .const-tab .m{color:var(--faint)}
+.const-tab td.note{white-space:normal;color:var(--faint);padding-right:0}
 .const-note{font-size:calc(11px * var(--cz,1))}
 .float-b p{margin:0}
 .float-b dl{margin:0;display:flex;flex-direction:column;gap:6px}
@@ -351,12 +355,12 @@ body.focus .stage-col{padding-right:max(16px,env(safe-area-inset-right,0px))}
   <div class="brand">
     <svg viewBox="0 0 40 40" width="38" height="38" aria-hidden="true">
       <title>Yin yang, clockwise flow</title>
-      <!-- Phi box: R = (40/2)·√2/Φ ≈ 17.4806 · Lobe = R/2 · Eye = Lobe·φ³ ≈ 2.0633 -->
-      <rect width="40" height="40" fill="var(--surface-3)"/>
-      <circle cx="20" cy="20" r="17.4806" fill="var(--ink)"/>
-      <path d="M20,2.5194 A17.4806,17.4806 0 0 0 20,37.4806 A8.7403,8.7403 0 0 1 20,20 A8.7403,8.7403 0 0 0 20,2.5194Z" fill="var(--surface)"/>
-      <circle cx="20" cy="11.2597" r="2.0633" fill="var(--ink)"/>
-      <circle cx="20" cy="28.7403" r="2.0633" fill="var(--surface)"/>
+      <!-- Phi box: R = (40/2)·√2/Φ ≈ 17.4806 · Lobe = R/2 · Eye = Lobe·Φ⁵/37 ≈ 2.6198 · no rim, no eye ring -->
+      <rect width="40" height="40" fill="var(--lg-bg)"/>
+      <path d="M20,2.5194 A17.4806,17.4806 0 0 1 20,37.4806 A8.7403,8.7403 0 0 1 20,20 A8.7403,8.7403 0 0 0 20,2.5194Z" fill="var(--lg-b)"/>
+      <path d="M20,2.5194 A17.4806,17.4806 0 0 0 20,37.4806 A8.7403,8.7403 0 0 1 20,20 A8.7403,8.7403 0 0 0 20,2.5194Z" fill="var(--lg-a)"/>
+      <circle cx="20" cy="11.2597" r="2.6198" fill="var(--lg-ea)"/>
+      <circle cx="20" cy="28.7403" r="2.6198" fill="var(--lg-eb)"/>
     </svg>
     <h1>Yin Yang Generator</h1>
   </div>
@@ -367,6 +371,7 @@ body.focus .stage-col{padding-right:max(16px,env(safe-area-inset-right,0px))}
       <option value="vertical">Vertical Line Ratios</option>
       <option value="segments">Other Segments</option>
       <option value="measure">Measure (click points)</option>
+      <option value="guides">Construction Guides (calipers)</option>
     </select>
     <select class="ctl-select" id="scaleSel" aria-label="Panel text size">
       <option value="1">Text: Normal</option>
@@ -593,8 +598,7 @@ body.focus .stage-col{padding-right:max(16px,env(safe-area-inset-right,0px))}
         </div>
         <div class="divider"></div>
         <div class="field">
-          <div class="chips"><button class="chip" type="button" id="auraOn">Aura</button><button class="chip" type="button" id="starsOn">Star field</button><button class="chip" type="button" id="guidesOn">Construction guides</button></div>
-          <p class="sub-note" style="margin:0">Guides: calipers from the center to each box corner. <span class="ck" style="--k:#86D4BF"></span>1 center → edge · <span class="ck" style="--k:#E2B657"></span>φ edge → corner · <span class="ck br" style="--k:#F4EEE0"></span>Φ bracket, center → corner.</p>
+          <div class="chips"><button class="chip" type="button" id="auraOn">Aura</button><button class="chip" type="button" id="starsOn">Star field</button></div>
           <div class="inline"><span class="color-in" id="auraColSw"><input type="color" id="auraCol" value="#8dcab0" aria-label="Aura color"></span><span class="mini grow">Aura color</span></div>
           <div class="field-h"><label for="auraSize">Aura size</label><output id="auraSizeOut">1.0</output></div>
           <input type="range" id="auraSize" min="0.2" max="2.5" step="0.05" value="1">
@@ -2205,6 +2209,42 @@ function updateHeaderConstants(){
     sec('On your screen now') + `<tbody id="constLive"></tbody>` +
     `</table><p class="mini const-note" style="margin:0">Golden-section calipers opened from the center to a box corner put their mark on the symbol’s edge: radius <b style="color:${CAL_COL.one};filter:brightness(.8)">1</b>, edge → corner <b style="color:${CAL_COL.phi};filter:brightness(.8)">φ</b>, the whole <b>Φ = 1 + φ</b>. Construction guides (Ornaments) draws this check at all four corners. Symbol ∶ Box area lands within 0.002% of ⅗ because π ≈ 6Φ²⁄5.</p>`;
 }
+// Edge audit: renders the scene offscreen at the box's exact pixel size on solid red with plain black and white halves,
+// then measures from the centre outward (sub-pixel) how far the symbol reaches along the four side midlines and the
+// four corner diagonals. Redness of a pixel = (R − G)/255, which red-over-grey mixtures give exactly whatever the grey.
+const AUDIT = {map:new Map()}, TUNED = new Map();
+// The largest distance (px) between any of the eight audited gaps and the exact Phi value, for a box W px wide
+function auditWorst(W){
+  const A = edgeAudit(W); if (!A) return null;
+  const e1 = A.half - A.R, e2 = A.half * Math.SQRT2 - A.R;
+  return Math.max(...A.mid.map(v => Math.abs(v - e1)), ...A.diag.map(v => Math.abs(v - e2)));
+}
+function edgeAudit(W){
+  const key = W + '|' + S.eyeRatio;
+  if (AUDIT.map.has(key)) return AUDIT.map.get(key);
+  const keep = {bg:S.bg, fills:S.fills, fx:S.fx, stars:S.stars, style:S.style, d3:S.d3, rot:S.rot, flipH:S.flipH, flipV:S.flipV, da:dragAngle, mot:S.motion, fr:S.fractal};
+  let img = null;
+  try {
+    S.bg = solid('#ff0000'); S.fills = {lobe1:solid('#ffffff'), lobe2:solid('#000000'), eye1:solid('#000000'), eye2:solid('#ffffff')};
+    S.fx = Object.assign({}, S.fx, {guides:false, aura:false, bagua:'off', bolt:false, rimW:0}); S.stars = false; S.style = 'flat';
+    S.d3 = Object.assign({}, S.d3, {mode:'flat'}); S.rot = 0; S.flipH = false; S.flipV = false; dragAngle = 0;
+    S.motion = Object.assign({}, S.motion, {playing:false, tide:false, breathe:false, spin:false, swirl:false}); S.fractal = Object.assign({}, S.fractal, {depth:0});
+    const c = document.createElement('canvas'); c.width = c.height = W; const g = c.getContext('2d', {willReadFrequently:true});
+    drawScene(g, W, 0, 'export'); img = g.getImageData(0, 0, W, W).data;
+  } catch (e){ img = null; }
+  finally { S.bg = keep.bg; S.fills = keep.fills; S.fx = keep.fx; S.stars = keep.stars; S.style = keep.style; S.d3 = keep.d3; S.rot = keep.rot; S.flipH = keep.flipH; S.flipV = keep.flipV; dragAngle = keep.da; S.motion = keep.mot; S.fractal = keep.fr; }
+  if (!img) return null;
+  // symbolness at a point: bilinear between pixel centres
+  const px = (x, y) => { const i = (Math.min(W - 1, Math.max(0, y)) * W + Math.min(W - 1, Math.max(0, x))) * 4; return 1 - (img[i] - img[i + 1]) / 255; };
+  const at = (x, y) => { const fx = x - .5, fy = y - .5, x0 = Math.floor(fx), y0 = Math.floor(fy), tx = fx - x0, ty = fy - y0;
+    return (px(x0, y0) * (1 - tx) + px(x0 + 1, y0) * tx) * (1 - ty) + (px(x0, y0 + 1) * (1 - tx) + px(x0 + 1, y0 + 1) * tx) * ty; };
+  const half = W / 2, step = .05, reach = (ux, uy, D) => { let sum = 0; for (let t = step / 2; t < D; t += step) sum += at(half + ux * t, half + uy * t) * step; return D - sum; };
+  const k = Math.SQRT1_2, Rr = half * SYM_K;
+  const res = {W, R:Rr, half, mid:[[-1, 0], [1, 0], [0, -1], [0, 1]].map(([ux, uy]) => reach(ux, uy, half)),
+    diag:[[-k, -k], [k, -k], [-k, k], [k, k]].map(([ux, uy]) => reach(ux, uy, half * Math.SQRT2))};
+  if (AUDIT.map.size > 60) AUDIT.map.clear();
+  AUDIT.map.set(key, res); return res;
+}
 // Live check of the box on screen, in physical screen pixels: the box must be a whole number of them,
 // start on the pixel grid, and hold the symbol at its exact middle with radius = SYM_K × half-side
 function updateLiveConst(){
@@ -2217,6 +2257,19 @@ function updateLiveConst(){
     `<tr><td>Symbol radius (1)</td><td>${r.toFixed(3)} px</td></tr>` +
     `<tr><td>Edge → corner (φ)</td><td>${(diag - r).toFixed(3)} px · ∶ R = <span class="b">${((diag - r) / r).toFixed(9)}</span></td></tr>` +
     `<tr><td>Center → corner (Φ)</td><td>${diag.toFixed(3)} px · ∶ R = <span class="b">${(diag / r).toFixed(9)}</span></td></tr>`;
+  // Eight-point audit of the pixels this box is actually drawn with
+  const A = edgeAudit(side); if (!A) return;
+  const e1 = half - A.R, e2 = diag - A.R, dv = (a, e) => (a - e >= 0 ? '+' : '−') + Math.abs(a - e).toFixed(3);
+  const worst = Math.max(...A.mid.map(v => Math.abs(v - e1)), ...A.diag.map(v => Math.abs(v - e2)));
+  const lr = A.mid[0] - A.mid[1], tb = A.mid[2] - A.mid[3], spread = Math.max(...A.diag) - Math.min(...A.diag), sym = Math.max(Math.abs(lr), Math.abs(tb), spread);
+  const names = ['left', 'right', 'top', 'bottom'], dn = ['↖', '↗', '↙', '↘'], sg = v => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(3);
+  el.innerHTML += `<tr><th colspan="2">Edge audit · rendered pixels</th></tr>` +
+    A.mid.map((v, i) => `<tr><td>Gap to symbol · ${names[i]}</td><td>${v.toFixed(3)} px <span class="m">(${dv(v, e1)})</span></td></tr>`).join('') +
+    A.diag.map((v, i) => `<tr><td>Corner gap ${dn[i]} (φ)</td><td>${v.toFixed(3)} px <span class="m">(${dv(v, e2)})</span> · ∶ R = <span class="b">${(v / A.R).toFixed(6)}</span></td></tr>`).join('') +
+    `<tr><td>Symmetry</td><td>L−R ${sg(lr)} · T−B ${sg(tb)} · corners ±${(spread / 2).toFixed(3)} px<br>${sym < .05 ? '<span class="b">centered ✓</span>' : 'off-centre by ' + sym.toFixed(3) + ' px'}</td></tr>` +
+    `<tr><td>Against Φ</td><td>largest deviation ${worst.toFixed(3)} px · ${worst < .25 ? '<span class="b">Phi-aligned ✓</span>' : 'check the render'}</td></tr>` +
+    `<tr><td colspan="2" class="note">Expected: sides ${e1.toFixed(3)} px, corners ${e2.toFixed(3)} px (φ × radius ${A.R.toFixed(3)}).</td></tr>` +
+    `<tr><td colspan="2" class="note">Measured from the drawn bitmap, in whole screen pixels.</td></tr>`;
 }
 function updateReadout(){
   const r = S.eyeRatio, prox = classifyRatio(r), fr = toFraction(r, 999), fmt = v => Math.round(v).toLocaleString(), ER = getER();
@@ -2434,7 +2487,7 @@ function syncAll(){
   $('boltCol').value = fx.boltCol; $('boltColSw').style.setProperty('--c', fx.boltCol);
   [['boltGlow', v => v.toFixed(1)], ['boltChaos', v => v.toFixed(1)], ['boltBranch', v => v], ['boltRate', v => v + ' /s']].forEach(([k, f]) => { $(k).value = fx[k]; $(k + 'Out').textContent = f(fx[k]); });
   syncSeg('baguaSeg', fx.bagua); syncSeg('baguaLblSeg', fx.baguaLbl); $('baguaCol').value = fx.baguaCol; $('baguaColSw').style.setProperty('--c', fx.baguaCol);
-  setPressed($('auraOn'), fx.aura); setPressed($('starsOn'), S.stars); setPressed($('guidesOn'), fx.guides);
+  setPressed($('auraOn'), fx.aura); setPressed($('starsOn'), S.stars); if (measureMode === 'off') $('measureSel').value = fx.guides ? 'guides' : 'off'; $('measureSel').classList.toggle('on', measureMode !== 'off' || !!fx.guides);
   $('auraCol').value = fx.auraCol; $('auraColSw').style.setProperty('--c', fx.auraCol); $('auraSize').value = fx.auraSize; $('auraSizeOut').textContent = fx.auraSize.toFixed(1);
   setPressed($('flipH'), S.flipH); setPressed($('flipV'), S.flipV);
   syncSeg('fmtSeg', S.exp.fmt); syncSeg('sizeSeg', S.exp.size); setPressed($('transpOn'), S.exp.transp); syncSeg('durSeg', S.exp.dur);
@@ -2499,7 +2552,6 @@ function bindControls(){
   bindColor('baguaCol', 'baguaColSw', v => { S.fx.baguaCol = v; });
   bindChip('auraOn', () => S.fx.aura, v => { S.fx.aura = v; });
   bindChip('starsOn', () => S.stars, v => { S.stars = v; });
-  bindChip('guidesOn', () => S.fx.guides, v => { S.fx.guides = v; });
   bindColor('auraCol', 'auraColSw', v => { S.fx.auraCol = v; });
   bindRange('auraSize', 'auraSizeOut', v => v.toFixed(1), v => { S.fx.auraSize = v; });
   $('rotCCW').addEventListener('click', () => { S.rot = (S.rot + 270) % 360; changed(); });
@@ -2515,11 +2567,11 @@ function bindControls(){
   $('cfgCsvBtn').addEventListener('click', exportConfigCSV); $('measCsvBtn').addEventListener('click', exportMeasureCSV);
   $('copyJsonBtn').addEventListener('click', () => openText('Settings', JSON.stringify(getSettings(), null, 1), 'yinyang-settings.json', hasImages() ? 'Uploaded images are not part of settings; they are saved as plain colors.' : 'Copy these settings to restore this exact look later or on another device.'));
   $('loadJsonBtn').addEventListener('click', openLoad);
-  $('measureSel').addEventListener('change', e => setMeasureMode(e.target.value));
+  $('measureSel').addEventListener('change', e => setMeasureChoice(e.target.value));
   $('scaleSel').addEventListener('change', e => setUIScale(e.target.value));
   $('themeBtn').addEventListener('click', toggleTheme);
   $('proxInfoBtn').addEventListener('click', () => { const f = $('proxFloat'); if (f.hidden){ showFloat('proxFloat', 'left'); $('proxInfoBtn').setAttribute('aria-expanded', 'true'); } else { hideFloat('proxFloat'); } });
-  $('geoClose').addEventListener('click', () => { $('measureSel').value = 'off'; setMeasureMode('off'); });
+  $('geoClose').addEventListener('click', () => { $('measureSel').value = 'off'; setMeasureChoice('off'); });
   $('constBtn').addEventListener('click', () => { if ($('constFloat').hidden){ showFloat('constFloat', 'left'); $('constBtn').setAttribute('aria-expanded', 'true'); } else hideFloat('constFloat'); });
   // floats with a corner grip can be resized; the text scales gently with the box width
   document.querySelectorAll('[data-resize]').forEach(g => { const f = $(g.dataset.resize); let d = null;
@@ -2577,7 +2629,9 @@ function showFloat(id, side){
 function hideFloat(id){ const f = $(id); if (!f) return; f.hidden = true; if (id === 'proxFloat') $('proxInfoBtn').setAttribute('aria-expanded', 'false'); if (id === 'constFloat') $('constBtn').setAttribute('aria-expanded', 'false'); }
 
 // ── Measurement / theme / scale ─────────────────────────────────────
-function setMeasureMode(m){ measureMode = m; $('measureSel').classList.toggle('on', m !== 'off'); if (m !== 'measure'){ geoSel = []; } renderOverlay(); updateSummaries(); needsDraw = true; }
+function setMeasureMode(m){ measureMode = m; $('measureSel').classList.toggle('on', m !== 'off' || S.fx.guides); if (m !== 'measure'){ geoSel = []; } renderOverlay(); updateSummaries(); needsDraw = true; }
+// The Measurements menu also holds the calipers: 'guides' draws the construction guides on the live stage (no overlay mode)
+function setMeasureChoice(v){ S.fx.guides = v === 'guides'; setMeasureMode(v === 'guides' ? 'off' : v); }
 function toggleTheme(){
   const next = isDarkTheme() ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next); store.set('yyg.theme', next); syncThemeLbl();
@@ -2745,6 +2799,19 @@ function shuffle(){
 // ── Layout & render loop ────────────────────────────────────────────
 const BOX_PX = 610;   // target box side in CSS px when there is room: a Fibonacci number
 const BOX = {dev:0, dpr:1, x:0, y:0, grid:true};
+// An element's own layout box in CSS px (1/64 steps), measured with its snap offset cleared so that the result never
+// depends on the offset layout() gave it last time (reading it back made the box flip by 1/64 px every frame)
+function baseRect(el){
+  el.style.left = ''; el.style.top = '';
+  const r = el.getBoundingClientRect();
+  return {left:Math.round(r.left * 64) / 64, top:Math.round(r.top * 64) / 64, w:r.width, h:r.height};
+}
+// What makes the box need re-laying out: the sizes and place of things layout() does not itself move
+const stageCol = document.querySelector('.stage-col');
+function layoutSig(){
+  const a = stageCol.getBoundingClientRect(), b = stage.getBoundingClientRect(), c = frame.getBoundingClientRect();
+  return [a.left, a.top, a.width, a.height, b.width, b.height, c.width, c.height, window.devicePixelRatio || 1].join('|');
+}
 function layout(){
   // The frame sizes itself in CSS (min of the stage's width and height), so it is always square.
   // The box (the canvas) is then sized in SCREEN pixels, not CSS pixels: 610 CSS px is a whole number of
@@ -2753,17 +2820,52 @@ function layout(){
   // of screen pixels, its corner sits on the pixel grid, and the canvas is drawn 1:1 with the screen.
   const cs = getComputedStyle(stage), sw = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), sh = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
   stage.classList.toggle('side-dock', sw - Math.min(BOX_PX, sh) >= 130);
-  const fr = frame.getBoundingClientRect(), fw = Math.max(1, fr.width), dpr = window.devicePixelRatio || 1;
-  // CSS stores lengths in 1/64 px steps, so a size or position is exact on screen only when it is a whole number
-  // of screen pixels AND a whole number of 1/64 CSS px. exact(n) says whether n screen px meets both.
-  const exact = n => Math.abs(n / dpr * 64 - Math.round(n / dpr * 64)) < 1e-6;
-  const nearestExact = (n, lo, hi) => { for (let k = 0; k <= 12; k++) for (const m of [n - k, n + k]) if (m >= lo && m <= hi && exact(m)) return m; return n; };
-  const full = fw >= BOX_PX - .01, want = full ? Math.round(BOX_PX * dpr) : Math.max(2, Math.floor(fw * dpr));
-  const dev = Math.min(2600, nearestExact(want, 2, full ? want + 12 : want)), css = dev / dpr;
-  // centre the box in the frame, then move its top-left corner to the nearest exact screen pixel
-  const X = nearestExact(Math.round((fr.left + (fw - css) / 2) * dpr), -1e9, 1e9), Y = nearestExact(Math.round((fr.top + (fr.height - css) / 2) * dpr), -1e9, 1e9);
-  const x0 = X / dpr - fr.left, y0 = Y / dpr - fr.top;
-  for (const el of [cv, $('ov')]){ el.style.width = el.style.height = css + 'px'; el.style.left = x0 + 'px'; el.style.top = y0 + 'px'; el.style.transform = ''; }
+  const dpr = window.devicePixelRatio || 1;
+  // Chrome pixel-snaps every box's origin before painting its children, so a fractional origin anywhere up the chain
+  // (the stage's 16 CSS px of padding is 17.6 screen px at 110%) shifts the canvas by up to half a pixel and smears its
+  // edges. Nudge the stage and the frame (position:relative, no layout effect) onto whole screen pixels first.
+  const snapOrigin = v => { const t = Math.round(v * dpr); let bx = t, be = 1e9;
+    for (let X = t - 2; X <= t + 2; X++){ const e = Math.abs(Math.round(X / dpr * 64) / 64 * dpr - X) + Math.abs(X - v * dpr) * 1e-4; if (e < be){ be = e; bx = X; } }
+    return Math.round(bx / dpr * 64) / 64; };
+  let fb = null;
+  for (const el of [stage, frame]){ const b0 = baseRect(el); el.style.left = (snapOrigin(b0.left) - b0.left) + 'px'; el.style.top = (snapOrigin(b0.top) - b0.top) + 'px'; fb = b0; }
+  const fw = Math.max(1, fb.w), fr = {left:fb.left, top:fb.top, height:fb.h};
+  // Chrome stores CSS lengths in 1/64 px steps (and truncates), so a size or position lands on a whole screen pixel
+  // only if k/64 CSS px × dpr is a whole number. At 100/125/150/200% that is easy; at ChromeOS zoom steps such as
+  // 110%, 133% or 160% it rarely is, and the browser then resamples the canvas and smears one edge of the box.
+  // So we search a small window for the box size (and the corner position) whose 1/64-step value is closest to a
+  // whole screen pixel, and write that value exactly. gridErr is the leftover in screen px (normally < 0.005).
+  const q64 = css => Math.round(css * 64) / 64, gridErr = (css, n) => Math.abs(q64(css) * dpr - n);
+  const full = fw >= BOX_PX - .01, want = full ? Math.round(BOX_PX * dpr) : Math.max(2, Math.floor(fw * dpr)), cap = Math.floor(fw * dpr + 1e-6);
+  const inRange = n => n >= 2 && n <= 2600 && (full || n <= cap);
+  let dev = want, best = 1e9;
+  for (let n = want - 40; n <= want + (full ? 40 : 0); n++){
+    if (!inRange(n)) continue;
+    const sc = gridErr(n / dpr, n) + Math.abs(n - want) * 4e-5; if (sc < best){ best = sc; dev = n; }
+  }
+  // Rasterizer tuning. A canvas draws a circle's outline with a few levels of edge coverage, so where the rim falls
+  // inside a pixel can move it by up to about a tenth of a pixel. After the window stops changing, try the nearby sizes
+  // whose edges are still on the pixel grid, audit each (the same Edge audit shown in Design Constants) and keep the
+  // size whose rim and corner distances come closest to the Phi values. Remembered per size and display scale.
+  const tkey = want + '|' + dpr + '|' + full, tuned = TUNED.get(tkey);
+  if (tuned !== undefined && inRange(tuned)) dev = tuned;
+  else { clearTimeout(layout.tt); layout.tt = setTimeout(() => {
+    let pick = dev, pickScore = 1e9;
+    for (let n = Math.max(2, dev - 8); n <= dev + 8; n++){
+      if (!inRange(n) || gridErr(n / dpr, n) > .02) continue;
+      const w = auditWorst(n); if (w === null) continue;
+      const sc = w + Math.abs(n - dev) * .0025; if (sc < pickScore){ pickScore = sc; pick = n; }
+    }
+    TUNED.set(tkey, pick); if (pick !== dev) layout();
+  }, 220); }
+  const css = q64(dev / dpr), cssSide = css;
+  // centre the box in the frame, then put its top-left corner on the screen pixel whose 1/64-step position is closest to whole
+  const place = (lo, span) => { const t = Math.round((lo + (span - css) / 2) * dpr); let bx = t, be = 1e9;
+    for (let X = t - 3; X <= t + 3; X++){ const k = Math.round(X / dpr * 64) / 64, e = Math.abs(k * dpr - X) + Math.abs(X - t) * 1e-4; if (e < be){ be = e; bx = X; } }
+    return q64(bx / dpr) - lo; };
+  const fL = snapOrigin(fr.left), fT = snapOrigin(fr.top);   // the frame's own (now snapped) origin
+  const x0 = place(fL, fw), y0 = place(fT, fr.height);
+  for (const el of [cv, $('ov')]){ el.style.width = el.style.height = cssSide + 'px'; el.style.left = x0 + 'px'; el.style.top = y0 + 'px'; el.style.transform = ''; }
   if (cv.width !== dev){ cv.width = dev; cv.height = dev; needsDraw = true; }
   const r = cv.getBoundingClientRect(), gx = r.left * dpr, gy = r.top * dpr;
   Object.assign(BOX, {dev, dpr, x:Math.round(gx), y:Math.round(gy), grid:Math.abs(gx - Math.round(gx)) < .02 && Math.abs(gy - Math.round(gy)) < .02});
@@ -2775,6 +2877,10 @@ let lastTs = 0, emaMs = 0, frames = 0;
 function tick(ts){
   const dt = lastTs ? Math.min(.1, (ts - lastTs) / 1000) : 0; lastTs = ts;
   if (S.motion.playing && measureMode === 'off'){ simTime += dt * S.motion.speed; needsDraw = true; }
+  // Anything on the page (panels, scrollbars, fonts, browser zoom) can shift the frame by a fraction of a pixel
+  // without resizing it, which would leave the box off the pixel grid. Re-snap whenever the frame has moved.
+  const sig = layoutSig();
+  if (sig !== tick.sig){ tick.sig = sig; layout(); }
   if (needsDraw && measureMode === 'off'){
     const t0 = performance.now();
     try { drawScene(ctx, cv.width, simTime, 'live'); } catch (e){ console.error(e); }
