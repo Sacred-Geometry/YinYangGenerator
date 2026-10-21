@@ -393,7 +393,7 @@ body.focus .stage-col{padding-right:max(16px,env(safe-area-inset-right,0px))}
   <section class="stage-col" aria-label="Stage">
     <div class="stage" id="stage">
       <div class="frame" id="frame">
-        <canvas id="cv"></canvas>
+        <canvas id="cv" role="img" aria-label="Yin yang symbol drawn from golden-ratio geometry"></canvas>
         <svg id="ov" xmlns="http://www.w3.org/2000/svg" hidden></svg>
       </div>
       <div class="dock" role="toolbar" aria-label="Playback">
@@ -431,7 +431,7 @@ body.focus .stage-col{padding-right:max(16px,env(safe-area-inset-right,0px))}
         <div class="ro-v" id="roAreas">—</div>
       </div>
       <div class="ro-cell">
-        <div class="ro-k"><span>Eye · 1000 px box</span></div>
+        <div class="ro-k"><span>Eye · 1000-unit geometry box</span></div>
         <div class="ro-v" id="roConst">—</div>
       </div>
       </div>
@@ -705,7 +705,7 @@ const EYE_RATIO_MIN = 0.01, EYE_RATIO_MAX = 0.995;
 
 // Measurement-overlay coordinate space (identical to the original tool)
 const SZ = 1000, CX = 500, CY = 500;
-const R  = (SZ / 2) * Math.SQRT2 / BIG_PHI;   // ≈ 437.016 px — symbol radius in a 1000 px box
+const R  = (SZ / 2) * Math.SQRT2 / BIG_PHI;   // ≈ 437.016 units — symbol radius in the 1000-unit geometry box
 const LR = R / 2;
 const SYM_K = R / (SZ / 2);                     // symbol radius ÷ half-box ≈ 0.874
 function getER(){ return LR * S.eyeRatio; }
@@ -777,7 +777,7 @@ function evalExpr(src){
   while (i < s.length){
     const c = s[i];
     if (/\s/.test(c)){ i++; continue; }
-    if (/[0-9.]/.test(c)){ let j = i; while (j < s.length && /[0-9.]/.test(s[j])) j++; const v = parseFloat(s.slice(i, j)); if (!isFinite(v)) throw new Error('Bad number'); toks.push({t:'n', v}); i = j; continue; }
+    if (/[0-9.]/.test(c)){ let j = i; while (j < s.length && /[0-9.]/.test(s[j])) j++; const txt = s.slice(i, j), v = parseFloat(txt); if (!isFinite(v) || !/^(\d+\.?\d*|\.\d+)$/.test(txt)) throw new Error(`Bad number “${txt}”`); toks.push({t:'n', v}); i = j; continue; }
     if (/[A-Za-z]/.test(c)){ let j = i; while (j < s.length && /[A-Za-z]/.test(s[j])) j++; toks.push({t:'id', v: s.slice(i, j)}); i = j; continue; }
     if ('φΦπτ'.includes(c)){ toks.push({t:'id', v: c}); i++; continue; }
     if (c === '√'){ toks.push({t:'id', v:'sqrt'}); i++; continue; }
@@ -2186,7 +2186,7 @@ function applyEyeEquation(){
 }
 function updateHeaderConstants(){
   // Constants of the construction: symbol radius = 1, its edge → the box corner = φ, so centre → corner = 1 + φ = Φ.
-  const f = v => v.toFixed(9), fmt = v => Math.round(v).toLocaleString(), row = (k, v) => `<tr><td>${k}</td><td>${v}</td></tr>`, sec = t => `<tr><th colspan="2">${t}</th></tr>`;
+  const SB = Math.PI / (2 * BIG_PHI * BIG_PHI), f = v => v.toFixed(9), fmt = v => Math.round(v).toLocaleString(), row = (k, v) => `<tr><td>${k}</td><td>${v}</td></tr>`, sec = t => `<tr><th colspan="2">${t}</th></tr>`;
   $('constBody').innerHTML = `<table class="const-tab">` +
     sec('Lengths · symbol radius = 1') +
     row('Symbol radius R', '<span class="b">1</span> <span class="m">(the unit)</span>') +
@@ -2194,20 +2194,20 @@ function updateHeaderConstants(){
     row('Center → box corner', `1 + φ = Φ ≈ <span class="b">${f(BIG_PHI)}</span>`) +
     row('Lobe radius', '½') +
     row('Eye radius', `½ρ <span class="m">(ρ variable · Geometry)</span>`) +
-    row('Box half-side', `Φ⁄√2 ≈ ${f(BIG_PHI / Math.SQRT2)}`) +
-    row('Box side', `√2·Φ ≈ ${f(Math.SQRT2 * BIG_PHI)}`) +
+    row('Geometry-box half-side', `Φ⁄√2 ≈ ${f(BIG_PHI / Math.SQRT2)}`) +
+    row('Geometry-box side', `√2·Φ ≈ ${f(Math.SQRT2 * BIG_PHI)}`) +
     sec('Areas') +
     row('Lobe ∶ Symbol', '¼') +
-    row('Symbol ∶ Box', `π⁄(2Φ²) ≈ ${(Math.PI / (2 * BIG_PHI * BIG_PHI)).toFixed(9)} <span class="m">≈ ⅗</span>`) +
-    row('Lobe ∶ Box', `π⁄(8Φ²) ≈ ${(Math.PI / (8 * BIG_PHI * BIG_PHI)).toFixed(9)}`) +
-    sec('In a 1000 px box') +
-    row('R = 500·√2⁄Φ', `≈ ${R.toFixed(3)} px`) +
-    row('Edge → corner', `≈ ${(R * LIT_phi).toFixed(3)} px`) +
-    row('Center → corner', `≈ ${(500 * Math.SQRT2).toFixed(3)} px`) +
-    row('Symbol area', `≈ ${fmt(Math.PI * R * R)} px²`) +
-    row('Lobe area', `≈ ${fmt(Math.PI * LR * LR)} px²`) +
+    row('Symbol ∶ Box area', `π⁄(2Φ²) = <span class="b">${SB.toFixed(9)}</span><br><span class="m">≈ ⅗, not exactly: ${((0.6 - SB) / 0.6 * 100).toFixed(4)}% below</span>`) +
+    row('Lobe ∶ Box area', `π⁄(8Φ²) ≈ ${(Math.PI / (8 * BIG_PHI * BIG_PHI)).toFixed(9)}`) +
+    sec('In a 1000-unit geometry box') +
+    row('R = 500·√2⁄Φ', `≈ ${R.toFixed(3)} units`) +
+    row('Edge → corner', `≈ ${(R * LIT_phi).toFixed(3)} units`) +
+    row('Center → corner', `≈ ${(500 * Math.SQRT2).toFixed(3)} units`) +
+    row('Symbol area', `≈ ${fmt(Math.PI * R * R)} units²`) +
+    row('Lobe area', `≈ ${fmt(Math.PI * LR * LR)} units²`) +
     sec('On your screen now') + `<tbody id="constLive"></tbody>` +
-    `</table><p class="mini const-note" style="margin:0">Golden-section calipers opened from the center to a box corner put their mark on the symbol’s edge: radius <b style="color:${CAL_COL.one};filter:brightness(.8)">1</b>, edge → corner <b style="color:${CAL_COL.phi};filter:brightness(.8)">φ</b>, the whole <b>Φ = 1 + φ</b>. Construction guides (calipers) draws this check at all four corners. Symbol ∶ Box area lands within 0.002% of ⅗ because π ≈ 6Φ²⁄5.</p>`;
+    `</table><p class="mini const-note" style="margin:0">Golden-section calipers opened from the center to a box corner put their mark on the symbol’s edge: radius <b style="color:${CAL_COL.one};filter:brightness(.8)">1</b>, edge → corner <b style="color:${CAL_COL.phi};filter:brightness(.8)">φ</b>, the whole <b>Φ = 1 + φ</b>. Construction guides (calipers) draws this check at all four corners. Symbol ∶ Box area is close to ⅗ but not equal to it: π is about 0.0015% below 6Φ²⁄5.<br>Terms: the <b>geometry box</b> is the 1000-unit square the construction is defined in; the <b>rendered canvas</b> is that square drawn in whole screen pixels; the <b>layout frame</b> is the page element around the canvas.</p>`;
 }
 // Edge audit: renders the scene offscreen at the box's exact pixel size on solid red with plain black and white halves,
 // then measures from the centre outward (sub-pixel) how far the symbol reaches along the four side midlines and the
@@ -2245,39 +2245,57 @@ function edgeAudit(W){
   if (AUDIT.map.size > 60) AUDIT.map.clear();
   AUDIT.map.set(key, res); return res;
 }
-// Live check of the box on screen, in physical screen pixels: the box must be a whole number of them,
-// start on the pixel grid, and hold the symbol at its exact middle with radius = SYM_K × half-side
+// Live check of the box on screen, in physical screen pixels. Three different questions, reported separately so a failure
+// says which layer is at fault:
+//   Centre alignment — is the rendered canvas where the layout centres it?        (placement: live DOM geometry)
+//   Phi geometry     — radius = SYM_K × half-side, and is the drawn symbol centred inside its canvas?   (geometry + raster)
+//   Pixel grid       — does the canvas start on a whole screen pixel, 1 : 1?       (rasterization)
 function updateLiveConst(){
   const el = $('constLive'); if (!el) return;
   const side = BOX.dev, half = side / 2, r = half * SYM_K, diag = half * Math.SQRT2, f = v => v.toFixed(3).replace(/\.?0+$/, '');
+  const sg = v => (Math.abs(v) < .0005 ? '+' : v >= 0 ? '+' : '−') + Math.abs(v).toFixed(3), good = t => `<span class="b">${t}</span>`;
+  const A = edgeAudit(side);
+  const cMax = Math.max(Math.abs(BOX.cx), Math.abs(BOX.cy)), geoErr = Math.abs(diag / r - BIG_PHI);
+  let symOff = null, worst = null, e1 = 0, e2 = 0, lr = 0, tb = 0, spread = 0;
+  if (A){
+    e1 = half - A.R; e2 = diag - A.R;
+    worst = Math.max(...A.mid.map(v => Math.abs(v - e1)), ...A.diag.map(v => Math.abs(v - e2)));
+    lr = A.mid[0] - A.mid[1]; tb = A.mid[2] - A.mid[3]; spread = Math.max(...A.diag) - Math.min(...A.diag);
+    symOff = Math.max(Math.abs(lr), Math.abs(tb), spread);
+  }
   el.innerHTML = `<tr><td>Pixel ratio</td><td>${f(BOX.dpr)} <span class="m">screen px per CSS px</span></td></tr>` +
-    `<tr><td>Box side</td><td>${side} screen px <span class="m">(${(side / BOX.dpr).toFixed(2)} CSS px)</span></td></tr>` +
-    `<tr><td>Box corner</td><td>${BOX.grid ? `<span class="b">on the pixel grid ✓</span>` : 'between pixels — zoom or resize to re-snap'}</td></tr>` +
-    `<tr><td>Center</td><td>${f(half)} px from every edge</td></tr>` +
+    `<tr><td>Rendered canvas</td><td>${side} × ${side} screen px <span class="m">(${(side / BOX.dpr).toFixed(2)} CSS px)</span></td></tr>` +
+    `<tr><td>Layout frame</td><td>${BOX.frameCss.toFixed(2)} CSS px <span class="m">sized to the canvas</span></td></tr>` +
+    `<tr><td>Center</td><td>${f(half)} px from every edge of the canvas</td></tr>` +
     `<tr><td>Symbol radius (1)</td><td>${r.toFixed(3)} px</td></tr>` +
     `<tr><td>Edge → corner (φ)</td><td>${(diag - r).toFixed(3)} px · ∶ R = <span class="b">${((diag - r) / r).toFixed(9)}</span></td></tr>` +
-    `<tr><td>Center → corner (Φ)</td><td>${diag.toFixed(3)} px · ∶ R = <span class="b">${(diag / r).toFixed(9)}</span></td></tr>`;
-  // Eight-point audit of the pixels this box is actually drawn with
-  const A = edgeAudit(side); if (!A) return;
-  const e1 = half - A.R, e2 = diag - A.R, dv = (a, e) => (a - e >= 0 ? '+' : '−') + Math.abs(a - e).toFixed(3);
-  const worst = Math.max(...A.mid.map(v => Math.abs(v - e1)), ...A.diag.map(v => Math.abs(v - e2)));
-  const lr = A.mid[0] - A.mid[1], tb = A.mid[2] - A.mid[3], spread = Math.max(...A.diag) - Math.min(...A.diag), sym = Math.max(Math.abs(lr), Math.abs(tb), spread);
-  const names = ['left', 'right', 'top', 'bottom'], dn = ['↖', '↗', '↙', '↘'], sg = v => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(3);
-  el.innerHTML += `<tr><th colspan="2">Edge audit · rendered pixels</th></tr>` +
+    `<tr><td>Center → corner (Φ)</td><td>${diag.toFixed(3)} px · ∶ R = <span class="b">${(diag / r).toFixed(9)}</span></td></tr>` +
+    `<tr><th colspan="2">Checks · centre, geometry, pixel grid</th></tr>` +
+    `<tr><td>Centre alignment</td><td>${cMax <= .51 ? good('✓') : '~'} ${cMax.toFixed(3)} px <span class="m">(x ${sg(BOX.cx)} · y ${sg(BOX.cy)})</span></td></tr>` +
+    `<tr><td>Phi geometry</td><td>${geoErr < 1e-9 && (worst === null || worst < .25) ? good('✓') : '~'} error ${geoErr.toFixed(9)}${worst === null ? '' : ` <span class="m">· drawn pixels ${worst.toFixed(3)} px</span>`}</td></tr>` +
+    `<tr><td>Pixel-grid alignment</td><td>${BOX.grid ? good('✓') : '~'} ${BOX.gridErr.toFixed(3)} px${BOX.grid ? '' : ' <span class="m">· between pixels; zoom or resize to re-snap</span>'}</td></tr>`;
+  if (!A) return;
+  const names = ['left', 'right', 'top', 'bottom'], dn = ['↖', '↗', '↙', '↘'], dv = (a, e) => (a - e >= 0 ? '+' : '−') + Math.abs(a - e).toFixed(3);
+  el.innerHTML += `<tr><th colspan="2">Edge audit · symbol inside its canvas</th></tr>` +
     A.mid.map((v, i) => `<tr><td>Gap to symbol · ${names[i]}</td><td>${v.toFixed(3)} px <span class="m">(${dv(v, e1)})</span></td></tr>`).join('') +
     A.diag.map((v, i) => `<tr><td>Corner gap ${dn[i]} (φ)</td><td>${v.toFixed(3)} px <span class="m">(${dv(v, e2)})</span> · ∶ R = <span class="b">${(v / A.R).toFixed(6)}</span></td></tr>`).join('') +
-    `<tr><td>Symmetry</td><td>L−R ${sg(lr)} · T−B ${sg(tb)} · corners ±${(spread / 2).toFixed(3)} px<br>${sym < .05 ? '<span class="b">centered ✓</span>' : 'off-centre by ' + sym.toFixed(3) + ' px'}</td></tr>` +
-    `<tr><td>Against Φ</td><td>largest deviation ${worst.toFixed(3)} px · ${worst < .25 ? '<span class="b">Phi-aligned ✓</span>' : 'check the render'}</td></tr>` +
+    `<tr><td>Symmetry</td><td>L−R ${sg(lr)} · T−B ${sg(tb)} · corners ±${(spread / 2).toFixed(3)} px<br>${symOff < .05 ? good('centered ✓') : 'off-centre by ' + symOff.toFixed(3) + ' px'}</td></tr>` +
+    `<tr><td>Against Φ</td><td>largest deviation ${worst.toFixed(3)} px · ${worst < .25 ? good('Phi-aligned ✓') : 'check the render'}</td></tr>` +
     `<tr><td colspan="2" class="note">Expected: sides ${e1.toFixed(3)} px, corners ${e2.toFixed(3)} px (φ × radius ${A.R.toFixed(3)}).</td></tr>` +
-    `<tr><td colspan="2" class="note">Measured from the drawn bitmap, in whole screen pixels.</td></tr>`;
+    `<tr><td colspan="2" class="note">Measured from a bitmap drawn at the canvas’s exact pixel size. It tests the symbol inside its canvas, not the canvas on the page — see the layout audit.</td></tr>` +
+    `<tr><th colspan="2">Layout audit · canvas on the page</th></tr>` +
+    `<tr><td>Canvas ↔ layout centre</td><td>x ${sg(BOX.cx)} · y ${sg(BOX.cy)} px</td></tr>` +
+    `<tr><td>Canvas ↔ frame centre</td><td>x ${sg(BOX.fx)} · y ${sg(BOX.fy)} px</td></tr>` +
+    `<tr><td>Canvas corner ↔ pixel grid</td><td>${BOX.gridErr.toFixed(3)} px</td></tr>` +
+    `<tr><td colspan="2" class="note">A whole-pixel box can be centred to within ±0.5 px at best: an even side centres on a whole pixel, an odd side on a half pixel. The side is chosen so this error stays as near 0 as the display scale allows.</td></tr>`;
 }
 function updateReadout(){
   const r = S.eyeRatio, prox = classifyRatio(r), fr = toFraction(r, 999), fmt = v => Math.round(v).toLocaleString(), ER = getER();
   $('roRatio').innerHTML = `ρ ≈ <span class="b">${r.toFixed(9)}</span> <span class="m">≈ ${fr ? fr.num + '⁄' + fr.den : '—'}</span><br><span class="m">${prox ? prox.label : 'No notable proximity'}</span>`;
   $('roEye').innerHTML = `= Lobe × ${prox && prox.tier === 'exact' ? `<span class="b">${prox.sym}</span>` : r.toFixed(6)}<br>≈ ${(r / 2).toFixed(6)} <span class="m">(symbol radius = 1)</span>`;
-  $('roLine').innerHTML = `ρ ≈ <span class="b">${r.toFixed(9)}</span> <span class="m">${prox ? prox.label : (fr ? '≈ ' + fr.num + '⁄' + fr.den : '')}</span> · Eye r ≈ ${(r / 2).toFixed(6)} · Eye∶Lobe area ≈ ${(r * r).toFixed(6)} · <span class="m">1000 px box:</span> r ≈ ${ER.toFixed(3)} px`;
+  $('roLine').innerHTML = `ρ ≈ <span class="b">${r.toFixed(9)}</span> <span class="m">${prox ? prox.label : (fr ? '≈ ' + fr.num + '⁄' + fr.den : '')}</span> · Eye r ≈ ${(r / 2).toFixed(6)} · Eye∶Lobe area ≈ ${(r * r).toFixed(6)} · <span class="m">1000-unit box:</span> r ≈ ${ER.toFixed(3)} units`;
   $('roAreas').innerHTML = `Eye∶Lobe = ρ² ≈ ${(r * r).toFixed(6)}<br>Eye∶Symbol = ρ²⁄4 ≈ ${(r * r / 4).toFixed(6)} <span class="m">· Eye∶Box ≈ ${(Math.PI * ER * ER / (SZ * SZ)).toFixed(6)}</span>`;
-  $('roConst').innerHTML = `r ≈ ${ER.toFixed(3)} px<br>Area ≈ ${fmt(Math.PI * ER * ER)} px²`;
+  $('roConst').innerHTML = `r ≈ ${ER.toFixed(3)} units<br>Area ≈ ${fmt(Math.PI * ER * ER)} units²`;
 }
 
 // ── Fill slots ──────────────────────────────────────────────────────
@@ -2798,7 +2816,7 @@ function shuffle(){
 
 // ── Layout & render loop ────────────────────────────────────────────
 const BOX_PX = 610;   // target box side in CSS px when there is room: a Fibonacci number
-const BOX = {dev:0, dpr:1, x:0, y:0, grid:true};
+const BOX = {dev:0, dpr:1, css:0, x:0, y:0, grid:true, gridErr:0, cx:0, cy:0, fx:0, fy:0, frameCss:0};
 // An element's own layout box in CSS px (1/64 steps), measured with its snap offset cleared so that the result never
 // depends on the offset layout() gave it last time (reading it back made the box flip by 1/64 px every frame)
 function baseRect(el){
@@ -2813,62 +2831,89 @@ function layoutSig(){
   return [a.left, a.top, a.width, a.height, b.width, b.height, c.width, c.height, window.devicePixelRatio || 1].join('|');
 }
 function layout(){
-  // The frame sizes itself in CSS (min of the stage's width and height), so it is always square.
-  // The box (the canvas) is then sized in SCREEN pixels, not CSS pixels: 610 CSS px is a whole number of
-  // screen pixels only at some scales (at 125% it is 762.5), and a half pixel forced the browser to resample
-  // and re-snap the canvas, nudging the symbol by up to a pixel on one side. Now the box is a whole number
-  // of screen pixels, its corner sits on the pixel grid, and the canvas is drawn 1:1 with the screen.
+  // WHAT THIS DOES, in priority order:
+  //   1. CENTRE. The box is centred exactly where the page layout puts it (the "natural" centre). Nothing below may move it
+  //      further than a whole-pixel box allows.
+  //   2. GEOMETRY. The symbol always sits in the Phi relation to its box (radius = SYM_K × half-side), whatever the size.
+  //   3. PIXEL GRID. The box is a whole number of screen pixels, starts on a whole screen pixel and is drawn 1:1, so the
+  //      browser never resamples it. A whole-pixel box can only be centred to within half a pixel (its centre falls on a
+  //      whole or a half pixel depending on whether its side is even or odd), so the side is chosen with that in mind.
+  // The frame is sized to the box (the canvas fills it), so the canvas is centred in its frame by construction and only one
+  // thing is ever placed on the pixel grid. Earlier versions kept a fixed-size frame and slid the canvas inside it to the
+  // nearest "exact" pixel, which could shift the box several pixels off-centre.
   const cs = getComputedStyle(stage), sw = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), sh = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
   stage.classList.toggle('side-dock', sw - Math.min(BOX_PX, sh) >= 130);
   const dpr = window.devicePixelRatio || 1;
-  // Chrome pixel-snaps every box's origin before painting its children, so a fractional origin anywhere up the chain
-  // (the stage's 16 CSS px of padding is 17.6 screen px at 110%) shifts the canvas by up to half a pixel and smears its
-  // edges. Nudge the stage and the frame (position:relative, no layout effect) onto whole screen pixels first.
-  const snapOrigin = v => { const t = Math.round(v * dpr); let bx = t, be = 1e9;
-    for (let X = t - 2; X <= t + 2; X++){ const e = Math.abs(Math.round(X / dpr * 64) / 64 * dpr - X) + Math.abs(X - v * dpr) * 1e-4; if (e < be){ be = e; bx = X; } }
-    return Math.round(bx / dpr * 64) / 64; };
-  let fb = null;
-  for (const el of [stage, frame]){ const b0 = baseRect(el); el.style.left = (snapOrigin(b0.left) - b0.left) + 'px'; el.style.top = (snapOrigin(b0.top) - b0.top) + 'px'; fb = b0; }
-  const fw = Math.max(1, fb.w), fr = {left:fb.left, top:fb.top, height:fb.h};
-  // Chrome stores CSS lengths in 1/64 px steps (and truncates), so a size or position lands on a whole screen pixel
-  // only if k/64 CSS px × dpr is a whole number. At 100/125/150/200% that is easy; at ChromeOS zoom steps such as
-  // 110%, 133% or 160% it rarely is, and the browser then resamples the canvas and smears one edge of the box.
-  // So we search a small window for the box size (and the corner position) whose 1/64-step value is closest to a
-  // whole screen pixel, and write that value exactly. gridErr is the leftover in screen px (normally < 0.005).
+  // Chrome stores CSS lengths in 1/64 px steps, so a CSS length lands on a screen pixel to within dpr/128 px at worst.
   const q64 = css => Math.round(css * 64) / 64, gridErr = (css, n) => Math.abs(q64(css) * dpr - n);
+  // The CSS position (1/64 steps) of the whole screen pixel nearest to v. Chrome pixel-snaps every box's origin before
+  // painting its children, so a fractional origin anywhere up the chain (the stage's 16 CSS px of padding is 17.6 screen px
+  // at 110%) would shift the canvas by up to half a pixel and smear its edges. Stage and frame are nudged onto whole pixels.
+  const snapOrigin = v => q64(Math.round(v * dpr) / dpr);
+  // Whole screen pixels X are not all equal. A CSS length is stored in 1/64 steps, so X is expressible exactly only when
+  // X ÷ dpr is a multiple of 1/64 (every pixel at 133%, 160%, 200%; every 3rd at 150%; every 5th at 125%; every 11th at
+  // 110%). A box that starts a hair off such a pixel can be rasterised slightly soft, so exact pixels are preferred, but only
+  // when that costs under half a pixel of centring: pickPx(v) returns the whole screen pixel to start the box on, for an
+  // ideal position v (screen px), minimising |X − v| plus PEN for an inexact pixel. The centring error is therefore at most
+  // 0.5 px for the pixel itself plus PEN.
+  const PEN = .5, exactPx = X => Math.abs(Math.round(X / dpr * 64) / 64 * dpr - X) < 5e-4;
+  const posCost = (X, v) => Math.abs(X - v) + (exactPx(X) ? 0 : PEN);
+  const pickPx = v => { let bx = Math.round(v), bc = posCost(bx, v); for (let X = bx - 2; X <= bx + 2; X++){ const c = posCost(X, v); if (c < bc){ bc = c; bx = X; } } return bx; };
+
+  // 1 ── Natural layout: clear everything layout() set last time, so the measurements never depend on our own earlier output.
+  frame.style.width = frame.style.height = '';
+  baseRect(stage); const nF = baseRect(frame);
+  const fw = Math.max(1, nF.w);
+  const ax = (nF.left + nF.w / 2) * dpr, ay = (nF.top + nF.h / 2) * dpr;                       // the layout's own centre, in screen px
+
+  // 2 ── Box side in screen pixels. Near the target (610 CSS px when there is room), preferring the side whose parity lets the
+  //      whole-pixel box sit closest to the centre. centreErr(n) is the distance, in screen px, between the centre this box
+  //      would end up with (its origin rounded to a whole screen pixel) and the natural centre.
+  const axis = (a, n) => { const X = pickPx(a - n / 2); return {err: Math.abs(X + n / 2 - a), pen: exactPx(X) ? 0 : PEN}; };
+  const centreErr = n => Math.max(axis(ax, n).err, axis(ay, n).err);
+  const softCost = n => axis(ax, n).pen + axis(ay, n).pen + (gridErr(n / dpr, n) < 5e-4 ? 0 : PEN);   // penalty for inexact origin or size
   const full = fw >= BOX_PX - .01, want = full ? Math.round(BOX_PX * dpr) : Math.max(2, Math.floor(fw * dpr)), cap = Math.floor(fw * dpr + 1e-6);
   const inRange = n => n >= 2 && n <= 2600 && (full || n <= cap);
   let dev = want, best = 1e9;
   for (let n = want - 40; n <= want + (full ? 40 : 0); n++){
     if (!inRange(n)) continue;
-    const sc = gridErr(n / dpr, n) + Math.abs(n - want) * 4e-5; if (sc < best){ best = sc; dev = n; }
+    const sc = centreErr(n) + softCost(n) + Math.abs(n - want) * .25; if (sc < best){ best = sc; dev = n; }
   }
   // Rasterizer tuning. A canvas draws a circle's outline with a few levels of edge coverage, so where the rim falls
   // inside a pixel can move it by up to about a tenth of a pixel. After the window stops changing, try the nearby sizes
-  // whose edges are still on the pixel grid, audit each (the same Edge audit shown in Design Constants) and keep the
-  // size whose rim and corner distances come closest to the Phi values. Remembered per size and display scale.
-  const tkey = want + '|' + dpr + '|' + full, tuned = TUNED.get(tkey);
+  // that centre just as well, audit each (the same Edge audit shown in Design Constants) and keep the size whose rim and
+  // corner distances come closest to the Phi values. Remembered per size and display scale.
+  const dev0 = dev, tkey = want + '|' + dpr + '|' + full + '|' + dev0, tuned = TUNED.get(tkey), c0 = centreErr(dev0) + softCost(dev0);
   if (tuned !== undefined && inRange(tuned)) dev = tuned;
   else { clearTimeout(layout.tt); layout.tt = setTimeout(() => {
-    let pick = dev, pickScore = 1e9;
-    for (let n = Math.max(2, dev - 8); n <= dev + 8; n++){
-      if (!inRange(n) || gridErr(n / dpr, n) > .02) continue;
+    let pick = dev0, pickScore = 1e9;
+    for (let n = Math.max(2, dev0 - 8); n <= dev0 + 8; n++){
+      if (!inRange(n) || gridErr(n / dpr, n) > .02 || centreErr(n) + softCost(n) > c0 + .02) continue;
       const w = auditWorst(n); if (w === null) continue;
-      const sc = w + Math.abs(n - dev) * .0025; if (sc < pickScore){ pickScore = sc; pick = n; }
+      const sc = w + Math.abs(n - dev0) * .0025; if (sc < pickScore){ pickScore = sc; pick = n; }
     }
     TUNED.set(tkey, pick); if (pick !== dev) layout();
   }, 220); }
-  const css = q64(dev / dpr), cssSide = css;
-  // centre the box in the frame, then put its top-left corner on the screen pixel whose 1/64-step position is closest to whole
-  const place = (lo, span) => { const t = Math.round((lo + (span - css) / 2) * dpr); let bx = t, be = 1e9;
-    for (let X = t - 3; X <= t + 3; X++){ const k = Math.round(X / dpr * 64) / 64, e = Math.abs(k * dpr - X) + Math.abs(X - t) * 1e-4; if (e < be){ be = e; bx = X; } }
-    return q64(bx / dpr) - lo; };
-  const fL = snapOrigin(fr.left), fT = snapOrigin(fr.top);   // the frame's own (now snapped) origin
-  const x0 = place(fL, fw), y0 = place(fT, fr.height);
-  for (const el of [cv, $('ov')]){ el.style.width = el.style.height = cssSide + 'px'; el.style.left = x0 + 'px'; el.style.top = y0 + 'px'; el.style.transform = ''; }
+  const css = q64(dev / dpr);
+
+  // 3 ── Size the frame to the box, then put stage and frame on whole screen pixels. The canvas fills the frame, so it is
+  //      centred in its frame exactly; the only placement left is the frame's own origin. That origin is the whole screen
+  //      pixel nearest to where the layout itself would put the frame, measured before the stage is nudged, so the stage's
+  //      own rounding can never push the box off-centre.
+  frame.style.width = frame.style.height = css + 'px';
+  const nf = baseRect(frame), tx = q64(pickPx(nf.left * dpr) / dpr), ty = q64(pickPx(nf.top * dpr) / dpr);
+  const bs = baseRect(stage); stage.style.left = (snapOrigin(bs.left) - bs.left) + 'px'; stage.style.top = (snapOrigin(bs.top) - bs.top) + 'px';
+  const bf = baseRect(frame); frame.style.left = (tx - bf.left) + 'px'; frame.style.top = (ty - bf.top) + 'px';
+  for (const el of [cv, $('ov')]){ el.style.width = el.style.height = css + 'px'; el.style.left = el.style.top = '0px'; el.style.transform = ''; }
   if (cv.width !== dev){ cv.width = dev; cv.height = dev; needsDraw = true; }
-  const r = cv.getBoundingClientRect(), gx = r.left * dpr, gy = r.top * dpr;
-  Object.assign(BOX, {dev, dpr, x:Math.round(gx), y:Math.round(gy), grid:Math.abs(gx - Math.round(gx)) < .02 && Math.abs(gy - Math.round(gy)) < .02});
+
+  // 4 ── Record where the box actually landed, in screen px, for the Design Constants audit.
+  const r = cv.getBoundingClientRect(), fr = frame.getBoundingClientRect(), gx = r.left * dpr, gy = r.top * dpr;
+  const gridX = Math.abs(gx - Math.round(gx)), gridY = Math.abs(gy - Math.round(gy));
+  Object.assign(BOX, {dev, dpr, css, x:Math.round(gx), y:Math.round(gy), grid:gridX < .02 && gridY < .02, gridErr:Math.max(gridX, gridY),
+    cx:gx + dev / 2 - ax, cy:gy + dev / 2 - ay,                                                   // canvas centre minus the layout's centre
+    fx:(r.left + r.width / 2 - fr.left - fr.width / 2) * dpr, fy:(r.top + r.height / 2 - fr.top - fr.height / 2) * dpr,   // canvas centre minus frame centre
+    frameCss:fr.width});
   updateLiveConst();
 }
 let layoutQueued = false;
