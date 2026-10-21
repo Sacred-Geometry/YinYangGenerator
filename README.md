@@ -3,7 +3,7 @@
 A free, browser-based tool for constructing a yin–yang symbol from precise
 golden-ratio (φ / Φ) relationships, featuring adjustable eye sizing, color pickers with
 presets, three measurement overlays, a Design Constants panel with live
-layout checks, and PNG/JPG export. No install, no
+screen checks, and PNG/JPG/SVG export. No install, no
 build step — it's a single HTML file you can open directly or host as a
 static page.
 
@@ -75,6 +75,10 @@ other ratios (supports `phi`, `Phi`, `Pi`, `e`, `tau`, `sqrt()`, and arithmetic)
   of the two flanking segments. The panel can be dragged anywhere on
   screen and cleared between measurements.
 
+The same menu also offers **Construction guides (calipers)**, which draws the
+golden-section caliper check on the live symbol at all four corners: center →
+edge `1`, edge → corner `φ`, the whole `Φ`.
+
 ---
 
 ## The Design Constants panel
@@ -89,42 +93,77 @@ numbers and a live check of what is on your screen right now. Symbol radius
 | Term | Meaning |
 |---|---|
 | **Geometry box** | The square the construction is defined in. The panel's "1000-unit box" figures are in these abstract units, not screen pixels. |
-| **Rendered canvas** | The geometry box as actually drawn, in a whole number of screen pixels. |
-| **Layout frame** | The invisible page element around the canvas. It is sized to the canvas. |
+| **Box on screen** | The geometry box as actually drawn: a whole, even number of screen pixels, so the center falls on a pixel corner. |
+| **Layout frame** | The page element around the box, centered in the stage by the page layout. |
+
+### How the box is placed
+
+The page layout centers the frame. The canvas inside it is then nudged by less
+than half a screen pixel so its corner lands exactly on a whole screen pixel.
+Without that nudge, at fractional display scales (for example 1.125× or 1.2×,
+common on Chromebooks) the browser can round one edge of the box differently
+from the other and drop a row or column of pixels, which puts the corners on
+that side slightly off. With it, the box is shown at exactly its intended size.
+
+The live picture is always drawn on that canvas, at the screen's own
+resolution. The SVG vector form is used for export.
 
 ### Live checks
 
-The checks are kept apart so a failure says which layer is at fault:
+Each section of the panel tests one layer, so a problem says where it is:
 
-- **Centre alignment** — is the rendered canvas centred where the page layout
-  puts the center? This is the only check that tests the canvas *on the page*.
-- **Phi geometry** — is the symbol's radius exactly `SYM_K` (≈ 0.874) times the
-  box's half-side, so that center → corner ÷ radius = Φ, and does the drawn
-  bitmap agree with that to within a fraction of a pixel?
-- **Pixel-grid alignment** — does the canvas start on a whole screen pixel and
-  map 1 : 1 onto screen pixels?
+- **Your screen** — **Check my screen** asks Chrome to share this tab, shows a
+  grey test card for a moment, measures one frame of the real screen pixels, and
+  stops sharing. It reports the symbol's center and, for each of the four
+  corners, where the Φ mark lands relative to the rim. **Copy these figures**
+  copies the result as text.
+- **The picture the page draws** — the same scene drawn offscreen and measured
+  from its own pixels: box, rim, center, the **Four-corner Φ test** (center →
+  corner ÷ rim radius at ↖ ↗ ↙ ↘ separately), **Corner spread** and
+  **Caliper miss**. No design constant enters the measurement; Φ appears only as
+  the answer it is compared with.
+- **What calipers can see at each corner** — the contrast between the rim and
+  the box at each corner. A rim that is close to the box color (for example
+  white on cream, or a light metallic highlight on a near-white box) is hard to
+  set a caliper point against, even when it is exactly in place.
+- **Placement on the page** — pixel-grid alignment (and the nudge applied),
+  page centering, and which drawing path the canvas uses.
+- **Other display scales** — the offscreen test repeated at 1× to 2×.
 
-Two audits give the details. The **Edge audit** draws the symbol on its own at
-the canvas's exact pixel size and measures the gap from the symbol to each side
-and each corner. It tests the symbol *inside* its canvas, not the canvas on the
-page. The **Layout audit** compares the canvas with the layout center, the
-layout frame, and the pixel grid.
+### Controlled Φ rim diagnostic
+
+Three views of the same geometry, for physical measurement:
+
+- **Normal** — the symbol as styled.
+- **Caliper target** — a black disc on white with white cross hairs and an
+  off-white center circle of radius φ⁷ (exactly 1⁄Φ⁷ of the outer radius), so a
+  caliper point can be set on the center against a light patch.
+- **Outer edge only** — a pale-gold disc on an off-white field with white cross
+  hairs at the center.
+
+In both test views the four corners are identical and turning the symbol
+changes nothing, so they separate the geometry from the colors at each corner.
+
+### Graphics-chip comparison
+
+Adding `?raster=cpu` to the address (for example
+`…/YinYangGenerator/?raster=cpu`) makes every canvas draw in software instead
+of on the graphics chip. The panel's **Canvas drawing** row shows which is in
+use. Remove it to go back.
 
 ### What can and cannot be exact
 
-- A box made of whole screen pixels can be centred to within ±0.5 px at best.
-  An even side centres on a whole pixel and an odd side on a half pixel. The
-  page chooses the side so the error stays as close to 0 as the display scale
-  (browser zoom × screen density) allows.
-- CSS sizes are stored in 1⁄64 CSS px, so at some zoom levels (for example 110%
-  or 150%) not every screen pixel can be addressed exactly. The page prefers
-  pixels that can be, when that costs less than half a pixel of centring.
 - On-screen drawing is anti-aliased, so a measured edge can differ from the
   ideal by a fraction of a pixel (the panel shows these as, for example,
-  "+0.100"). Calipers laid on a screenshot cannot resolve that.
+  "+0.020"). A quarter pixel is below what calipers on a screen can resolve.
+- CSS sizes are stored in 1⁄64 CSS px, so at some display scales not every
+  screen pixel can be addressed exactly; the remaining grid error is shown, and
+  is a few hundredths of a pixel at most.
 - The box aims for **610 CSS px** (a Fibonacci number) when the window has room,
-  and shrinks to fit otherwise. The panel's "Rendered canvas" line shows the
+  and shrinks to fit otherwise. The panel's "Box on screen" line shows the
   actual size.
+- For a reference that needs no screen at all, export a PNG at 2584 px and
+  print it at 100%.
 - The symbol-to-box area ratio is π⁄(2Φ²) ≈ 0.599991. It is close to ⅗ but not
   equal to it; π is about 0.0015% below 6Φ²⁄5.
 
