@@ -702,6 +702,12 @@ body.focus .stage-col{padding-right:max(16px,env(safe-area-inset-right,0px))}
 </div>
 <script>
 'use strict';
+// Canvas drawing path. Chrome normally draws 2D canvases on the graphics chip (GPU), whose edge smoothing differs
+// from the software path. Adding ?raster=cpu to the address draws every canvas in software instead, so the two can be
+// compared on the same screen. (willReadFrequently is the standard way to ask Chrome for a software canvas.)
+const RASTER_CPU = /[?&]raster=cpu\b/.test(location.search);
+if (RASTER_CPU){ const gc = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function(t, o){ return t === '2d' ? gc.call(this, t, Object.assign({}, o, {willReadFrequently:true})) : gc.call(this, t, o); }; }
 // ════════════════════════════════════════════════════════════════════
 //  CORE — constants, state, color & noise math, equation parser
 // ════════════════════════════════════════════════════════════════════
@@ -946,7 +952,8 @@ const S = {
 };
 let simTime = 0;          // seconds of animation time (scaled by speed)
 let measureMode = 'off';
-let rimTestMode = 'off'; // off | mono | edge: controlled outer-rim visual diagnostics
+let rimTestMode = 'off'; // off | target | edge: controlled outer-rim visual diagnostics
+const HUB_R = Math.pow(LIT_phi, 7);   // centre circle of the Caliper target: φ⁷ ≈ 0.034442 of the symbol radius
 
 // ════════════════════════════════════════════════════════════════════
 //  PATTERNS — procedural, animated fills + uploaded images
@@ -1797,19 +1804,34 @@ function drawScene(ctx, W, t, q, o = {}){
   const mode = S.d3.mode, solid3d = mode !== 'flat';
   const Rp = px, cx = W / 2, cy = W / 2;
 
-  // Controlled rim diagnostic rendered through the same device-pixel Canvas path
-  // as the live display. This avoids changing renderer technology between the
-  // diagnostic and the thing being physically measured.
-  if (rimTestMode === 'edge') {
-    const bg = '#fbf8f0', rim = '#cfc4a8', target = '#a99a78';
+  // Controlled rim diagnostics, drawn by the same device-pixel canvas as the live display, so the test and the
+  // thing being measured share one renderer. Both are a plain disc of radius 1 in the Phi box; only colours differ.
+  //   target · black disc on white, with an off-white centre circle of radius φ⁷ (exactly 1⁄Φ⁷ of the outer radius)
+  //            and white cross hairs, so a caliper point can be set on the centre against a light patch
+  //   edge   · pale-gold disc on off-white with white cross hairs at the centre
+  if (rimTestMode !== 'off'){
+    // The box side is even, so the centre sits on a pixel corner: lines exactly 2 screen px wide cover two whole pixels
+    // and stay solid (a 1 px line there would be split into two half-strength grey pixels).
+    const target = rimTestMode === 'target', ui = q === 'export' ? 1 : (window.devicePixelRatio || 1), u = ui / px, w2 = 2 / px;
+    const bg = target ? '#FFFFFF' : '#fbf8f0', disc = target ? '#000000' : '#cfc4a8';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = bg; ctx.fillRect(0, 0, W, W);
     ctx.setTransform(px, 0, 0, px, cx, cy);
-    ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(0, 0, 1, 0, TAU); ctx.fill();
-    const rr = Math.max(0.0015, 3.2 / px);
-    ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(0, 0, rr, 0, TAU); ctx.fill();
-    ctx.strokeStyle = target; ctx.lineWidth = Math.max(.8 / px, .8 / px);
-    ctx.beginPath(); ctx.moveTo(-7 / px, 0); ctx.lineTo(7 / px, 0); ctx.moveTo(0, -7 / px); ctx.lineTo(0, 7 / px); ctx.stroke();
+    ctx.fillStyle = disc; ctx.beginPath(); ctx.arc(0, 0, 1, 0, TAU); ctx.fill();
+    ctx.lineCap = 'butt';
+    const cross = (a, b, col, w) => { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath();
+      ctx.moveTo(-b, 0); ctx.lineTo(-a, 0); ctx.moveTo(a, 0); ctx.lineTo(b, 0); ctx.moveTo(0, -b); ctx.lineTo(0, -a); ctx.moveTo(0, a); ctx.lineTo(0, b); ctx.stroke(); };
+    if (target){
+      const hub = HUB_R;
+      cross(hub, .94, '#FFFFFF', w2);                                     // white cross hairs across the black disc, clear of the rim
+      ctx.fillStyle = '#F2EEE3'; ctx.beginPath(); ctx.arc(0, 0, hub, 0, TAU); ctx.fill();
+      cross(0, hub * .72, '#3A3A3A', w2);                                 // fine centre mark inside the off-white circle
+    } else {
+      const rr = 3.2 * u;
+      ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(0, 0, rr, 0, TAU); ctx.fill();
+      cross(rr, 14 * u, '#FFFFFF', w2);                                   // white cross hairs
+    }
+    if (S.fx.guides) drawCaliper(ctx, W, px, q === 'export' ? 0 : ui);
     return;
   }
   if (S.fx.aura){
@@ -1836,7 +1858,10 @@ const CAL_INK = {
   dark: {one:'#86D4BF', phi:'#E2B657', Phi:'#F4EEE0', tick:'#FFFFFF', shade:'rgba(0,0,0,0.62)'},
   light:{one:'#0E6A55', phi:'#8C5A00', Phi:'#1B2320', tick:'#000000', shade:'rgba(255,255,255,0.8)'},
 };
-function calCol(){ const [r, g, b] = h2rgb(fillColor(S.bg)); return CAL_INK[(.2126 * r + .7152 * g + .0722 * b) / 255 > .55 ? 'light' : 'dark']; }
+// Rim tests (Caliper target, Outer edge only): the cross hairs are white (with a dark halo, which keeps them
+// readable where they run on past the rim over the white box).
+CAL_INK.test = {one:'#FFFFFF', phi:'#FFFFFF', Phi:'#FFFFFF', tick:'#FFFFFF', shade:'rgba(0,0,0,0.7)'};
+function calCol(){ if (rimTestMode !== 'off') return CAL_INK.test; const [r, g, b] = h2rgb(fillColor(S.bg)); return CAL_INK[(.2126 * r + .7152 * g + .0722 * b) / 255 > .55 ? 'light' : 'dark']; }
 function caliperModel(k = 1){
   const D = viewHalf() * Math.SQRT2, s2 = Math.SQRT1_2, d = .06, lines = [], labels = [];
   for (const [sx, sy] of [[1, -1], [-1, -1], [-1, 1], [1, 1]]){
@@ -1895,7 +1920,6 @@ function vecWhyNot(){
   // rasterisation can place a fractional viewBox edge differently from the
   // device-pixel canvas. For a metrology-oriented display, Canvas is the
   // authoritative on-screen renderer.
-  if (rimTestMode !== 'off') return '';
   if (window.PRECISION_CANVAS_LIVE !== false) return 'precision canvas live mode';
   if (measureMode !== 'off') return 'a measurement overlay is open';
   if (S.motion.playing) return 'animating';
@@ -1930,7 +1954,7 @@ function vectorInner(u, o = {}){
       `<circle r="${u2 * 3.2}" fill="${bg}" stroke="${target}" stroke-width="${u2 * .9}"/>` +
       `<path d="M-${n(u2 * 7)} 0H${n(u2 * 7)} M0 -${n(u2 * 7)}V${n(u2 * 7)}" stroke="${target}" stroke-width="${u2 * .8}"/>`;
   }
-  const diagnosticMono = rimTestMode === 'mono';
+  const diagnosticMono = rimTestMode === 'target';
   const bgFill = diagnosticMono ? '#ffffff' : col(S.bg);
   const lobe1Fill = diagnosticMono ? '#000000' : col(F.lobe1);
   const lobe2Fill = diagnosticMono ? '#000000' : col(F.lobe2);
@@ -1939,7 +1963,7 @@ function vectorInner(u, o = {}){
     `<path d="${lobe1}" fill="${lobe1Fill}"/>` + (diagnosticMono ? '' : `<circle cy="${n(G.c1)}" r="${n(G.e1)}" fill="${col(F.eye1)}"/><circle cy="${n(G.c2)}" r="${n(G.e2)}" fill="${col(F.eye2)}"/>`);
   if (S.fx.guides){
     // the same construction guides as the canvas: circles and axes, then the line from A through the lower lobe centre
-    const ink = 'rgba(213,181,122,.9)', shade = 'rgba(0,0,0,.35)', dash = `stroke-dasharray="${n(7 * u)} ${n(5 * u)}"`;
+    const ink = rimTestMode !== 'off' ? '#FFFFFF' : 'rgba(213,181,122,.9)', shade = rimTestMode !== 'off' ? 'rgba(0,0,0,.7)' : 'rgba(0,0,0,.35)', dash = `stroke-dasharray="${n(7 * u)} ${n(5 * u)}"`;
     const L = Math.hypot(1, G.c2), ux = -1 / L, uy = G.c2 / L, tF = -2 * ux;
     const dashed = `<circle r="1"/><circle cy="${n(G.c1)}" r="${r1}"/><circle cy="${n(G.c2)}" r="${r2}"/><circle cy="${n(G.c1)}" r="${n(G.e1)}"/><circle cy="${n(G.c2)}" r="${n(G.e2)}"/><path d="M0 -1.04V1.04M-1.04 0H1.04"/>`;
     const solidL = `<path d="M1 0L${n(1 + ux * tF)} ${n(uy * tF)}"/>`;
@@ -2339,14 +2363,14 @@ function updateHeaderConstants(){
 // a real test of the picture, and "caliper miss" is how far a golden-section caliper's mark would land from the drawn rim.
 const AUDIT = new Map(), AUDIT_SCALES = [1, 1.25, 1.5, 1.75, 2], AUDIT_M = 6, auditJobs = [];
 function withAuditLook(fn){
-  const keep = {bg:S.bg, fills:S.fills, fx:S.fx, stars:S.stars, style:S.style, d3:S.d3, rot:S.rot, flipH:S.flipH, flipV:S.flipV, da:dragAngle, mot:S.motion, fr:S.fractal};
+  const keep = {rt:rimTestMode, bg:S.bg, fills:S.fills, fx:S.fx, stars:S.stars, style:S.style, d3:S.d3, rot:S.rot, flipH:S.flipH, flipV:S.flipV, da:dragAngle, mot:S.motion, fr:S.fractal};
   try {
-    S.bg = solid('#ff0000'); S.fills = {lobe1:solid('#ffffff'), lobe2:solid('#000000'), eye1:solid('#000000'), eye2:solid('#ffffff')};
+    rimTestMode = 'off'; S.bg = solid('#ff0000'); S.fills = {lobe1:solid('#ffffff'), lobe2:solid('#000000'), eye1:solid('#000000'), eye2:solid('#ffffff')};
     S.fx = Object.assign({}, S.fx, {guides:false, aura:false, bagua:'off', bolt:false, rimW:0}); S.stars = false; S.style = 'flat';
     S.d3 = Object.assign({}, S.d3, {mode:'flat'}); S.rot = 0; S.flipH = false; S.flipV = false; dragAngle = 0;
     S.motion = Object.assign({}, S.motion, {playing:false, tide:false, breathe:false, spin:false, swirl:false}); S.fractal = Object.assign({}, S.fractal, {depth:0});
     return fn();
-  } finally { S.bg = keep.bg; S.fills = keep.fills; S.fx = keep.fx; S.stars = keep.stars; S.style = keep.style; S.d3 = keep.d3; S.rot = keep.rot; S.flipH = keep.flipH; S.flipV = keep.flipV; dragAngle = keep.da; S.motion = keep.mot; S.fractal = keep.fr; }
+  } finally { rimTestMode = keep.rt; S.bg = keep.bg; S.fills = keep.fills; S.fx = keep.fx; S.stars = keep.stars; S.style = keep.style; S.d3 = keep.d3; S.rot = keep.rot; S.flipH = keep.flipH; S.flipV = keep.flipV; dragAngle = keep.da; S.motion = keep.mot; S.fractal = keep.fr; }
 }
 function onMargin(src, W){
   const N = W + 2 * AUDIT_M, b = document.createElement('canvas'); b.width = b.height = N;
@@ -2450,14 +2474,14 @@ let screenResult = null;
 const testKeep = {on:false};
 function testCard(on){
   if (on && !testKeep.on){
-    Object.assign(testKeep, {on:true, bg:S.bg, fills:S.fills, fx:S.fx, stars:S.stars, style:S.style, d3:S.d3, fr:S.fractal, mot:S.motion, mm:measureMode});
+    Object.assign(testKeep, {on:true, rt:rimTestMode, bg:S.bg, fills:S.fills, fx:S.fx, stars:S.stars, style:S.style, d3:S.d3, fr:S.fractal, mot:S.motion, mm:measureMode});
     S.bg = solid('#808080'); S.fills = {lobe1:solid('#ffffff'), lobe2:solid('#000000'), eye1:solid('#000000'), eye2:solid('#ffffff')};
     S.fx = Object.assign({}, S.fx, {guides:false, aura:false, bagua:'off', bolt:false}); S.stars = false; S.style = 'flat';
     S.d3 = Object.assign({}, S.d3, {mode:'flat'}); S.fractal = Object.assign({}, S.fractal, {depth:0}); S.motion = Object.assign({}, S.motion, {playing:false});
-    if (measureMode !== 'off'){ measureMode = 'off'; renderOverlay(); }
+    rimTestMode = 'off'; if (measureMode !== 'off'){ measureMode = 'off'; renderOverlay(); }
     document.body.classList.add('testcard');
   } else if (!on && testKeep.on){
-    S.bg = testKeep.bg; S.fills = testKeep.fills; S.fx = testKeep.fx; S.stars = testKeep.stars; S.style = testKeep.style; S.d3 = testKeep.d3; S.fractal = testKeep.fr; S.motion = testKeep.mot;
+    rimTestMode = testKeep.rt; S.bg = testKeep.bg; S.fills = testKeep.fills; S.fx = testKeep.fx; S.stars = testKeep.stars; S.style = testKeep.style; S.d3 = testKeep.d3; S.fractal = testKeep.fr; S.motion = testKeep.mot;
     if (testKeep.mm !== 'off'){ measureMode = testKeep.mm; renderOverlay(); }
     document.body.classList.remove('testcard'); testKeep.on = false;
   }
@@ -2481,7 +2505,7 @@ async function screenCheck(){
   let stream = null;
   try {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) throw new Error('This browser cannot capture its own tab. Chrome and Edge can.');
-    stream = await navigator.mediaDevices.getDisplayMedia({video:{cursor:'never', frameRate:{ideal:30}}, audio:false, preferCurrentTab:true, selfBrowserSurface:'include', surfaceSwitching:'exclude', monitorTypeSurfaces:'exclude'});
+    stream = await navigator.mediaDevices.getDisplayMedia({video:{cursor:'never', frameRate:{ideal:30}, width:{ideal:Math.round(innerWidth * (window.devicePixelRatio || 1))}, height:{ideal:Math.round(innerHeight * (window.devicePixelRatio || 1))}, resizeMode:'none'}, audio:false, preferCurrentTab:true, selfBrowserSurface:'include', surfaceSwitching:'exclude', monitorTypeSurfaces:'exclude'});
     const track = stream.getVideoTracks()[0], set = track && track.getSettings ? track.getSettings() : {};
     if (set.displaySurface && set.displaySurface !== 'browser') throw new Error('Share “this tab” rather than a window or the whole screen, so the capture lines up with the page.');
     const video = document.createElement('video'); video.muted = true; video.playsInline = true; video.srcObject = stream; await video.play();
@@ -2629,17 +2653,18 @@ function updateLiveConst(){
   h += sec('Controlled Φ rim diagnostic') +
     `<tr><td colspan="2"><div style="display:flex;gap:6px;flex-wrap:wrap">` +
       `<button class="btn ${rimTestMode==='off'?'primary':''}" type="button" data-act="rimtest" data-v="off">Normal</button>` +
-      `<button class="btn ${rimTestMode==='mono'?'primary':''}" type="button" data-act="rimtest" data-v="mono">Monochrome</button>` +
+      `<button class="btn ${rimTestMode==='target'?'primary':''}" type="button" data-act="rimtest" data-v="target">Caliper target</button>` +
       `<button class="btn ${rimTestMode==='edge'?'primary':''}" type="button" data-act="rimtest" data-v="edge">Outer edge only</button>` +
     `</div></td></tr>` +
-    note(rimTestMode === 'off' ? 'Normal Yin-Yang rendering.' : rimTestMode === 'mono' ? 'Both lobes are rendered as one black shape on white. The geometry is unchanged; this removes the black/white lobe contrast difference from the outer rim.' : 'A pale-gold unit-radius circle is shown on an off-white field through the same device-pixel Canvas renderer used for the live display, with a small centre target. This deliberately removes SVG from the physical test. If the asymmetry remains here, it is not caused by the Yin-Yang lobes, their colors, or SVG rasterisation.');
+    note(rimTestMode === 'off' ? 'Normal Yin-Yang rendering.' : rimTestMode === 'target' ? 'A black disc of radius 1 on white, drawn by the same device-pixel canvas as the live display. The off-white centre circle has radius φ⁷ ≈ 0.034442 of the rim radius (1⁄Φ⁷ exactly), so a caliper point can be set on the centre against a light patch; the white cross hairs and the fine mark inside the circle meet at the exact centre. All four corners are identical in this view, and turning the symbol changes nothing.' : 'A pale-gold disc of radius 1 on an off-white field, drawn by the same device-pixel canvas as the live display, with white cross hairs at the centre. All four corners are identical in this view, so a corner that reads differently here is not caused by the yin yang’s lobes or colours.');
 
   // 5 ── Placement on the page
   h += sec('Placement on the page') +
     `<tr><td>Layout frame</td><td>${BOX.frameCss.toFixed(2)} CSS px <span class="m">· ${!BOX.full ? 'shrunk to fit the stage' : Math.abs(BOX.frameCss - BOX_PX) < .01 ? 'the 610 px Fibonacci box' : 'the nearest to 610 px this display scale draws exactly'}</span></td></tr>` +
     `<tr><td>Pixel-grid alignment</td><td>${BOX.grid ? good('✓') : '~'} ${BOX.gridErr.toFixed(3)} px <span class="m">· the canvas is nudged ${Math.abs(BOX.snapX || 0).toFixed(3)} × ${Math.abs(BOX.snapY || 0).toFixed(3)} screen px inside the frame so its corner sits on a whole pixel; Chrome then shows the box exactly ${side} × ${side} instead of rounding one edge and dropping a row or column</span></td></tr>` +
     `<tr><td>Page centring</td><td>${cMax <= 6 ? good('✓') : '~'} ${cMax.toFixed(3)} px <span class="m">(x ${sg(BOX.cx)} · y ${sg(BOX.cy)}) between the frame centre and stage centre — CSS centres the frame; only the canvas inside it is nudged, by under half a pixel</span></td></tr>` +
-    `<tr><td>Live renderer</td><td><span class="b">Device-pixel Canvas</span> <span class="m">· SVG retained for vector/export use, not used for the live flat display</span></td></tr>`;
+    `<tr><td>Live renderer</td><td><span class="b">Device-pixel Canvas</span> <span class="m">· SVG retained for vector/export use, not used for the live flat display</span></td></tr>` +
+    `<tr><td>Canvas drawing</td><td>${RASTER_CPU ? good('Software (CPU)') + ' <span class="m">· set by ?raster=cpu in the address; remove it to go back to the graphics chip</span>' : 'Graphics chip (GPU) <span class="m">· add ?raster=cpu to the address to draw in software and compare</span>'}</td></tr>`;
 
   // 5 ── The offscreen audit at other display scales
   h += sec(`Same offscreen audit at other display scales · ${kind}`) +
