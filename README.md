@@ -2,7 +2,8 @@
 
 A free, browser-based tool for constructing a yin–yang symbol from precise
 golden-ratio (φ / Φ) relationships, featuring adjustable eye sizing, color pickers with
-presets, two measurement overlays, and PNG/JPG export. No install, no
+presets, three measurement overlays, a Design Constants panel with live
+layout checks, and PNG/JPG export. No install, no
 build step — it's a single HTML file you can open directly or host as a
 static page.
 
@@ -13,7 +14,7 @@ static page.
 ## Basic terms: Ear, Lobe, Eye
 
 The symbol is built from three circular measurements, all defined
-relative to the same center point. The Ear radii originates at (0,0), the Lobes are positioned at fixed offsets along the vertical axis ($\pm 0.5$), and the Eyes are then placed at those exact same points.
+relative to the same center point. The Ear radius originates at (0,0), the Lobes are positioned at fixed offsets along the vertical axis (±0.5), and the Eyes are then placed at those exact same points.
 
 | Term | What it is | Radius |
 |---|---|---|
@@ -31,9 +32,9 @@ This distinction matters because it's the whole logic of the tool:
   - The S-curve that divides the two halves
   - Every point and ratio derived only from Ear + Lobe — for example, the
     segment construction in the "Other Segments" displays points A, B, C, G, H,
-    and O that are **independent of eye size**. AB = φ·R (~.618) and AG = Φ·R (~1.618)     no matter how large or small the eyes.
+    and O that are **independent of eye size**. AB = φ·R (≈ 0.618) and AG = Φ·R (≈ 1.618), no matter how large or small the eyes.
 
-- **Variable :**
+- **Variable:**
   - The **Eye** radius, is adjusted with the slider, presets, or equation
   input, expressed as a ratio of the Lobe radius (`Eye ∶ Lobe`).
   - Colors are adjusted with presets and color pickers, as well as style options. (Ear A/B, Eye A/B, Background)
@@ -51,9 +52,9 @@ radius, several distances in the symbol resolve to clean multiples of φ
 or Φ automatically — not because they were forced to, but because of
 the 2:1 Ear-to-Lobe ratio itself (a 1, ½, √5⁄2 right triangle is inherent
 in the construction). The **Eye Ratio Presets** panel offers several
-φ/Φ derrived values (e.g. the default, φ³ ≈ 0.236) as well as plain fractions
-(⅓, ¼, 5⁄21,) and a free-form equation box to explore
-other ratios (supports `phi`, `Phi`, `Pi`,  e , tau ,`sqrt()`, and arithmetic).
+φ/Φ derived values (e.g. the default, φ³ ≈ 0.236) as well as plain fractions
+(⅓, ¼, 5⁄21) and a free-form equation box to explore
+other ratios (supports `phi`, `Phi`, `Pi`, `e`, `tau`, `sqrt()`, and arithmetic).
 
 ### The three measurement overlays
 
@@ -73,6 +74,59 @@ other ratios (supports `phi`, `Phi`, `Pi`,  e , tau ,`sqrt()`, and arithmetic).
   three clicks compute the angle at the middle point along with the ratio
   of the two flanking segments. The panel can be dragged anywhere on
   screen and cleared between measurements.
+
+---
+
+## The Design Constants panel
+
+The **Design Constants** button opens a panel with the construction's fixed
+numbers and a live check of what is on your screen right now. Symbol radius
+= 1; the symbol's edge to the box corner is φ; so the center to the corner is
+1 + φ = Φ.
+
+### Terms
+
+| Term | Meaning |
+|---|---|
+| **Geometry box** | The square the construction is defined in. The panel's "1000-unit box" figures are in these abstract units, not screen pixels. |
+| **Rendered canvas** | The geometry box as actually drawn, in a whole number of screen pixels. |
+| **Layout frame** | The invisible page element around the canvas. It is sized to the canvas. |
+
+### Live checks
+
+The checks are kept apart so a failure says which layer is at fault:
+
+- **Centre alignment** — is the rendered canvas centred where the page layout
+  puts the center? This is the only check that tests the canvas *on the page*.
+- **Phi geometry** — is the symbol's radius exactly `SYM_K` (≈ 0.874) times the
+  box's half-side, so that center → corner ÷ radius = Φ, and does the drawn
+  bitmap agree with that to within a fraction of a pixel?
+- **Pixel-grid alignment** — does the canvas start on a whole screen pixel and
+  map 1 : 1 onto screen pixels?
+
+Two audits give the details. The **Edge audit** draws the symbol on its own at
+the canvas's exact pixel size and measures the gap from the symbol to each side
+and each corner. It tests the symbol *inside* its canvas, not the canvas on the
+page. The **Layout audit** compares the canvas with the layout center, the
+layout frame, and the pixel grid.
+
+### What can and cannot be exact
+
+- A box made of whole screen pixels can be centred to within ±0.5 px at best.
+  An even side centres on a whole pixel and an odd side on a half pixel. The
+  page chooses the side so the error stays as close to 0 as the display scale
+  (browser zoom × screen density) allows.
+- CSS sizes are stored in 1⁄64 CSS px, so at some zoom levels (for example 110%
+  or 150%) not every screen pixel can be addressed exactly. The page prefers
+  pixels that can be, when that costs less than half a pixel of centring.
+- On-screen drawing is anti-aliased, so a measured edge can differ from the
+  ideal by a fraction of a pixel (the panel shows these as, for example,
+  "+0.100"). Calipers laid on a screenshot cannot resolve that.
+- The box aims for **610 CSS px** (a Fibonacci number) when the window has room,
+  and shrinks to fit otherwise. The panel's "Rendered canvas" line shows the
+  actual size.
+- The symbol-to-box area ratio is π⁄(2Φ²) ≈ 0.599991. It is close to ⅗ but not
+  equal to it; π is about 0.0015% below 6Φ²⁄5.
 
 ---
 
