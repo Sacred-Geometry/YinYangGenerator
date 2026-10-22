@@ -156,25 +156,20 @@ and resizing or blurring a capture doesn't shift them.
 
 ### Controlled Φ rim diagnostic
 
-Three views of the same geometry, for physical measurement:
+Two views of the same geometry, for physical measurement:
 
 - **Normal** — the symbol as styled.
-- **Caliper target** — a pale-blue (#DEE9FF) disc on white with white cross hairs and an
-  off-white center circle of radius φ⁷ (exactly 1⁄Φ⁷ of the outer radius), so a
-  caliper point can be set on the center against a light patch; a light-yellow
-  cross inside that circle marks the exact center.
-- **Outer edge only** — a pale-blue (#DEE9FF) disc on an off-white field with
-  white cross hairs and a tiny yellow dot on the exact center.
+- **Caliper target** — a pale-blue (#DEE9FF) disc of radius 1 on an off-white
+  field, with white cross hairs and a tiny yellow dot on the exact center.
 
-Both discs are light on purpose: a metal caliper point is easy to see in front of
-a light color and lost in front of a dark one. For the same reason, use the
+The disc is light on purpose: a metal caliper point is easy to see in front of a
+light color and lost in front of a dark one. For the same reason, use the
 **Light** theme when measuring with calipers.
 
-In both test views the four corners are identical and turning the symbol
-changes nothing, so they separate the geometry from the colors at each corner.
-Closing Inspect while a test view is on folds the panel down to a small
-switcher with the three views; its ✕ appears once **Normal** is chosen, and ⤢
-opens the full panel again.
+In Caliper target the four corners are identical and turning the symbol changes
+nothing, so it separates the geometry from the colors at each corner. Closing
+Inspect while it is on folds the panel down to a small switcher; its ✕ appears
+once **Normal** is chosen, and ⤢ opens the full panel again.
 
 ### Graphics-chip comparison
 

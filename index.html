@@ -687,7 +687,7 @@ body.focus .stage-col{padding-right:max(16px,env(safe-area-inset-right,0px))}
 <div class="float" id="rimFloat" role="dialog" aria-label="Φ rim diagnostic" hidden>
   <div class="float-bar" data-drag="rimFloat"><span class="float-t">Φ rim diagnostic</span><span class="float-acts"><button class="float-x" type="button" id="rimExpand" title="Open Inspect" aria-label="Open Inspect">⤢</button><button class="float-x" type="button" id="rimClose" title="Close" aria-label="Close">✕</button></span></div>
   <div class="float-b">
-    <div class="seg" id="rimSeg" role="group" aria-label="Rim diagnostic view"><button type="button" data-v="off">Normal</button><button type="button" data-v="target">Caliper target</button><button type="button" data-v="edge">Outer edge only</button></div>
+    <div class="seg" id="rimSeg" role="group" aria-label="Rim diagnostic view"><button type="button" data-v="off">Normal</button><button type="button" data-v="target">Caliper target</button></div>
     <p class="rim-note" id="rimNote"></p>
   </div>
 </div>
@@ -971,10 +971,10 @@ const S = {
 };
 let simTime = 0;          // seconds of animation time (scaled by speed)
 let measureMode = 'off';
-let rimTestMode = 'off'; // off | target | edge: controlled outer-rim visual diagnostics
-const HUB_R = Math.pow(LIT_phi, 7);   // centre circle of the Caliper target: φ⁷ ≈ 0.034442 of the symbol radius
-// Colours of the two rim diagnostics (canvas, vector form and the contrast readout share them)
-const RIM_TEST = {target:{bg:'#FFFFFF', disc:'#DEE9FF', hub:'#F2EEE3', mark:'#FFE680'}, edge:{bg:'#FBF8F0', disc:'#DEE9FF', dot:'#FFC400'}};
+let rimTestMode = 'off'; // off | target: controlled outer-rim visual diagnostic (Caliper target)
+// Colours of the Caliper target (canvas, vector form and the contrast readout share them). The disc is light on purpose:
+// a metal caliper point is easy to see in front of a light colour and lost in front of a dark one.
+const RIM_TEST = {target:{bg:'#FBF8F0', disc:'#DEE9FF', dot:'#FFC400'}};
 
 // ════════════════════════════════════════════════════════════════════
 //  PATTERNS — procedural, animated fills + uploaded images
@@ -1884,35 +1884,23 @@ function drawScene(ctx, W, t, q, o = {}){
   const mode = S.d3.mode, solid3d = mode !== 'flat';
   const Rp = px, cx = W / 2, cy = W / 2;
 
-  // Controlled rim diagnostics, drawn by the same device-pixel canvas as the live display, so the test and the
-  // thing being measured share one renderer. Both are a plain disc of radius 1 in the Phi box; only colours differ,
-  // and the disc's rim has exact pixel areas, like the symbol's.
-  //   target · pale-blue disc on white, with an off-white centre circle of radius φ⁷ (exactly 1⁄Φ⁷ of the outer radius),
-  //            white cross hairs across the disc and a light-yellow cross inside the centre circle
-  //   edge   · pale-blue disc on off-white with white cross hairs and a tiny yellow dot on the exact centre
+  // Caliper target: the controlled rim diagnostic, drawn by the same device-pixel canvas as the live display, so the test
+  // and the thing being measured share one renderer. A plain pale-blue disc of radius 1 in the Phi box, on off-white, with
+  // the same exact rim as the symbol, white cross hairs and a tiny yellow dot on the exact centre.
   if (rimTestMode !== 'off'){
     // The box side is even, so the centre sits on a pixel corner: lines exactly 2 screen px wide cover two whole pixels
     // and stay solid (a 1 px line there would be split into two half-strength pixels).
-    const target = rimTestMode === 'target', ui = q === 'export' ? 1 : (window.devicePixelRatio || 1), u = ui / px, w2 = 2 / px;
-    const bg = target ? RIM_TEST.target.bg : RIM_TEST.edge.bg, disc = target ? RIM_TEST.target.disc : RIM_TEST.edge.disc;
+    const T = RIM_TEST.target, ui = q === 'export' ? 1 : (window.devicePixelRatio || 1), u = ui / px, w2 = 2 / px, rr = 3.2 * u;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, W);
-    ctx.drawImage(exactDisc(W, px, disc), 0, 0);
+    ctx.fillStyle = T.bg; ctx.fillRect(0, 0, W, W);
+    ctx.drawImage(exactDisc(W, px, T.disc), 0, 0);
     ctx.setTransform(px, 0, 0, px, cx, cy);
     ctx.lineCap = 'butt';
-    const cross = (a, b, col, w) => { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath();
-      ctx.moveTo(-b, 0); ctx.lineTo(-a, 0); ctx.moveTo(a, 0); ctx.lineTo(b, 0); ctx.moveTo(0, -b); ctx.lineTo(0, -a); ctx.moveTo(0, a); ctx.lineTo(0, b); ctx.stroke(); };
-    if (target){
-      const hub = HUB_R;
-      cross(hub, .94, '#FFFFFF', w2);                                     // white cross hairs across the disc, clear of the rim
-      ctx.fillStyle = RIM_TEST.target.hub; ctx.beginPath(); ctx.arc(0, 0, hub, 0, TAU); ctx.fill();
-      cross(0, hub * .72, RIM_TEST.target.mark, w2);                      // light-yellow centre cross inside the off-white circle
-    } else {
-      const rr = 3.2 * u;
-      ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(0, 0, rr, 0, TAU); ctx.fill();
-      cross(rr, 14 * u, '#FFFFFF', w2);                                   // white cross hairs
-      ctx.fillStyle = RIM_TEST.edge.dot; ctx.beginPath(); ctx.arc(0, 0, Math.max(1.1 * u, 1.2 / px), 0, TAU); ctx.fill();   // tiny yellow dot on the centre
-    }
+    ctx.fillStyle = T.bg; ctx.beginPath(); ctx.arc(0, 0, rr, 0, TAU); ctx.fill();
+    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = w2; ctx.beginPath();   // white cross hairs, starting just outside the centre circle
+    for (const [x, y] of [[-1, 0], [1, 0], [0, -1], [0, 1]]){ ctx.moveTo(x * rr, y * rr); ctx.lineTo(x * 14 * u, y * 14 * u); }
+    ctx.stroke();
+    ctx.fillStyle = T.dot; ctx.beginPath(); ctx.arc(0, 0, Math.max(1.1 * u, 1.2 / px), 0, TAU); ctx.fill();   // tiny yellow dot on the centre
     if (S.fx.guides) drawCaliper(ctx, W, px, q === 'export' ? 0 : ui);
     return;
   }
@@ -1944,7 +1932,7 @@ const CAL_INK = {
   dark: {one:'#86D4BF', phi:'#E2B657', Phi:'#F4EEE0', tick:'#FFFFFF', shade:'rgba(0,0,0,0.62)'},
   light:{one:'#0E6A55', phi:'#8C5A00', Phi:'#1B2320', tick:'#000000', shade:'rgba(255,255,255,0.8)'},
 };
-// Rim tests (Caliper target, Outer edge only): the cross hairs are white (with a dark halo, which keeps them
+// Rim test (Caliper target): the cross hairs are white (with a dark halo, which keeps them
 // readable where they run on past the rim over the white box).
 CAL_INK.test = {one:'#FFFFFF', phi:'#FFFFFF', Phi:'#FFFFFF', tick:'#FFFFFF', shade:'rgba(0,0,0,0.7)'};
 function calCol(){ if (rimTestMode !== 'off') return CAL_INK.test; const [r, g, b] = h2rgb(fillColor(S.bg)); return CAL_INK[(.2126 * r + .7152 * g + .0722 * b) / 255 > .55 ? 'light' : 'dark']; }
@@ -2028,16 +2016,12 @@ function vectorInner(u, o = {}){
   const lobe2 = `M0 -1A1 1 0 0 1 0 1A${r2} ${r2} 0 0 1 0 ${j}A${r1} ${r1} 0 0 0 0 -1Z`;
   const inset = 1 - 1.25 * u;
   if (rimTestMode !== 'off'){
-    // The two rim diagnostics, as the canvas draws them (see drawScene). The centre marks are far smaller than the
-    // radius and no audit uses them.
-    const ui = o.ui || 1, cu = ui * u, w2 = n(2 * u), box = `<rect x="${n(-Hh)}" y="${n(-Hh)}" width="${n(2 * Hh)}" height="${n(2 * Hh)}"`;
-    const cross = (a, b, col) => `<path d="M${n(-b)} 0H${n(-a)}M${n(a)} 0H${n(b)}M0 ${n(-b)}V${n(-a)}M0 ${n(a)}V${n(b)}" stroke="${col}" stroke-width="${w2}" fill="none"/>`;
-    let g;
-    if (rimTestMode === 'target'){ const T = RIM_TEST.target;
-      g = `${box} fill="${T.bg}"/><circle r="1" fill="${T.disc}"/>` + cross(HUB_R, .94, '#FFFFFF') + `<circle r="${n(HUB_R)}" fill="${T.hub}"/>` + cross(0, HUB_R * .72, T.mark);
-    } else { const E = RIM_TEST.edge, rr = 3.2 * cu;
-      g = `${box} fill="${E.bg}"/><circle r="1" fill="${E.disc}"/><circle r="${n(rr)}" fill="${E.bg}"/>` + cross(rr, 14 * cu, '#FFFFFF') + `<circle r="${n(Math.max(1.1 * cu, 1.2 * u))}" fill="${E.dot}"/>`;
-    }
+    // The Caliper target, as the canvas draws it (see drawScene). The centre mark is far smaller than the radius and no
+    // audit uses it.
+    const T = RIM_TEST.target, ui = o.ui || 1, cu = ui * u, w2 = n(2 * u), rr = 3.2 * cu, b = 14 * cu;
+    let g = `<rect x="${n(-Hh)}" y="${n(-Hh)}" width="${n(2 * Hh)}" height="${n(2 * Hh)}" fill="${T.bg}"/><circle r="1" fill="${T.disc}"/><circle r="${n(rr)}" fill="${T.bg}"/>` +
+      `<path d="M${n(-b)} 0H${n(-rr)}M${n(rr)} 0H${n(b)}M0 ${n(-b)}V${n(-rr)}M0 ${n(rr)}V${n(b)}" stroke="#FFFFFF" stroke-width="${w2}" fill="none"/>` +
+      `<circle r="${n(Math.max(1.1 * cu, 1.2 * u))}" fill="${T.dot}"/>`;
     if (S.fx.guides) g += caliperSVG(Math.max(1.5 * cu, .0042), Math.max(.056, 12 * cu));
     return g;
   }
@@ -2780,8 +2764,7 @@ function analyseScreen(g, rect, sx, sy, side){
 //   Pixel grid   — does the box start on a whole screen pixel and show 1 : 1?           (no browser resampling)
 const RIM_NOTES = {
   off:'Normal Yin-Yang rendering.',
-  target:'Pale-blue disc on white, light enough to see a caliper point against. The white cross hairs and the light-yellow cross inside the off-white centre circle meet at the exact centre. Choose Normal to close this panel.',
-  edge:'Pale-blue disc on off-white, with white cross hairs and a tiny yellow dot on the exact centre. Choose Normal to close this panel.'};
+  target:'Pale-blue disc on off-white, light so a caliper point stays visible in front of it, with white cross hairs and a tiny yellow dot on the exact centre. Choose Normal to close this panel.'};
 function updateLiveConst(){
   const el = $('constLive'); if (!el || $('constFloat').hidden) return;      // measured only while the panel is open
   const side = BOX.dev, kind = vecOn ? 'vector' : 'canvas', A = requestAudit(kind, side);
@@ -2858,11 +2841,9 @@ function updateLiveConst(){
     `<tr><td colspan="2"><div style="display:flex;gap:6px;flex-wrap:wrap">` +
       `<button class="btn ${rimTestMode==='off'?'primary':''}" type="button" data-act="rimtest" data-v="off" aria-pressed="${rimTestMode==='off'}">Normal</button>` +
       `<button class="btn ${rimTestMode==='target'?'primary':''}" type="button" data-act="rimtest" data-v="target" aria-pressed="${rimTestMode==='target'}">Caliper target</button>` +
-      `<button class="btn ${rimTestMode==='edge'?'primary':''}" type="button" data-act="rimtest" data-v="edge" aria-pressed="${rimTestMode==='edge'}">Outer edge only</button>` +
     `</div></td></tr>` +
-    note(rimTestMode === 'off' ? 'Normal Yin-Yang rendering. The two test views draw a plain disc of radius 1 in the same box, by the same canvas, with the same exact rim; closing this panel while one is on leaves a small switcher on screen.'
-      : rimTestMode === 'target' ? 'A pale-blue (#DEE9FF) disc of radius 1 on white, light so that a caliper point stays visible in front of it. The off-white centre circle has radius φ⁷ ≈ 0.034442 of the rim radius (1⁄Φ⁷ exactly), so a caliper point can be set on the centre against a light patch; the white cross hairs and the light-yellow cross inside the circle meet at the exact centre. All four corners are identical in this view, and turning the symbol changes nothing. Closing this panel leaves a small switcher on screen.'
-      : 'A pale-blue (#DEE9FF) disc of radius 1 on an off-white field, with white cross hairs and a tiny yellow dot on the exact centre. All four corners are identical in this view, so a corner that reads differently here is not caused by the yin yang’s lobes or colours. Closing this panel leaves a small switcher on screen.');
+    note(rimTestMode === 'off' ? 'Normal Yin-Yang rendering. Caliper target draws a plain disc of radius 1 in the same box, by the same canvas, with the same exact rim; closing this panel while it is on leaves a small switcher on screen.'
+      : 'A pale-blue (#DEE9FF) disc of radius 1 on an off-white field, light so that a caliper point stays visible in front of it, with white cross hairs and a tiny yellow dot on the exact centre. All four corners are identical in this view, so a corner that reads differently here is not caused by the yin yang’s lobes or colours. Closing this panel leaves a small switcher on screen.');
 
   // 5 ── Placement on the page
   h += sec('Placement on the page') +
@@ -3253,11 +3234,11 @@ function openConstFloat(){
 }
 
 // ── Φ rim diagnostic ────────────────────────────────────────────────
-// One switch for the test views, used by Inspect and by its folded-down form. Closing Inspect while a
+// One switch for the test view, used by Inspect and by its folded-down form. Closing Inspect while a
 // test view is on folds the panel to a small switcher at its top-right corner; the switcher's ✕ appears once Normal is
 // chosen, so a test view can't be left on the stage with nothing on screen to turn it off.
 function setRimTest(v){
-  rimTestMode = v === 'target' || v === 'edge' ? v : 'off';
+  rimTestMode = v === 'target' ? v : 'off';
   if (rimTestMode !== 'off' && measureMode !== 'off'){ $('measureSel').value = S.fx.guides ? 'guides' : 'off'; setMeasureMode('off'); }
   needsDraw = true; renderVector(); updateLiveConst(); syncRimFloat();
 }
