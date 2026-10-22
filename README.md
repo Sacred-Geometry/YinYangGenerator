@@ -2,7 +2,7 @@
 
 A free, browser-based tool for constructing a yin–yang symbol from precise
 golden-ratio (φ / Φ) relationships, featuring adjustable eye sizing, color pickers with
-presets, three measurement overlays, a Design Constants panel with live
+presets, three measurement overlays, an Inspect panel (design constants) with live
 screen checks, and PNG/JPG/SVG export. No install, no
 build step — it's a single HTML file you can open directly or host as a
 static page.
@@ -81,9 +81,9 @@ edge `1`, edge → corner `φ`, the whole `Φ`.
 
 ---
 
-## The Design Constants panel
+## The Inspect panel
 
-The **Design Constants** button opens a panel with the construction's fixed
+The **Inspect** button opens a panel with the construction's fixed
 numbers and a live check of what is on your screen right now. Symbol radius
 = 1; the symbol's edge to the box corner is φ; so the center to the corner is
 1 + φ = Φ.
@@ -147,7 +147,9 @@ and resizing or blurring a capture doesn't shift them.
 - **What calipers can see at each corner** — the contrast between the rim and
   the box at each corner. A rim that is close to the box color (for example
   white on cream, or a light metallic highlight on a near-white box) is hard to
-  set a caliper point against, even when it is exactly in place.
+  set a caliper point against, even when it is exactly in place. The panel also
+  rates the box corners against the stage, and recommends the Light theme for
+  caliper work.
 - **Placement on the page** — pixel-grid alignment (and the nudge applied),
   page centering, and which drawing path the canvas uses.
 - **Other display scales** — the offscreen test repeated at 1× to 2×.
@@ -157,16 +159,20 @@ and resizing or blurring a capture doesn't shift them.
 Three views of the same geometry, for physical measurement:
 
 - **Normal** — the symbol as styled.
-- **Caliper target** — a black disc on white with white cross hairs and an
+- **Caliper target** — a pale-blue (#DEE9FF) disc on white with white cross hairs and an
   off-white center circle of radius φ⁷ (exactly 1⁄Φ⁷ of the outer radius), so a
   caliper point can be set on the center against a light patch; a light-yellow
   cross inside that circle marks the exact center.
-- **Outer edge only** — a pale-gold disc on an off-white field with white cross
-  hairs and a tiny yellow dot on the exact center.
+- **Outer edge only** — a pale-blue (#DEE9FF) disc on an off-white field with
+  white cross hairs and a tiny yellow dot on the exact center.
+
+Both discs are light on purpose: a metal caliper point is easy to see in front of
+a light color and lost in front of a dark one. For the same reason, use the
+**Light** theme when measuring with calipers.
 
 In both test views the four corners are identical and turning the symbol
 changes nothing, so they separate the geometry from the colors at each corner.
-Closing Design Constants while a test view is on folds the panel down to a small
+Closing Inspect while a test view is on folds the panel down to a small
 switcher with the three views; its ✕ appears once **Normal** is chosen, and ⤢
 opens the full panel again.
 
@@ -196,6 +202,11 @@ itself, so they are the same either way.
   actual size.
 - For a reference that needs no screen at all, export a PNG at 2584 px and
   print it at 100%.
+- The SVG export states the geometry exactly (radius 437.016024 in a 1000-unit
+  box, each half drawn as its own path), but how it looks depends on the program
+  that displays it: browsers smooth vector edges their own way, typically a
+  tenth of a pixel or so. A PNG export carries the page's exact rim in its
+  pixels, so it is the better file to measure.
 - The symbol-to-box area ratio is π⁄(2Φ²) ≈ 0.599991. It is close to ⅗ but not
   equal to it; π is about 0.0015% below 6Φ²⁄5.
 

@@ -280,7 +280,7 @@ input[type=range]::-moz-range-progress{background:var(--jade);height:4px;border-
 /* resizable float: drag the corner grip; the body fills whatever size it is given */
 .float.rs{display:flex;flex-direction:column;min-width:260px;min-height:160px;max-height:calc(100vh - 16px)}
 #constFloat{width:380px}
-/* Φ rim diagnostic, folded down: what stays on screen when Design constants is closed with a test view on */
+/* Φ rim diagnostic, folded down: what stays on screen when Inspect is closed with a test view on */
 #rimFloat{width:auto;max-width:calc(100vw - 16px)}
 #rimFloat .float-bar{gap:12px;padding:7px 8px 7px 12px}
 #rimFloat .float-b{padding:10px 12px 11px;gap:7px}
@@ -380,7 +380,7 @@ body.focus .stage-col{padding-right:max(16px,env(safe-area-inset-right,0px))}
     <h1>Yin Yang Generator</h1>
   </div>
   <div class="top-actions">
-    <button class="icon-btn" id="constBtn" type="button" aria-expanded="false" aria-controls="constFloat" title="Show the design constants">Design Constants</button>
+    <button class="icon-btn" id="constBtn" type="button" aria-expanded="false" aria-controls="constFloat" title="Inspect: design constants and live Φ checks">Inspect</button>
     <select class="ctl-select" id="measureSel" aria-label="Measurement overlay">
       <option value="off">Measurements: Off</option>
       <option value="vertical">Vertical Line Ratios</option>
@@ -676,16 +676,16 @@ body.focus .stage-col{padding-right:max(16px,env(safe-area-inset-right,0px))}
   </div>
 </div>
 
-<div class="float rs" id="constFloat" role="dialog" aria-label="Design constants" hidden>
-  <div class="float-bar" data-drag="constFloat"><span class="float-t">Design constants</span><button class="float-x" type="button" data-close="constFloat" aria-label="Close">✕</button></div>
+<div class="float rs" id="constFloat" role="dialog" aria-label="Inspect" hidden>
+  <div class="float-bar" data-drag="constFloat"><span class="float-t">Inspect · design constants</span><button class="float-x" type="button" data-close="constFloat" aria-label="Close">✕</button></div>
   <div class="float-b" id="constBody"></div>
   <span class="float-rs" data-resize="constFloat" aria-hidden="true"></span>
 </div>
 
-<!-- The rim diagnostic folded down: shown when Design constants is closed while a test view is on. Its ✕ appears once
+<!-- The rim diagnostic folded down: shown when Inspect is closed while a test view is on. Its ✕ appears once
      Normal is chosen, so a test view can't be left on screen with nothing to switch it back. -->
 <div class="float" id="rimFloat" role="dialog" aria-label="Φ rim diagnostic" hidden>
-  <div class="float-bar" data-drag="rimFloat"><span class="float-t">Φ rim diagnostic</span><span class="float-acts"><button class="float-x" type="button" id="rimExpand" title="Open Design constants" aria-label="Open Design constants">⤢</button><button class="float-x" type="button" id="rimClose" title="Close" aria-label="Close">✕</button></span></div>
+  <div class="float-bar" data-drag="rimFloat"><span class="float-t">Φ rim diagnostic</span><span class="float-acts"><button class="float-x" type="button" id="rimExpand" title="Open Inspect" aria-label="Open Inspect">⤢</button><button class="float-x" type="button" id="rimClose" title="Close" aria-label="Close">✕</button></span></div>
   <div class="float-b">
     <div class="seg" id="rimSeg" role="group" aria-label="Rim diagnostic view"><button type="button" data-v="off">Normal</button><button type="button" data-v="target">Caliper target</button><button type="button" data-v="edge">Outer edge only</button></div>
     <p class="rim-note" id="rimNote"></p>
@@ -974,7 +974,7 @@ let measureMode = 'off';
 let rimTestMode = 'off'; // off | target | edge: controlled outer-rim visual diagnostics
 const HUB_R = Math.pow(LIT_phi, 7);   // centre circle of the Caliper target: φ⁷ ≈ 0.034442 of the symbol radius
 // Colours of the two rim diagnostics (canvas, vector form and the contrast readout share them)
-const RIM_TEST = {target:{bg:'#FFFFFF', disc:'#000000', hub:'#F2EEE3', mark:'#FFE680'}, edge:{bg:'#FBF8F0', disc:'#CFC4A8', dot:'#FFC400'}};
+const RIM_TEST = {target:{bg:'#FFFFFF', disc:'#DEE9FF', hub:'#F2EEE3', mark:'#FFE680'}, edge:{bg:'#FBF8F0', disc:'#DEE9FF', dot:'#FFC400'}};
 
 // ════════════════════════════════════════════════════════════════════
 //  PATTERNS — procedural, animated fills + uploaded images
@@ -1887,9 +1887,9 @@ function drawScene(ctx, W, t, q, o = {}){
   // Controlled rim diagnostics, drawn by the same device-pixel canvas as the live display, so the test and the
   // thing being measured share one renderer. Both are a plain disc of radius 1 in the Phi box; only colours differ,
   // and the disc's rim has exact pixel areas, like the symbol's.
-  //   target · black disc on white, with an off-white centre circle of radius φ⁷ (exactly 1⁄Φ⁷ of the outer radius),
+  //   target · pale-blue disc on white, with an off-white centre circle of radius φ⁷ (exactly 1⁄Φ⁷ of the outer radius),
   //            white cross hairs across the disc and a light-yellow cross inside the centre circle
-  //   edge   · pale-gold disc on off-white with white cross hairs and a tiny yellow dot on the exact centre
+  //   edge   · pale-blue disc on off-white with white cross hairs and a tiny yellow dot on the exact centre
   if (rimTestMode !== 'off'){
     // The box side is even, so the centre sits on a pixel corner: lines exactly 2 screen px wide cover two whole pixels
     // and stay solid (a 1 px line there would be split into two half-strength pixels).
@@ -1904,7 +1904,7 @@ function drawScene(ctx, W, t, q, o = {}){
       ctx.moveTo(-b, 0); ctx.lineTo(-a, 0); ctx.moveTo(a, 0); ctx.lineTo(b, 0); ctx.moveTo(0, -b); ctx.lineTo(0, -a); ctx.moveTo(0, a); ctx.lineTo(0, b); ctx.stroke(); };
     if (target){
       const hub = HUB_R;
-      cross(hub, .94, '#FFFFFF', w2);                                     // white cross hairs across the black disc, clear of the rim
+      cross(hub, .94, '#FFFFFF', w2);                                     // white cross hairs across the disc, clear of the rim
       ctx.fillStyle = RIM_TEST.target.hub; ctx.beginPath(); ctx.arc(0, 0, hub, 0, TAU); ctx.fill();
       cross(0, hub * .72, RIM_TEST.target.mark, w2);                      // light-yellow centre cross inside the off-white circle
     } else {
@@ -2774,15 +2774,14 @@ function analyseScreen(g, rect, sx, sy, side){
     off:{x:a1.ox / kx, y:a1.oy / ky}, corners, worst:Math.max(...corners.map(c => Math.abs(c.mark)))};
 }
 
-// Live readout in Design Constants. Three layers, reported separately so a failure says which one is at fault:
+// Live readout in Inspect. Three layers, reported separately so a failure says which one is at fault:
 //   Drawn pixels — the pixel audit above, on the renderer and size actually shown now   (geometry + rasterization)
 //   Placement    — is the box where the layout centres it?                              (live DOM geometry)
 //   Pixel grid   — does the box start on a whole screen pixel and show 1 : 1?           (no browser resampling)
-const STAGE_TONE = {light:'#E1E6E0', dark:'#080B0A'};   // --stage in each theme
 const RIM_NOTES = {
   off:'Normal Yin-Yang rendering.',
-  target:'Black disc on white. The white cross hairs and the light-yellow cross inside the off-white centre circle meet at the exact centre. Choose Normal to close this panel.',
-  edge:'Pale-gold disc on off-white, with white cross hairs and a tiny yellow dot on the exact centre. Choose Normal to close this panel.'};
+  target:'Pale-blue disc on white, light enough to see a caliper point against. The white cross hairs and the light-yellow cross inside the off-white centre circle meet at the exact centre. Choose Normal to close this panel.',
+  edge:'Pale-blue disc on off-white, with white cross hairs and a tiny yellow dot on the exact centre. Choose Normal to close this panel.'};
 function updateLiveConst(){
   const el = $('constLive'); if (!el || $('constFloat').hidden) return;      // measured only while the panel is open
   const side = BOX.dev, kind = vecOn ? 'vector' : 'canvas', A = requestAudit(kind, side);
@@ -2836,7 +2835,7 @@ function updateLiveConst(){
   // 3 ── What calipers can see at each corner
   const test = rimTestMode !== 'off' ? RIM_TEST[rimTestMode] : null, bgc = test ? test.bg : fillColor(S.bg), faint = [];
   const dark = isDarkTheme(), stageCol = getComputedStyle(document.documentElement).getPropertyValue('--stage').trim();
-  const cStage = /^#[0-9a-f]{6}$/i.test(stageCol) ? contrast(bgc, stageCol) : null, cOther = contrast(bgc, STAGE_TONE[dark ? 'light' : 'dark']);
+  const cStage = /^#[0-9a-f]{6}$/i.test(stageCol) ? contrast(bgc, stageCol) : null;
   h += sec('What calipers can see at each corner');
   if (test){
     const cr = contrast(test.disc, test.bg);
@@ -2847,8 +2846,10 @@ function updateLiveConst(){
     h += `<tr><td>${C.a} ${C.n}</td><td>rim ${cr.toFixed(2)} ∶ 1${cr < 1.5 ? ' <span class="warn">· hard to see</span>' : ''} <span class="m">(Ear ${f === 'lobe1' ? 'A' : 'B'} against the box)</span></td></tr>`;
   }
   if (cStage !== null){
-    const theme = dark ? 'Light' : 'Dark';
-    h += `<tr><td>Box corners</td><td>${cStage.toFixed(2)} ∶ 1 against the stage${cStage < 1.5 ? ' <span class="warn">· hard to see</span> <span class="m">' + (cOther >= 1.5 ? `— the ${theme} theme (top bar) changes only the stage around the box, and there the corners stand out at ${cOther.toFixed(1)} ∶ 1` : '— in either theme') + '</span>' : ''}</td></tr>`;
+    // Calipers are best used in the Light theme: a metal caliper point is easy to see against light and lost against dark
+    const tip = dark ? ` <span class="m">— for calipers, switch to the Light theme (top bar): metal caliper points are easy to see against light and hard to see against dark, and the theme changes only the stage around the box</span>`
+      : cStage < 1.5 ? ' <span class="m">— keep the Light theme for calipers (their points are lost against dark); find the corner where the box’s top or bottom edge meets its side edge</span>' : '';
+    h += `<tr><td>Box corners</td><td>${cStage.toFixed(2)} ∶ 1 against the stage${cStage < 1.5 ? ' <span class="warn">· faint</span>' : ''}${tip}</td></tr>`;
   }
   h += note(`${faint.length ? `At ${faint.join(' and ')} the rim barely stands out from the box, so a caliper point is hard to set there, and a rim brighter than its background also looks slightly larger than it is. ` : ''}With the box on the pixel grid and the rim drawn from exact areas, all four corners show the same Φ on screen to within a few hundredths of a pixel (<b>Check my screen</b> above measures this). If one corner still reads differently with calipers, the cause is on the glass, not in the image: the pixels sit under a cover glass, so a corner seen at a slant (usually a top corner on a laptop) shifts by parallax. Measure that corner with your eye straight over the caliper point. To confirm, turn the symbol 180° (<b>Transform</b>, ↻ 90° twice). Box and circle are unchanged by that; only the colour at each corner moves. If the same screen corner still reads best, the cause is where that corner sits on the glass (viewing angle, or a caliper point not resting flat), not the image. If the best corner moves with the colours, it is the rim contrast.`);
 
@@ -2860,8 +2861,8 @@ function updateLiveConst(){
       `<button class="btn ${rimTestMode==='edge'?'primary':''}" type="button" data-act="rimtest" data-v="edge" aria-pressed="${rimTestMode==='edge'}">Outer edge only</button>` +
     `</div></td></tr>` +
     note(rimTestMode === 'off' ? 'Normal Yin-Yang rendering. The two test views draw a plain disc of radius 1 in the same box, by the same canvas, with the same exact rim; closing this panel while one is on leaves a small switcher on screen.'
-      : rimTestMode === 'target' ? 'A black disc of radius 1 on white. The off-white centre circle has radius φ⁷ ≈ 0.034442 of the rim radius (1⁄Φ⁷ exactly), so a caliper point can be set on the centre against a light patch; the white cross hairs and the light-yellow cross inside the circle meet at the exact centre. All four corners are identical in this view, and turning the symbol changes nothing. Closing this panel leaves a small switcher on screen.'
-      : 'A pale-gold disc of radius 1 on an off-white field, with white cross hairs and a tiny yellow dot on the exact centre. All four corners are identical in this view, so a corner that reads differently here is not caused by the yin yang’s lobes or colours. Closing this panel leaves a small switcher on screen.');
+      : rimTestMode === 'target' ? 'A pale-blue (#DEE9FF) disc of radius 1 on white, light so that a caliper point stays visible in front of it. The off-white centre circle has radius φ⁷ ≈ 0.034442 of the rim radius (1⁄Φ⁷ exactly), so a caliper point can be set on the centre against a light patch; the white cross hairs and the light-yellow cross inside the circle meet at the exact centre. All four corners are identical in this view, and turning the symbol changes nothing. Closing this panel leaves a small switcher on screen.'
+      : 'A pale-blue (#DEE9FF) disc of radius 1 on an off-white field, with white cross hairs and a tiny yellow dot on the exact centre. All four corners are identical in this view, so a corner that reads differently here is not caused by the yin yang’s lobes or colours. Closing this panel leaves a small switcher on screen.');
 
   // 5 ── Placement on the page
   h += sec('Placement on the page') +
@@ -3252,7 +3253,7 @@ function openConstFloat(){
 }
 
 // ── Φ rim diagnostic ────────────────────────────────────────────────
-// One switch for the test views, used by Design constants and by its folded-down form. Closing Design constants while a
+// One switch for the test views, used by Inspect and by its folded-down form. Closing Inspect while a
 // test view is on folds the panel to a small switcher at its top-right corner; the switcher's ✕ appears once Normal is
 // chosen, so a test view can't be left on the stage with nothing on screen to turn it off.
 function setRimTest(v){
@@ -3347,9 +3348,17 @@ function buildVectorSVG(){
   let defs = '', gid = 0; const n = v => +v.toFixed(6);
   const ref = f => { if (f.mode !== 'gradient') return fillColor(f); const id = 'g' + (gid++), st = f.stops.map(s => `<stop offset="${s.p}%" stop-color="${s.c}"/>`).join('');
     defs += f.gtype === 'lg' ? `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${f.x1}" y1="${f.y1}" x2="${f.x2}" y2="${f.y2}">${st}</linearGradient>` : `<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="${f.cx}" cy="${f.cy}" r="${f.r}">${st}</radialGradient>`; return `url(#${id})`; };
+  // The outer symbol is drawn as two exact half paths, as the live canvas draws it. (Built from a circle and a half-box clipped
+  // to the disc, the browser smooths the clip edge on top of the shapes' own edges: the right half's rim came out about
+  // 0.2 px small and the left half's slightly large, so the symbol sat a little off centre in the file.) A Lobe-B disc
+  // stopping just inside the rim backs the shared S-curve so that seam stays clean. Inner symbols in the eyes keep the
+  // simpler clipped form.
+  const P1 = 'M0 -1A1 1 0 0 0 0 1A0.5 0.5 0 0 1 0 0A0.5 0.5 0 0 0 0 -1Z', P2 = 'M0 -1A1 1 0 0 1 0 1A0.5 0.5 0 0 1 0 0A0.5 0.5 0 0 0 0 -1Z';
   const sym = (Fs, level) => {
-    let o = `<circle r="1" fill="${ref(Fs.lobe2)}"/><rect x="-1" y="-1" width="1" height="2" fill="${ref(Fs.lobe1)}"/><circle cy="-0.5" r="0.5" fill="${ref(Fs.lobe1)}"/><circle cy="0.5" r="0.5" fill="${ref(Fs.lobe2)}"/>`;
-    if (S.stars) STARS.forEach(s => { o += `<circle cx="${n(s.x)}" cy="${n(s.y)}" r="${n(s.r)}" fill="${s.c}" opacity="${s.o.toFixed(2)}"/>`; });
+    let o;
+    if (level === 0){ const l2 = ref(Fs.lobe2); o = `<path d="${P2}" fill="${l2}"/><circle r="${n(1 - 1.25 / 437)}" fill="${l2}"/><path d="${P1}" fill="${ref(Fs.lobe1)}"/>`; }
+    else o = `<circle r="1" fill="${ref(Fs.lobe2)}"/><rect x="-1" y="-1" width="1" height="2" fill="${ref(Fs.lobe1)}"/><circle cy="-0.5" r="0.5" fill="${ref(Fs.lobe1)}"/><circle cy="0.5" r="0.5" fill="${ref(Fs.lobe2)}"/>`;
+    if (S.stars){ let st = ''; STARS.forEach(s => { st += `<circle cx="${n(s.x)}" cy="${n(s.y)}" r="${n(s.r)}" fill="${s.c}" opacity="${s.o.toFixed(2)}"/>`; }); o += level === 0 ? `<g clip-path="url(#uc)">${st}</g>` : st; }
     [['eye1', G.c1, G.e1, 'upper'], ['eye2', G.c2, G.e2, 'lower']].forEach(([k, cy, r, w]) => {
       const inner = level < Math.min(5, fr.depth) && (fr.eyes === 'both' || fr.eyes === w) && r * (1 - fr.ring) * 437 * Math.pow(.3, level) > .5;
       if (!inner || fr.ring >= .005) o += `<circle cy="${cy}" r="${n(r)}" fill="${ref(Fs[k])}"/>`;
@@ -3364,8 +3373,8 @@ function buildVectorSVG(){
     // construction circles and axes turn with the symbol, as on the stage
     const dash = `stroke-dasharray="${n(7 / 437)} ${n(5 / 437)}"`, sw = n(1.1 / 437), gl = `stroke="rgba(213,181,122,.9)" stroke-width="${sw}" fill="none"`;
     const tF = 2 / Math.hypot(1, G.c2);
-    body += `<g ${gl} ${dash}><circle r="1"/><circle cy="${G.c1}" r="${G.r1}"/><circle cy="${G.c2}" r="${G.r2}"/><circle cy="${G.c1}" r="${n(G.e1)}"/><circle cy="${G.c2}" r="${n(G.e2)}"/>` +
-      `<line x1="0" y1="-1.04" x2="0" y2="1.04"/><line x1="-1.04" y1="0" x2="1.04" y2="0"/></g><line ${gl} x1="1" y1="0" x2="${n(1 - tF / Math.hypot(1, G.c2))}" y2="${n(G.c2 * tF / Math.hypot(1, G.c2))}"/>`;
+    body += `<g clip-path="url(#uc)"><g ${gl} ${dash}><circle r="1"/><circle cy="${G.c1}" r="${G.r1}"/><circle cy="${G.c2}" r="${G.r2}"/><circle cy="${G.c1}" r="${n(G.e1)}"/><circle cy="${G.c2}" r="${n(G.e2)}"/>` +
+      `<line x1="0" y1="-1.04" x2="0" y2="1.04"/><line x1="-1.04" y1="0" x2="1.04" y2="0"/></g><line ${gl} x1="1" y1="0" x2="${n(1 - tF / Math.hypot(1, G.c2))}" y2="${n(G.c2 * tF / Math.hypot(1, G.c2))}"/></g>`;
   }
   let bag = '';
   if (S.fx.bagua !== 'off'){
@@ -3374,7 +3383,7 @@ function buildVectorSVG(){
       bag += `<g transform="rotate(${n(deg)})" fill="${S.fx.baguaCol}">${lines}</g>`; });
     bag += `<circle r="1.012" fill="none" stroke="${S.fx.baguaCol}" stroke-opacity=".45" stroke-width="0.0025"/><circle r="1.111" fill="none" stroke="${S.fx.baguaCol}" stroke-opacity=".45" stroke-width="0.0025"/>`;
   }
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<!-- Yin Yang Generator · github.com/Sacred-Geometry/YinYangGenerator · Eye:Lobe = ${S.eyeRatio.toFixed(9)} -->\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">\n<defs><clipPath id="uc" clipPathUnits="userSpaceOnUse"><circle r="1"/></clipPath>${defs}</defs>\n${bg}\n<g transform="translate(500 500) scale(${n(k)})">\n<g transform="${flips}" clip-path="url(#uc)">${body}</g>${bag}${S.fx.guides ? caliperSVG() : ''}\n</g>\n</svg>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<!-- Yin Yang Generator · github.com/Sacred-Geometry/YinYangGenerator · Eye:Lobe = ${S.eyeRatio.toFixed(9)} -->\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">\n<defs><clipPath id="uc" clipPathUnits="userSpaceOnUse"><circle r="1"/></clipPath>${defs}</defs>\n${bg}\n<g transform="translate(500 500) scale(${n(k)})">\n<g transform="${flips}">${body}</g>${bag}${S.fx.guides ? caliperSVG() : ''}\n</g>\n</svg>`;
 }
 function exportSVG(){
   const txt = buildVectorSVG();
