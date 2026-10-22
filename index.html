@@ -280,6 +280,15 @@ input[type=range]::-moz-range-progress{background:var(--jade);height:4px;border-
 /* resizable float: drag the corner grip; the body fills whatever size it is given */
 .float.rs{display:flex;flex-direction:column;min-width:260px;min-height:160px;max-height:calc(100vh - 16px)}
 #constFloat{width:380px}
+/* Φ rim diagnostic, folded down: what stays on screen when Design constants is closed with a test view on */
+#rimFloat{width:auto;max-width:calc(100vw - 16px)}
+#rimFloat .float-bar{gap:12px;padding:7px 8px 7px 12px}
+#rimFloat .float-b{padding:10px 12px 11px;gap:7px}
+#rimFloat .seg button{flex:none;padding:6px 10px}
+.float-acts{display:flex;align-items:center;gap:2px}
+.float-acts .float-x{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:5px}
+.float-acts .float-x:hover{background:var(--surface-3)}
+.rim-note{margin:0;font-size:11px;line-height:1.4;color:var(--mute);max-width:290px}
 .float.rs .float-b{flex:1;min-height:0;max-height:none}
 .float.rs.sized .float-b{max-height:none}
 .float-rs{position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;touch-action:none;
@@ -673,6 +682,16 @@ body.focus .stage-col{padding-right:max(16px,env(safe-area-inset-right,0px))}
   <span class="float-rs" data-resize="constFloat" aria-hidden="true"></span>
 </div>
 
+<!-- The rim diagnostic folded down: shown when Design constants is closed while a test view is on. Its ✕ appears once
+     Normal is chosen, so a test view can't be left on screen with nothing to switch it back. -->
+<div class="float" id="rimFloat" role="dialog" aria-label="Φ rim diagnostic" hidden>
+  <div class="float-bar" data-drag="rimFloat"><span class="float-t">Φ rim diagnostic</span><span class="float-acts"><button class="float-x" type="button" id="rimExpand" title="Open Design constants" aria-label="Open Design constants">⤢</button><button class="float-x" type="button" id="rimClose" title="Close" aria-label="Close">✕</button></span></div>
+  <div class="float-b">
+    <div class="seg" id="rimSeg" role="group" aria-label="Rim diagnostic view"><button type="button" data-v="off">Normal</button><button type="button" data-v="target">Caliper target</button><button type="button" data-v="edge">Outer edge only</button></div>
+    <p class="rim-note" id="rimNote"></p>
+  </div>
+</div>
+
 <div class="float" id="geoFloat" role="dialog" aria-label="Measure intersection points" hidden>
   <div class="float-bar" data-drag="geoFloat"><span class="float-t">Measure · intersection points</span><button class="float-x" type="button" id="geoClose" aria-label="Close">✕</button></div>
   <div class="float-b" id="geoBody"></div>
@@ -954,6 +973,8 @@ let simTime = 0;          // seconds of animation time (scaled by speed)
 let measureMode = 'off';
 let rimTestMode = 'off'; // off | target | edge: controlled outer-rim visual diagnostics
 const HUB_R = Math.pow(LIT_phi, 7);   // centre circle of the Caliper target: φ⁷ ≈ 0.034442 of the symbol radius
+// Colours of the two rim diagnostics (canvas, vector form and the contrast readout share them)
+const RIM_TEST = {target:{bg:'#FFFFFF', disc:'#000000', hub:'#F2EEE3', mark:'#FFE680'}, edge:{bg:'#FBF8F0', disc:'#CFC4A8', dot:'#FFC400'}};
 
 // ════════════════════════════════════════════════════════════════════
 //  PATTERNS — procedural, animated fills + uploaded images
@@ -1507,7 +1528,65 @@ function drawGuides(ctx, G, px){
   ctx.fillText('A', 1.02, -.02); ctx.restore();
 }
 
-// Draw the full symbol layer into ctx (cleared) — W px square covering [-ext, ext]²
+// ── Exact outer rim ─────────────────────────────────────────────────
+// The rim is where the Φ check is read, so its edge pixels are not left to the graphics chip's edge smoothing, which can
+// draw the circle a few hundredths of a pixel small, and by different amounts in different directions. Once the symbol is
+// drawn, every pixel near the rim is given an alpha equal to the exact area of that pixel inside the circle, worked out in
+// the page; its colour stays what was drawn there. The circle is then the same at every size and on every machine.
+// discArea: exact area of the disc x² + y² ≤ r² inside the rectangle [x0, x1] × [y0, y1]
+function discArea(x0, x1, y0, y1, r){
+  const r2 = r * r, H = x => { x = x < -r ? -r : x > r ? r : x; return .5 * (x * Math.sqrt(Math.max(0, r2 - x * x)) + r2 * Math.asin(x / r)); };
+  const quad = (a0, a1, b0, b1) => {   // one quadrant: 0 ≤ a0 ≤ a1, 0 ≤ b0 ≤ b1
+    if (a0 >= r || b0 >= r) return 0;
+    const xa = b1 >= r ? 0 : Math.sqrt(r2 - b1 * b1), xb = Math.sqrt(r2 - b0 * b0), lo = Math.max(a0, xa), hi = Math.min(a1, xb);
+    return (a0 < xa ? (b1 - b0) * (Math.min(a1, xa) - a0) : 0) + (hi > lo ? H(hi) - H(lo) - b0 * (hi - lo) : 0);
+  };
+  const split = (a, b) => b <= 0 ? [[-b, -a]] : a >= 0 ? [[a, b]] : [[0, -a], [0, b]];
+  let s = 0; for (const [a0, a1] of split(x0, x1)) for (const [b0, b1] of split(y0, y1)) s += quad(a0, a1, b0, b1);
+  return s;
+}
+// The pixels from 1.5 px inside to 2.5 px outside a rim of radius r centred on a W px box, with each one's exact alpha
+// and a pixel 1.5 px further in (whose colour stands in where almost nothing was drawn). Kept per size.
+const RIM_LISTS = new Map();
+function rimList(W, r){
+  const key = W + '|' + r.toFixed(9); let L = RIM_LISTS.get(key); if (L) return L;
+  if (RIM_LISTS.size > 12) RIM_LISTS.clear();
+  const c = W / 2, lo = Math.max(0, r - 1.5), hi = r + 2.5, idx = [], al = [], nb = [];
+  for (let j = Math.max(0, Math.floor(c - hi)); j <= Math.min(W - 1, Math.ceil(c + hi)); j++){
+    const y = j + .5 - c; if (Math.abs(y) > hi) continue;
+    const xo = Math.sqrt(hi * hi - y * y), xi = Math.abs(y) < lo ? Math.sqrt(lo * lo - y * y) : 0;
+    const spans = xi > 0 ? [[-xo, -xi], [xi, xo]] : [[-xo, xo]];
+    for (const [a, b] of spans) for (let i = Math.max(0, Math.floor(c + a - .5)); i <= Math.min(W - 1, Math.ceil(c + b - .5)); i++){
+      const x = i + .5 - c, d = Math.hypot(x, y); if (d < lo || d > hi) continue;
+      const m = d < r - .75 ? 1 : d > r + .75 ? 0 : discArea(i - c, i + 1 - c, j - c, j + 1 - c, r), k = d > 0 ? 1.5 / d : 0;
+      idx.push(j * W + i); al.push(Math.round(m * 255));
+      nb.push(clamp(Math.floor(c + y * (1 - k)), 0, W - 1) * W + clamp(Math.floor(c + x * (1 - k)), 0, W - 1));
+    }
+  }
+  L = {idx:Int32Array.from(idx), al:Uint8Array.from(al), nb:Int32Array.from(nb)}; RIM_LISTS.set(key, L); return L;
+}
+// Give a drawn layer (on a canvas the page can read) its exact rim
+function exactRim(g, W, r){
+  const L = rimList(W, r), im = g.getImageData(0, 0, W, W), d = im.data, n = L.idx.length;
+  for (let k = 0; k < n; k++){
+    const p = L.idx[k] * 4, a = L.al[k];
+    if (a && d[p + 3] < 12){ const s = L.nb[k] * 4; d[p] = d[s]; d[p + 1] = d[s + 1]; d[p + 2] = d[s + 2]; }
+    d[p + 3] = a;
+  }
+  g.putImageData(im, 0, 0);
+}
+// Still frames, exports and audits are drawn on this readable canvas so the rim can be made exact; while the symbol is
+// animating, the faster graphics-chip canvas (symCv) is used instead.
+const symCvX = document.createElement('canvas'); symCvX.getContext('2d', {willReadFrequently:true});
+// A plain disc of one colour with an exact rim (the rim diagnostics)
+function exactDisc(W, r, col){
+  const g = sizeCanvas(symCvX, W); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.clearRect(0, 0, W, W);
+  g.fillStyle = col; g.beginPath(); g.arc(W / 2, W / 2, r + 1.5, 0, TAU); g.fill();   // a little oversize, so every rim pixel holds the colour
+  exactRim(g, W, r); return symCvX;
+}
+
+// Draw the full symbol layer into ctx (cleared) — W px square covering [-ext, ext]².
+// o.exactRim: give the outer rim exact pixel areas (ctx must be readable, i.e. symCvX)
 function drawSymbolLayer(ctx, W, t, q, ext, o = {}){
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, W);
   const px = W / (2 * ext), G = geomAt(t), F = effFills(), fr = S.fractal;
@@ -1532,6 +1611,7 @@ function drawSymbolLayer(ctx, W, t, q, ext, o = {}){
     if (inv) F0 = invertFills(F);
   }
   drawSymbol(ctx, env, G, F0, lv0);
+  if (o.exactRim) exactRim(ctx, W, px);   // alpha at the rim = exact pixel area (the transform and clip don't apply to pixel access)
   if (S.fx.guides && !diveOn()) drawGuides(ctx, G, Math.hypot(ctx.getTransform().a, ctx.getTransform().b));
   ctx.restore();
   if (S.style === 'glow' && !o.noGlow) glowPass(ctx, W, px);
@@ -1805,31 +1885,33 @@ function drawScene(ctx, W, t, q, o = {}){
   const Rp = px, cx = W / 2, cy = W / 2;
 
   // Controlled rim diagnostics, drawn by the same device-pixel canvas as the live display, so the test and the
-  // thing being measured share one renderer. Both are a plain disc of radius 1 in the Phi box; only colours differ.
-  //   target · black disc on white, with an off-white centre circle of radius φ⁷ (exactly 1⁄Φ⁷ of the outer radius)
-  //            and white cross hairs, so a caliper point can be set on the centre against a light patch
-  //   edge   · pale-gold disc on off-white with white cross hairs at the centre
+  // thing being measured share one renderer. Both are a plain disc of radius 1 in the Phi box; only colours differ,
+  // and the disc's rim has exact pixel areas, like the symbol's.
+  //   target · black disc on white, with an off-white centre circle of radius φ⁷ (exactly 1⁄Φ⁷ of the outer radius),
+  //            white cross hairs across the disc and a light-yellow cross inside the centre circle
+  //   edge   · pale-gold disc on off-white with white cross hairs and a tiny yellow dot on the exact centre
   if (rimTestMode !== 'off'){
     // The box side is even, so the centre sits on a pixel corner: lines exactly 2 screen px wide cover two whole pixels
-    // and stay solid (a 1 px line there would be split into two half-strength grey pixels).
+    // and stay solid (a 1 px line there would be split into two half-strength pixels).
     const target = rimTestMode === 'target', ui = q === 'export' ? 1 : (window.devicePixelRatio || 1), u = ui / px, w2 = 2 / px;
-    const bg = target ? '#FFFFFF' : '#fbf8f0', disc = target ? '#000000' : '#cfc4a8';
+    const bg = target ? RIM_TEST.target.bg : RIM_TEST.edge.bg, disc = target ? RIM_TEST.target.disc : RIM_TEST.edge.disc;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = bg; ctx.fillRect(0, 0, W, W);
+    ctx.drawImage(exactDisc(W, px, disc), 0, 0);
     ctx.setTransform(px, 0, 0, px, cx, cy);
-    ctx.fillStyle = disc; ctx.beginPath(); ctx.arc(0, 0, 1, 0, TAU); ctx.fill();
     ctx.lineCap = 'butt';
     const cross = (a, b, col, w) => { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath();
       ctx.moveTo(-b, 0); ctx.lineTo(-a, 0); ctx.moveTo(a, 0); ctx.lineTo(b, 0); ctx.moveTo(0, -b); ctx.lineTo(0, -a); ctx.moveTo(0, a); ctx.lineTo(0, b); ctx.stroke(); };
     if (target){
       const hub = HUB_R;
       cross(hub, .94, '#FFFFFF', w2);                                     // white cross hairs across the black disc, clear of the rim
-      ctx.fillStyle = '#F2EEE3'; ctx.beginPath(); ctx.arc(0, 0, hub, 0, TAU); ctx.fill();
-      cross(0, hub * .72, '#3A3A3A', w2);                                 // fine centre mark inside the off-white circle
+      ctx.fillStyle = RIM_TEST.target.hub; ctx.beginPath(); ctx.arc(0, 0, hub, 0, TAU); ctx.fill();
+      cross(0, hub * .72, RIM_TEST.target.mark, w2);                      // light-yellow centre cross inside the off-white circle
     } else {
       const rr = 3.2 * u;
       ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(0, 0, rr, 0, TAU); ctx.fill();
       cross(rr, 14 * u, '#FFFFFF', w2);                                   // white cross hairs
+      ctx.fillStyle = RIM_TEST.edge.dot; ctx.beginPath(); ctx.arc(0, 0, Math.max(1.1 * u, 1.2 / px), 0, TAU); ctx.fill();   // tiny yellow dot on the centre
     }
     if (S.fx.guides) drawCaliper(ctx, W, px, q === 'export' ? 0 : ui);
     return;
@@ -1843,7 +1925,11 @@ function drawScene(ctx, W, t, q, o = {}){
   if (mode === 'coin') drawCoin(ctx, W, t, q, cx, cy, Rp);
   else if (mode === 'orb') drawOrb(ctx, W, t, q, cx, cy, Rp);
   else if (mode === 'halves'){ drawHalves(ctx, W, t, q, cx, cy, Rp); if (S.style === 'glow') glowPass(ctx, W, px); }
-  else { const sc = sizeCanvas(symCv, W); drawSymbolLayer(sc, W, t, q, Hh); ctx.drawImage(symCv, 0, 0); }
+  else {
+    // A still picture (and every export and audit) gets the exact rim; an animating one is left to the graphics chip
+    const exact = q !== 'live' || !S.motion.playing, lay = exact ? symCvX : symCv;
+    drawSymbolLayer(sizeCanvas(lay, W), W, t, q, Hh, {exactRim:exact}); ctx.drawImage(lay, 0, 0);
+  }
   if (S.fx.bagua !== 'off') drawBagua(ctx, W, px);
   // Calipers ride on the same canvas, in the same pixel grid and transform as the symbol, so they cannot drift from it
   if (S.fx.guides && S.d3.mode === 'flat') drawCaliper(ctx, W, px, q === 'export' ? 0 : (window.devicePixelRatio || 1));
@@ -1941,29 +2027,26 @@ function vectorInner(u, o = {}){
   const lobe1 = `M0 -1A1 1 0 0 0 0 1A${r2} ${r2} 0 0 1 0 ${j}A${r1} ${r1} 0 0 0 0 -1Z`;
   const lobe2 = `M0 -1A1 1 0 0 1 0 1A${r2} ${r2} 0 0 1 0 ${j}A${r1} ${r1} 0 0 0 0 -1Z`;
   const inset = 1 - 1.25 * u;
-  if (rimTestMode === 'edge'){
-    // Precision test: keep both surfaces light, so the circle edge is visible without
-    // the visual weight of a black disk. A small centre target makes the true centre
-    // easy to locate with physical calipers without changing the R=1 boundary.
-    // The target is deliberately far smaller than the geometric radius and is not
-    // used by any audit calculation.
-    const bg = '#fbf8f0', rim = '#cfc4a8', target = '#a99a78';
-    const u2 = n(Math.max(u * 1.2, .0015));
-    return `<rect x="${n(-Hh)}" y="${n(-Hh)}" width="${n(2 * Hh)}" height="${n(2 * Hh)}" fill="${bg}"/>` +
-      `<circle r="1" fill="${rim}"/>` +
-      `<circle r="${u2 * 3.2}" fill="${bg}" stroke="${target}" stroke-width="${u2 * .9}"/>` +
-      `<path d="M-${n(u2 * 7)} 0H${n(u2 * 7)} M0 -${n(u2 * 7)}V${n(u2 * 7)}" stroke="${target}" stroke-width="${u2 * .8}"/>`;
+  if (rimTestMode !== 'off'){
+    // The two rim diagnostics, as the canvas draws them (see drawScene). The centre marks are far smaller than the
+    // radius and no audit uses them.
+    const ui = o.ui || 1, cu = ui * u, w2 = n(2 * u), box = `<rect x="${n(-Hh)}" y="${n(-Hh)}" width="${n(2 * Hh)}" height="${n(2 * Hh)}"`;
+    const cross = (a, b, col) => `<path d="M${n(-b)} 0H${n(-a)}M${n(a)} 0H${n(b)}M0 ${n(-b)}V${n(-a)}M0 ${n(a)}V${n(b)}" stroke="${col}" stroke-width="${w2}" fill="none"/>`;
+    let g;
+    if (rimTestMode === 'target'){ const T = RIM_TEST.target;
+      g = `${box} fill="${T.bg}"/><circle r="1" fill="${T.disc}"/>` + cross(HUB_R, .94, '#FFFFFF') + `<circle r="${n(HUB_R)}" fill="${T.hub}"/>` + cross(0, HUB_R * .72, T.mark);
+    } else { const E = RIM_TEST.edge, rr = 3.2 * cu;
+      g = `${box} fill="${E.bg}"/><circle r="1" fill="${E.disc}"/><circle r="${n(rr)}" fill="${E.bg}"/>` + cross(rr, 14 * cu, '#FFFFFF') + `<circle r="${n(Math.max(1.1 * cu, 1.2 * u))}" fill="${E.dot}"/>`;
+    }
+    if (S.fx.guides) g += caliperSVG(Math.max(1.5 * cu, .0042), Math.max(.056, 12 * cu));
+    return g;
   }
-  const diagnosticMono = rimTestMode === 'target';
-  const bgFill = diagnosticMono ? '#ffffff' : col(S.bg);
-  const lobe1Fill = diagnosticMono ? '#000000' : col(F.lobe1);
-  const lobe2Fill = diagnosticMono ? '#000000' : col(F.lobe2);
-  let s = `<rect x="${n(-Hh)}" y="${n(-Hh)}" width="${n(2 * Hh)}" height="${n(2 * Hh)}" fill="${bgFill}"/>`;
-  s += `<g transform="${xf}"><path d="${lobe2}" fill="${lobe2Fill}"/>` + (inset > .5 ? `<circle r="${n(inset)}" fill="${lobe2Fill}"/>` : '') +
-    `<path d="${lobe1}" fill="${lobe1Fill}"/>` + (diagnosticMono ? '' : `<circle cy="${n(G.c1)}" r="${n(G.e1)}" fill="${col(F.eye1)}"/><circle cy="${n(G.c2)}" r="${n(G.e2)}" fill="${col(F.eye2)}"/>`);
+  let s = `<rect x="${n(-Hh)}" y="${n(-Hh)}" width="${n(2 * Hh)}" height="${n(2 * Hh)}" fill="${col(S.bg)}"/>`;
+  s += `<g transform="${xf}"><path d="${lobe2}" fill="${col(F.lobe2)}"/>` + (inset > .5 ? `<circle r="${n(inset)}" fill="${col(F.lobe2)}"/>` : '') +
+    `<path d="${lobe1}" fill="${col(F.lobe1)}"/><circle cy="${n(G.c1)}" r="${n(G.e1)}" fill="${col(F.eye1)}"/><circle cy="${n(G.c2)}" r="${n(G.e2)}" fill="${col(F.eye2)}"/>`;
   if (S.fx.guides){
     // the same construction guides as the canvas: circles and axes, then the line from A through the lower lobe centre
-    const ink = rimTestMode !== 'off' ? '#FFFFFF' : 'rgba(213,181,122,.9)', shade = rimTestMode !== 'off' ? 'rgba(0,0,0,.7)' : 'rgba(0,0,0,.35)', dash = `stroke-dasharray="${n(7 * u)} ${n(5 * u)}"`;
+    const ink = 'rgba(213,181,122,.9)', shade = 'rgba(0,0,0,.35)', dash = `stroke-dasharray="${n(7 * u)} ${n(5 * u)}"`;
     const L = Math.hypot(1, G.c2), ux = -1 / L, uy = G.c2 / L, tF = -2 * ux;
     const dashed = `<circle r="1"/><circle cy="${n(G.c1)}" r="${r1}"/><circle cy="${n(G.c2)}" r="${r2}"/><circle cy="${n(G.c1)}" r="${n(G.e1)}"/><circle cy="${n(G.c2)}" r="${n(G.e2)}"/><path d="M0 -1.04V1.04M-1.04 0H1.04"/>`;
     const solidL = `<path d="M1 0L${n(1 + ux * tF)} ${n(uy * tF)}"/>`;
@@ -2358,10 +2441,81 @@ function updateHeaderConstants(){
 // view, by the canvas renderer otherwise — at a given size, on solid red with a plain black-and-white symbol, and pasted
 // 1 : 1 onto a green margin. Everything is then recovered from the pixels alone:
 //   • the box: its four edges (red ↔ green, sub-pixel), hence its centre and its four corners;
-//   • the rim: from that centre outward along the four side midlines and the four corner diagonals (grey ↔ red, sub-pixel).
+//   • the rim: from pixel areas (rimByArea below) — the whole covered area, the centre of that area, and the rim's
+//     distance in 8 directions (the four sides and the four corners).
 // No construction constant (R, SYM_K, viewHalf, BOX, Φ) enters the measurement. "Centre → corner ÷ rim radius" is therefore
 // a real test of the picture, and "caliper miss" is how far a golden-section caliper's mark would land from the drawn rim.
 const AUDIT = new Map(), AUDIT_SCALES = [1, 1.25, 1.5, 1.75, 2], AUDIT_M = 6, auditJobs = [];
+
+// ── Rim from pixel areas ────────────────────────────────────────────
+// Sampling the picture along a line to a corner reads the rim up to 0.05 px off, by an amount that depends on where the rim
+// happens to cross the pixel grid on that diagonal — so the reading changed with the box size even for a perfect circle.
+// Areas don't have that problem. Pixels well inside a first guess R0 count as fully covered; every pixel near the rim
+// counts with its measured coverage. Then:
+//   • rim radius     √(covered area ⁄ π)
+//   • symbol centre  the centre of the covered area
+//   • rim distance in a direction θ: the covered area inside a narrow wedge θ ± 7.5° from the centre, A, gives √(A ⁄ 7.5°).
+//     Pixels the wedge's sides cut are split exactly; a rim pixel cut by a side is split along the rim's own edge.
+// For a circle drawn with exact pixel areas this returns the radius to about a thousandth of a pixel at any size.
+const RIM_DIRS = [Math.PI, 0, -Math.PI / 2, Math.PI / 2, -3 * Math.PI / 4, -Math.PI / 4, 3 * Math.PI / 4, Math.PI / 4];   // ← → ↑ ↓ ↖ ↗ ↙ ↘
+const RIM_DW = Math.PI / 24;
+const RIM_SIDES = RIM_DIRS.map(th => [Math.cos(th - RIM_DW), Math.sin(th - RIM_DW), Math.cos(th + RIM_DW), Math.sin(th + RIM_DW)]);
+// index into RIM_DIRS of the direction nearest an angle, looked up by round(angle ⁄ 45°) + 4  (−180° … 180°)
+const RIM_NEAR = [0, 4, 2, 5, 1, 7, 3, 6, 0];
+// Sutherland–Hodgman: the part of polygon P (flat x, y list) where f(x, y) ≥ 0
+function clipPoly(P, f){
+  const out = [], n = P.length;
+  for (let i = 0; i < n; i += 2){
+    const ax = P[i], ay = P[i + 1], bx = P[(i + 2) % n], by = P[(i + 3) % n], fa = f(ax, ay), fb = f(bx, by);
+    if (fa >= 0) out.push(ax, ay);
+    if ((fa >= 0) !== (fb >= 0)){ const t = fa / (fa - fb); out.push(ax + (bx - ax) * t, ay + (by - ay) * t); }
+  }
+  return out;
+}
+function polyArea(P){ let s = 0; const n = P.length; for (let i = 0; i < n; i += 2){ const j = (i + 2) % n; s += P[i] * P[j + 1] - P[j] * P[i + 1]; } return Math.abs(s) / 2; }
+// The pixel [x0, x0+1] × [y0, y0+1] (relative to the centre), clipped to wedge k
+function wedgePoly(x0, y0, k){
+  const [c1, s1, c2, s2] = RIM_SIDES[k];
+  let P = clipPoly([x0, y0, x0 + 1, y0, x0 + 1, y0 + 1, x0, y0 + 1], (x, y) => c1 * y - s1 * x);
+  if (P.length >= 6) P = clipPoly(P, (x, y) => s2 * x - c2 * y);
+  return P.length >= 6 ? P : null;
+}
+// How much of a partly covered pixel lies inside wedge k, splitting the pixel along a straight rim edge that is square to
+// the direction from the centre and leaves the measured coverage m on the inner side
+function rimPixelInWedge(x0, y0, m, k){
+  const P = wedgePoly(x0, y0, k); if (!P) return 0;
+  const mx = x0 + .5, my = y0 + .5, d = Math.hypot(mx, my), ux = mx / d, uy = my / d, sq = [x0, y0, x0 + 1, y0, x0 + 1, y0 + 1, x0, y0 + 1];
+  const inner = (poly, rho) => polyArea(clipPoly(poly, (x, y) => rho - ux * x - uy * y));
+  let lo = d - .75, hi = d + .75;
+  for (let it = 0; it < 32; it++){ const mid = (lo + hi) / 2; if (inner(sq, mid) < m) lo = mid; else hi = mid; }
+  return inner(P, (lo + hi) / 2);
+}
+// cov(i, j): measured coverage of pixel (i, j), 0 … 1; (cx, cy): centre in pixel units; R0: first guess of the radius;
+// lim: [i0, i1, j0, j1], the pixels that may be read
+function rimByArea(cov, cx, cy, R0, lim){
+  const inR = R0 - 2.5, outR = R0 + 3, aw = new Float64Array(8);
+  let A = 0, sx = 0, sy = 0;
+  const i0 = Math.max(lim[0], Math.floor(cx - outR)), i1 = Math.min(lim[1], Math.ceil(cx + outR)), j0 = Math.max(lim[2], Math.floor(cy - outR)), j1 = Math.min(lim[3], Math.ceil(cy + outR));
+  for (let j = j0; j <= j1; j++){
+    const y0 = j - cy, y = y0 + .5;
+    for (let i = i0; i <= i1; i++){
+      const x0 = i - cx, x = x0 + .5, d = Math.hypot(x, y); if (d > outR) continue;
+      const m = d < inR ? 1 : cov(i, j); if (!(m > 0)) continue;
+      A += m; sx += m * x; sy += m * y;
+      const ang = Math.atan2(y, x), del = d > 1 ? Math.asin(Math.min(1, .7072 / d)) : 4;
+      // wedges sit 45° apart with 30° gaps, so beyond 3 px from the centre a pixel can only touch the nearest one
+      const k0 = d > 3 ? RIM_NEAR[Math.round(ang / (Math.PI / 4)) + 4] : 0, k1 = d > 3 ? k0 : 7;
+      for (let k = k0; k <= k1; k++){
+        let df = ang - RIM_DIRS[k]; if (df > Math.PI) df -= TAU; else if (df < -Math.PI) df += TAU;
+        const a = Math.abs(df); if (a >= RIM_DW + del) continue;
+        if (a <= RIM_DW - del) aw[k] += m;
+        else if (m >= 1) { const P = wedgePoly(x0, y0, k); if (P) aw[k] += polyArea(P); }
+        else aw[k] += rimPixelInWedge(x0, y0, m, k);
+      }
+    }
+  }
+  return {A, R:Math.sqrt(A / Math.PI), ox:sx / A, oy:sy / A, rad:Array.from(aw, v => Math.sqrt(v / RIM_DW))};
+}
 function withAuditLook(fn){
   const keep = {rt:rimTestMode, bg:S.bg, fills:S.fills, fx:S.fx, stars:S.stars, style:S.style, d3:S.d3, rot:S.rot, flipH:S.flipH, flipV:S.flipV, da:dragAngle, mot:S.motion, fr:S.fractal};
   try {
@@ -2401,29 +2555,31 @@ function analyseAudit(img, W){
   const left = avg(lines.map(y => edgeIn(P(0, y), col))), right = N - avg(lines.map(y => edgeIn(P(N - 1, y), -col)));
   const top = avg(lines.map(x => edgeIn(P(x, 0), row))), bottom = N - avg(lines.map(x => edgeIn(P(x, N - 1), -row)));
   const bw = right - left, bh = bottom - top, cx = (left + right) / 2, cy = (top + bottom) / 2;
+  if (![bw, bh, cx, cy].every(isFinite)) return null;
   // Rim. Inside the box a pixel is red over grey (black, white or their mix at the S-curve), so its symbol coverage is
-  // 1 − (r − g) ⁄ 255 exactly, whatever the grey. Integrating it outward from the centre gives the rim distance on that ray.
+  // 1 − (r − g) ⁄ 255 exactly, whatever the grey.
   const sym = (x, y) => { const i = P(x, y); return Math.min(1, Math.max(0, 1 - (img[i] - img[i + 1]) / 255)); };
-  const at = (x, y) => { const fx = x - .5, fy = y - .5, x0 = Math.floor(fx), y0 = Math.floor(fy), tx = fx - x0, ty = fy - y0;
-    return (sym(x0, y0) * (1 - tx) + sym(x0 + 1, y0) * tx) * (1 - ty) + (sym(x0, y0 + 1) * (1 - tx) + sym(x0 + 1, y0 + 1) * tx) * ty; };
-  const ray = (ux, uy, L) => { const step = 1 / 16; let s = 0; for (let t = step / 2; t < L; t += step) s += at(cx + ux * t, cy + uy * t) * step; return s; };
-  const k = Math.SQRT1_2, hx = bw / 2, hy = bh / 2, hd = Math.hypot(hx, hy);
-  const mid = [[-1, 0, hx], [1, 0, hx], [0, -1, hy], [0, 1, hy]].map(([ux, uy, L]) => ray(ux, uy, L - 3));   // left, right, top, bottom
-  const diag = [[-k, -k], [k, -k], [-k, k], [k, k]].map(([ux, uy]) => ray(ux, uy, hd - 4));                  // ↖ ↗ ↙ ↘
-  const all = mid.concat(diag), Rm = avg(all), D = hd;
-  const cornerRatios = diag.map(r => D / r);
-  const cornerMarks = diag.map(r => D / BIG_PHI - r);
-  const cornerSpread = Math.max(...cornerMarks) - Math.min(...cornerMarks);
-  return {W, box:{left:left - M, top:top - M, w:bw, h:bh}, mid, diag, R:Rm, Rmin:Math.min(...all), Rmax:Math.max(...all),
-    D, gap:D - avg(diag), ratio:D / Rm, gapRatio:(D - avg(diag)) / Rm,
+  const lim = [Math.ceil(left), Math.floor(right) - 1, Math.ceil(top), Math.floor(bottom) - 1];
+  // first guess: the two pixel rows through the centre each hold a chord of about 2R
+  const jc = Math.floor(cy - .5); let chord = 0; for (let i = lim[0]; i <= lim[1]; i++) chord += sym(i, jc) + sym(i, jc + 1);
+  const hx = bw / 2, hy = bh / 2, D = Math.hypot(hx, hy);
+  const box = rimByArea(sym, cx, cy, chord / 4, lim);                                   // from the box centre: sides, centring
+  const own = rimByArea(sym, cx + box.ox, cy + box.oy, box.R, lim);                     // from the symbol's own centre: corners
+  const rad = box.rad, diag = own.rad.slice(4), Dc = CORNERS.map(C => Math.hypot(C.sx * hx - box.ox, C.sy * hy - box.oy));
+  const cornerRatios = diag.map((r, i) => Dc[i] / r);
+  const cornerMarks = diag.map((r, i) => Dc[i] / BIG_PHI - r);
+  const cornerSpread = Math.max(...cornerMarks) - Math.min(...cornerMarks), avgDiag = avg(diag);
+  return {W, box:{left:left - M, top:top - M, w:bw, h:bh}, mid:rad.slice(0, 4), diag, R:box.R, Rmin:Math.min(...rad), Rmax:Math.max(...rad),
+    D, gap:D - avgDiag, ratio:D / box.R, gapRatio:(D - avgDiag) / box.R,
     cornerRatios, cornerMarks, cornerSpread,
-    sideGap:[hx - mid[0], hx - mid[1], hy - mid[2], hy - mid[3]],
+    sideGap:[hx - rad[0], hx - rad[1], hy - rad[2], hy - rad[3]],
     miss:Math.max(...cornerMarks.map(v => Math.abs(v))),              // Φ is compared only with independently measured rim positions
-    offX:(mid[1] - mid[0]) / 2, offY:(mid[3] - mid[2]) / 2};
+    offX:box.ox, offY:box.oy};
 }
-// Audits run one at a time in the background and are remembered; the panel redraws as each one lands.
+// Audits run one at a time in the background and are remembered; the panel redraws as each one lands. Box and rim are all
+// they measure, and the eyes never reach the rim, so an audit is kept per renderer and size (not redone per eye size).
 function requestAudit(kind, W){
-  const key = kind + '|' + W + '|' + S.eyeRatio.toFixed(9);
+  const key = kind + '|' + W;
   if (AUDIT.has(key)) return AUDIT.get(key);
   if (AUDIT.size > 60) AUDIT.clear();
   AUDIT.set(key, 'pending'); auditJobs.push({key, kind, W}); if (auditJobs.length === 1) setTimeout(runAuditJob, 0);
@@ -2465,17 +2621,18 @@ function rimFillAt(sx, sy){
 
 // ── Screen check: the real pixels on this screen ─────────────────────
 // The pixel audit above tests the picture the page draws. This tests what actually reaches the screen. Chrome is asked to
-// share this tab; for a moment the box shows a plain test card (mid-grey box, white and black halves, black surround, so
-// both rims have the same contrast); one frame is captured at the screen's own resolution; sharing stops at once.
-// The box's edges, the rim in 16 directions, the symbol's centre and the four corners are then found in that frame from
-// the pixels alone, and each corner gets the caliper test as calipers on the glass do it: from the symbol's centre to
-// the box corner, does the Φ mark land on the rim? The frame never leaves the page.
+// share this tab; for a moment the box shows a plain test card (a white disc on a mid-grey box, black around the box, so
+// all four corners look alike); frames are taken until one shows the card where the page has it; sharing stops at once.
+// The box's edges, the rim (from pixel areas, as in the audit), the symbol's centre and the four corners are then found in
+// that frame from the pixels alone, and each corner gets the caliper test as calipers on the glass do it: from the symbol's
+// centre to the box corner, does the Φ mark land on the rim? The frame never leaves the page.
 let screenResult = null;
 const testKeep = {on:false};
 function testCard(on){
   if (on && !testKeep.on){
     Object.assign(testKeep, {on:true, rt:rimTestMode, bg:S.bg, fills:S.fills, fx:S.fx, stars:S.stars, style:S.style, d3:S.d3, fr:S.fractal, mot:S.motion, mm:measureMode});
-    S.bg = solid('#808080'); S.fills = {lobe1:solid('#ffffff'), lobe2:solid('#000000'), eye1:solid('#000000'), eye2:solid('#ffffff')};
+    const white = solid('#ffffff');
+    S.bg = solid('#808080'); S.fills = {lobe1:white, lobe2:white, eye1:white, eye2:white};
     S.fx = Object.assign({}, S.fx, {guides:false, aura:false, bagua:'off', bolt:false}); S.stars = false; S.style = 'flat';
     S.d3 = Object.assign({}, S.d3, {mode:'flat'}); S.fractal = Object.assign({}, S.fractal, {depth:0}); S.motion = Object.assign({}, S.motion, {playing:false});
     rimTestMode = 'off'; if (measureMode !== 'off'){ measureMode = 'off'; renderOverlay(); }
@@ -2493,32 +2650,67 @@ async function settleLayout(){
   let last = '', same = 0;
   for (let i = 0; i < 40 && same < 3; i++){ await sleep(100); const s = layoutSig() + '|' + BOX.dev + '|' + (needsDraw ? 1 : 0); same = s === last ? same + 1 : 0; last = s; }
 }
-// Wait for n fresh frames from the capture (or give up on each after a while: a still page may send few frames)
-async function videoFrames(video, n){
-  for (let i = 0; i < n; i++){
-    await Promise.race([new Promise(r => video.requestVideoFrameCallback ? video.requestVideoFrameCallback(() => r()) : setTimeout(r, 80)), sleep(700)]);
+// The next frame from the capture: ImageCapture where Chrome has it, else the (playing) video element
+async function nextFrame(video, cap){
+  if (cap){ try { const b = await Promise.race([cap.grabFrame(), sleep(1200).then(() => null)]); if (b) return b; } catch (e){} }
+  await Promise.race([new Promise(r => video.requestVideoFrameCallback ? video.requestVideoFrameCallback(() => r()) : setTimeout(r, 80)), sleep(400)]);
+  return video;
+}
+// Chrome sends a captured frame only when the page changes, and may hand back a frame from before the test card or before
+// the "sharing this tab" bar moved the box (measuring such a frame is what used to report NaN). So each frame is checked
+// before it is used: black just outside the box's edges, grey just inside them, white at the centre.
+function cardSeen(g, W, H, rect, sx, sy){
+  const ex = rect.left * sx, ey = rect.top * sy, ew = rect.width * sx, eh = rect.height * sy;
+  if (ex < 8 || ey < 8 || ex + ew > W - 8 || ey + eh > H - 8 || ew < 40) return false;
+  const L = (x, y) => { const p = g.getImageData(Math.round(x), Math.round(y), 1, 1).data; return .2126 * p[0] + .7152 * p[1] + .0722 * p[2]; };
+  for (const t of [.25, .5, .75]){
+    const ins = [L(ex + 5, ey + eh * t), L(ex + ew - 6, ey + eh * t), L(ex + ew * t, ey + 5), L(ex + ew * t, ey + eh - 6)];
+    const out = [L(ex - 6, ey + eh * t), L(ex + ew + 5, ey + eh * t), L(ex + ew * t, ey - 6), L(ex + ew * t, ey + eh + 5)];
+    if (ins.some(v => v < 88 || v > 168) || out.some(v => v > 50)) return false;
   }
+  return L(ex + ew / 2, ey + eh / 2) > 200;
 }
 async function screenCheck(){
   if (screenResult && screenResult.state === 'running') return;
   screenResult = {state:'running'}; updateLiveConst();
-  let stream = null;
+  let stream = null, video = null, beat = null, beatT = 0;
   try {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) throw new Error('This browser cannot capture its own tab. Chrome and Edge can.');
     stream = await navigator.mediaDevices.getDisplayMedia({video:{cursor:'never', frameRate:{ideal:30}, width:{ideal:Math.round(innerWidth * (window.devicePixelRatio || 1))}, height:{ideal:Math.round(innerHeight * (window.devicePixelRatio || 1))}, resizeMode:'none'}, audio:false, preferCurrentTab:true, selfBrowserSurface:'include', surfaceSwitching:'exclude', monitorTypeSurfaces:'exclude'});
     const track = stream.getVideoTracks()[0], set = track && track.getSettings ? track.getSettings() : {};
     if (set.displaySurface && set.displaySurface !== 'browser') throw new Error('Share “this tab” rather than a window or the whole screen, so the capture lines up with the page.');
-    const video = document.createElement('video'); video.muted = true; video.playsInline = true; video.srcObject = stream; await video.play();
-    testCard(true); await settleLayout(); await videoFrames(video, 4);
-    const rect = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, side = BOX.dev, W = video.videoWidth, H = video.videoHeight;
-    const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d', {willReadFrequently:true}); g.drawImage(video, 0, 0, W, H);
+    try { track.contentHint = 'detail'; } catch (e){}
+    // the video stays on the page (2 px, invisible) so Chrome keeps it up to date; a 3 px mark in the page's corner
+    // flickers between two blacks so that new frames keep arriving while the page itself is still
+    video = document.createElement('video'); video.muted = true; video.playsInline = true; video.srcObject = stream;
+    video.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1';
+    document.body.appendChild(video); await video.play();
+    let cap = null; try { if (typeof ImageCapture === 'function') cap = new ImageCapture(track); } catch (e){}
+    beat = document.createElement('div'); beat.setAttribute('aria-hidden', 'true');
+    beat.style.cssText = 'position:fixed;left:0;bottom:0;width:3px;height:3px;pointer-events:none;z-index:2147483647;background:#000';
+    document.body.appendChild(beat); let flip = 0; beatT = setInterval(() => { beat.style.background = (flip++ & 1) ? '#000' : '#0d0d0d'; }, 60);
+    testCard(true); await settleLayout();
+    const c = document.createElement('canvas'), g = c.getContext('2d', {willReadFrequently:true});
+    let got = null, frames = 0;
+    for (; frames < 16 && !got; frames++){
+      const src = await nextFrame(video, cap), W = src.videoWidth || src.width, H = src.videoHeight || src.height;
+      if (!W || !H){ await sleep(120); continue; }
+      if (c.width !== W || c.height !== H){ c.width = W; c.height = H; }
+      g.drawImage(src, 0, 0, W, H); if (src.close) src.close();
+      const rect = cv.getBoundingClientRect(), sx = W / innerWidth, sy = H / innerHeight;
+      if (cardSeen(g, W, H, rect, sx, sy)) got = {W, H, rect, sx, sy}; else await sleep(120);
+    }
+    const side = BOX.dev, dpr = window.devicePixelRatio || 1, pageW = Math.round(innerWidth * dpr), pageH = Math.round(innerHeight * dpr);
     testCard(false);
-    const sx = W / innerWidth, sy = H / innerHeight, res = analyseScreen(g, rect, sx, sy, side);
-    screenResult = Object.assign({state:'done', at:new Date(), dpr, W, H, side, pageW:Math.round(innerWidth * dpr), pageH:Math.round(innerHeight * dpr)}, res);
+    if (!got) throw new Error('Chrome kept sending a picture of the tab from before the test card appeared, so nothing was measured. Please try again; if it happens again, reload the page first.');
+    const res = analyseScreen(g, got.rect, got.sx, got.sy, side);
+    if (res.error) throw new Error(res.error);
+    screenResult = Object.assign({state:'done', at:new Date(), dpr, W:got.W, H:got.H, side, pageW, pageH, frames}, res);
   } catch (e){
     screenResult = {state:'error', msg:e && e.name === 'NotAllowedError' ? 'Sharing was declined, so nothing was measured.' : (e && e.message) || String(e)};
   } finally {
     testCard(false); if (stream) stream.getTracks().forEach(t => t.stop());
+    clearInterval(beatT); if (beat) beat.remove(); if (video){ video.srcObject = null; video.remove(); }
     queueLiveConst();
   }
 }
@@ -2526,8 +2718,8 @@ async function screenCheck(){
 function screenResultText(R){
   const f = v => (v >= 0 ? '+' : '-') + Math.abs(v).toFixed(3);
   return [`Yin Yang Generator · Check my screen · ${R.at.toISOString()}`,
-    `Pixel ratio ${+R.dpr.toFixed(4)} · window ${R.pageW}×${R.pageH} · capture ${R.W}×${R.H} · box ${R.side}×${R.side} (found ${R.box.w.toFixed(3)}×${R.box.h.toFixed(3)})`,
-    `Symbol centre x ${f(R.off.x)} y ${f(R.off.y)} px · rim radius ${R.R.toFixed(3)} px (${R.Rmin.toFixed(3)}–${R.Rmax.toFixed(3)})`,
+    `Pixel ratio ${+R.dpr.toFixed(4)} · window ${R.pageW}×${R.pageH} · capture ${R.W}×${R.H} · box ${R.side}×${R.side} (found ${R.box.w.toFixed(3)}×${R.box.h.toFixed(3)} capture px)`,
+    `Symbol centre x ${f(R.off.x)} y ${f(R.off.y)} px · rim radius ${R.R.toFixed(3)} px (${R.Rmin.toFixed(3)}–${R.Rmax.toFixed(3)} over 8 directions)`,
     ...R.corners.map(c => `${c.a} ${c.n}: centre→corner : rim ${c.ratio.toFixed(6)} · Φ mark ${f(c.mark)} px from the rim (+ outside)`),
     `Browser: ${navigator.userAgent}`].join('\n');
 }
@@ -2537,62 +2729,60 @@ function copyScreenResult(){
   try { navigator.clipboard.writeText(text).then(() => done(true), () => done(false)); } catch (e){ done(false); }
 }
 function analyseScreen(g, rect, sx, sy, side){
-  const ex = rect.left * sx, ey = rect.top * sy, ew = rect.width * sx, eh = rect.height * sy, M = 8;
-  const x0 = Math.max(0, Math.round(ex) - M), y0 = Math.max(0, Math.round(ey) - M);
-  const w = Math.min(g.canvas.width - x0, Math.round(ew) + 2 * M), h = Math.min(g.canvas.height - y0, Math.round(eh) + 2 * M);
-  const d = g.getImageData(x0, y0, w, h).data, avg = a => a.reduce((p, v) => p + v, 0) / a.length;
-  const L = (x, y) => { x = Math.min(w - 1, Math.max(0, x)); y = Math.min(h - 1, Math.max(0, y)); const i = (y * w + x) * 4; return (d[i] + d[i + 1] + d[i + 2]) / 3; };
-  const Lb = (x, y) => { const fx = x - .5, fy = y - .5, xa = Math.floor(fx), ya = Math.floor(fy), tx = fx - xa, ty = fy - ya;
-    return (L(xa, ya) * (1 - tx) + L(xa + 1, ya) * tx) * (1 - ty) + (L(xa, ya + 1) * (1 - tx) + L(xa + 1, ya + 1) * tx) * ty; };
-  const fr = (v, a, b) => Math.min(1, Math.max(0, (v - a) / (b - a)));
-  // Box edges: walking in from the black surround to the grey box, the missing coverage adds up to the edge position
-  const inside = M + 6, edgeIn = get => { const ys = (get(0) + get(1)) / 2, yb = get(inside); let s = 0; for (let t = 0; t < inside; t++) s += 1 - fr(get(t), ys, yb); return s; };
+  // the box as the page placed it, mapped into the frame, with a 12 px margin around it
+  const ex = rect.left * sx, ey = rect.top * sy, ew = rect.width * sx, eh = rect.height * sy, M = 12;
+  const x0 = Math.max(0, Math.floor(ex) - M), y0 = Math.max(0, Math.floor(ey) - M);
+  const w = Math.min(g.canvas.width - x0, Math.ceil(ew) + 2 * M), h = Math.min(g.canvas.height - y0, Math.ceil(eh) + 2 * M);
+  const d = g.getImageData(x0, y0, w, h).data, avg = a => a.reduce((p, v) => p + v, 0) / a.length, med = a => a.slice().sort((p, q) => p - q)[a.length >> 1];
+  const L = (x, y) => { x = x < 0 ? 0 : x >= w ? w - 1 : x; y = y < 0 ? 0 : y >= h ? h - 1 : y; const i = (y * w + x) * 4; return .2126 * d[i] + .7152 * d[i + 1] + .0722 * d[i + 2]; };
+  const bx = ex - x0, by = ey - y0, R0 = v => Math.round(v);
+  // Levels: black around the box, grey just inside its edges, white at the centre of the disc
+  const kb = [], kg = [], kw = [];
+  for (let t = .15; t < .86; t += .05){
+    kb.push(L(R0(bx - 6), R0(by + eh * t)), L(R0(bx + ew + 5), R0(by + eh * t)), L(R0(bx + ew * t), R0(by - 6)), L(R0(bx + ew * t), R0(by + eh + 5)));
+    kg.push(L(R0(bx + 5), R0(by + eh * t)), L(R0(bx + ew - 6), R0(by + eh * t)), L(R0(bx + ew * t), R0(by + 5)), L(R0(bx + ew * t), R0(by + eh - 6)));
+  }
+  for (let j = -3; j <= 3; j++) for (let i = -3; i <= 3; i++) kw.push(L(R0(bx + ew / 2) + i, R0(by + eh / 2) + j));
+  const lb = med(kb), lg = med(kg), lw = med(kw);
+  if (!(lg - lb > 40 && lw - lg > 40)) return {error:'The captured frame did not show the test card clearly (black around a grey box with a white disc), so nothing was measured. Please try again.'};
+  const fr = (v, a, b) => { const t = (v - a) / (b - a); return t < 0 ? 0 : t > 1 ? 1 : t; };
+  // Box edges: walking in from 8 px outside an edge to 8 px inside it, the missing coverage adds up to where the edge is.
+  // Averaged over 17 rows / columns.
   const ks = []; for (let k = 2; k < 19; k++) ks.push(k / 20);
-  const left = avg(ks.map(k => { const y = Math.round(M + eh * k); return edgeIn(t => L(t, y)); }));
-  const right = w - avg(ks.map(k => { const y = Math.round(M + eh * k); return edgeIn(t => L(w - 1 - t, y)); }));
-  const top = avg(ks.map(k => { const x = Math.round(M + ew * k); return edgeIn(t => L(x, t)); }));
-  const bottom = h - avg(ks.map(k => { const x = Math.round(M + ew * k); return edgeIn(t => L(x, h - 1 - t)); }));
-  const bcx = (left + right) / 2, bcy = (top + bottom) / 2, hx = (right - left) / 2, hy = (bottom - top) / 2;
+  const walk = (get, p0, dir) => { let s = 0; for (let t = 0; t < 16; t++) s += 1 - fr(get(p0 + dir * t), lb, lg); return dir > 0 ? p0 + s : p0 + 1 - s; };
+  const left = avg(ks.map(k => { const y = R0(by + eh * k); return walk(x => L(x, y), R0(bx) - 8, 1); }));
+  const right = avg(ks.map(k => { const y = R0(by + eh * k); return walk(x => L(x, y), R0(bx + ew) + 7, -1); }));
+  const top = avg(ks.map(k => { const x = R0(bx + ew * k); return walk(y => L(x, y), R0(by) - 8, 1); }));
+  const bottom = avg(ks.map(k => { const x = R0(bx + ew * k); return walk(y => L(x, y), R0(by + eh) + 7, -1); }));
+  const bw = right - left, bh = bottom - top, cx = (left + right) / 2, cy = (top + bottom) / 2;
+  if (!(Math.abs(bw - ew) < 6 && Math.abs(bh - eh) < 6)) return {error:`In the captured frame the box measures ${bw.toFixed(1)} × ${bh.toFixed(1)} where ${ew.toFixed(1)} × ${eh.toFixed(1)} was expected, so the frame doesn't line up with the page. Please try again.`};
   // The box is side × side screen pixels by construction, so any difference in the capture is the capture's own scaling.
-  // Everything below is measured in the capture and then expressed in screen pixels by that per-axis factor.
-  const kx = (right - left) / side, ky = (bottom - top) / side;
-  const toN = (x, y) => [(x - bcx) / kx, (y - bcy) / ky], fromN = (X, Y) => [bcx + X * kx, bcy + Y * ky];
-  const grey = L(Math.round(bcx), Math.round(top + 4));
-  // Rim along a ray: find roughly where the grey box begins, then integrate the symbol's coverage across that edge
-  const rim = (ox, oy, ux, uy, Lmax) => {
-    let t = Lmax * .5, run = 0;
-    for (; t < Lmax - 2; t += 1){ run = Math.abs(Lb(ox + ux * t, oy + uy * t) - grey) < 12 ? run + 1 : 0; if (run >= 3) break; }
-    const tOut = t - 2, ta = tOut - 10, tb = tOut + 4, yin = Lb(ox + ux * (ta - 2), oy + uy * (ta - 2));
-    if (Math.abs(yin - grey) < 40) return NaN;
-    let s = 0; const st = 1 / 8; for (let q = ta + st / 2; q < tb; q += st) s += fr(Lb(ox + ux * q, oy + uy * q), grey, yin) * st;
-    return ta + s;
-  };
-  const pts = [];
-  for (let i = 0; i < 16; i++){ const a = i * Math.PI / 8, ux = Math.cos(a), uy = Math.sin(a), Lm = Math.min(Math.abs(ux) > 1e-9 ? hx / Math.abs(ux) : 1e9, Math.abs(uy) > 1e-9 ? hy / Math.abs(uy) : 1e9);
-    const r = rim(bcx, bcy, ux, uy, Lm); if (isFinite(r)) pts.push(toN(bcx + ux * r, bcy + uy * r)); }
-  // Least-squares circle through the rim points: the symbol's own centre and radius (screen px, relative to the box centre)
-  let sxx = 0, sxy = 0, syy = 0, sx1 = 0, sy1 = 0, sz = 0, szx = 0, szy = 0; const n = pts.length;
-  for (const [x, y] of pts){ const z = x * x + y * y; sxx += x * x; sxy += x * y; syy += y * y; sx1 += x; sy1 += y; sz += z; szx += z * x; szy += z * y; }
-  const A = [[sxx, sxy, sx1], [sxy, syy, sy1], [sx1, sy1, n]], B = [szx, szy, sz];
-  const det = m => m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
-  const D0 = det(A), col = j => A.map((r, i) => r.map((v, k) => k === j ? B[i] : v));
-  const ox = det(col(0)) / D0 / 2, oy = det(col(1)) / D0 / 2, R = Math.sqrt(det(col(2)) / D0 + ox * ox + oy * oy);
-  const radii = pts.map(([x, y]) => Math.hypot(x - ox, y - oy)), hN = side / 2;
-  // Each corner, as calipers measure it: from the symbol's centre to the box corner, and the rim on that line
-  const corners = CORNERS.map(C => {
-    const KX = C.sx * hN, KY = C.sy * hN, D = Math.hypot(KX - ox, KY - oy);
-    const [cx0, cy0] = fromN(ox, oy), [cx1, cy1] = fromN(KX, KY), Lc = Math.hypot(cx1 - cx0, cy1 - cy0), ux = (cx1 - cx0) / Lc, uy = (cy1 - cy0) / Lc;
-    const rc = rim(cx0, cy0, ux, uy, Lc - 3), [px, py] = toN(cx0 + ux * rc, cy0 + uy * rc), r = Math.hypot(px - ox, py - oy);
-    return {k:C.k, a:C.a, n:C.n, D, r, ratio:D / r, mark:D / BIG_PHI - r};   // mark > 0: the Φ mark lands outside the rim
+  // Everything is measured in the frame and then expressed in screen pixels by that per-axis factor.
+  const kx = bw / side, ky = bh / side, k45 = Math.sqrt((kx * kx + ky * ky) / 2), kd = th => Math.hypot(kx * Math.cos(th), ky * Math.sin(th));
+  // Rim from pixel areas, exactly as in the offscreen audit: the disc's coverage runs from grey (0) to white (1)
+  const cov = (i, j) => fr(L(i, j), lg, lw), lim = [Math.ceil(left), Math.floor(right) - 1, Math.ceil(top), Math.floor(bottom) - 1];
+  const jc = Math.floor(cy - .5); let chord = 0; for (let i = lim[0]; i <= lim[1]; i++) chord += cov(i, jc) + cov(i, jc + 1);
+  const a1 = rimByArea(cov, cx, cy, chord / 4, lim), a2 = rimByArea(cov, cx + a1.ox, cy + a1.oy, a1.R, lim);
+  if (![a1.R, a1.ox, a1.oy, a2.R].every(isFinite) || a1.R < 10) return {error:'The rim could not be found in the captured frame, so nothing was measured. Please try again.'};
+  const radii = a1.rad.map((r, i) => r / kd(RIM_DIRS[i]));
+  // Each corner, as calipers measure it: from the symbol's own centre to the box corner, and the rim on that line
+  const corners = CORNERS.map((C, i) => {
+    const Dc = Math.hypot(C.sx * bw / 2 - a1.ox, C.sy * bh / 2 - a1.oy), rc = a2.rad[4 + i];
+    return {k:C.k, a:C.a, n:C.n, D:Dc / k45, r:rc / k45, ratio:Dc / rc, mark:(Dc / BIG_PHI - rc) / k45};   // mark > 0: the Φ mark lands outside the rim
   });
-  return {box:{w:right - left, h:bottom - top}, kx, ky, exact:Math.abs(kx - 1) < 2e-4 && Math.abs(ky - 1) < 2e-4, R, Rmin:Math.min(...radii), Rmax:Math.max(...radii), rays:n,
-    off:{x:ox, y:oy}, corners, worst:Math.max(...corners.map(c => Math.abs(c.mark)))};
+  return {box:{w:bw, h:bh}, kx, ky, exact:Math.abs(kx - 1) < 2e-4 && Math.abs(ky - 1) < 2e-4, R:a1.R / Math.sqrt(kx * ky), Rmin:Math.min(...radii), Rmax:Math.max(...radii),
+    off:{x:a1.ox / kx, y:a1.oy / ky}, corners, worst:Math.max(...corners.map(c => Math.abs(c.mark)))};
 }
 
 // Live readout in Design Constants. Three layers, reported separately so a failure says which one is at fault:
 //   Drawn pixels — the pixel audit above, on the renderer and size actually shown now   (geometry + rasterization)
 //   Placement    — is the box where the layout centres it?                              (live DOM geometry)
 //   Pixel grid   — does the box start on a whole screen pixel and show 1 : 1?           (no browser resampling)
+const STAGE_TONE = {light:'#E1E6E0', dark:'#080B0A'};   // --stage in each theme
+const RIM_NOTES = {
+  off:'Normal Yin-Yang rendering.',
+  target:'Black disc on white. The white cross hairs and the light-yellow cross inside the off-white centre circle meet at the exact centre. Choose Normal to close this panel.',
+  edge:'Pale-gold disc on off-white, with white cross hairs and a tiny yellow dot on the exact centre. Choose Normal to close this panel.'};
 function updateLiveConst(){
   const el = $('constLive'); if (!el || $('constFloat').hidden) return;      // measured only while the panel is open
   const side = BOX.dev, kind = vecOn ? 'vector' : 'canvas', A = requestAudit(kind, side);
@@ -2600,24 +2790,28 @@ function updateLiveConst(){
   const cMax = Math.max(Math.abs(BOX.cx), Math.abs(BOX.cy)), pct = v => (v >= 0 ? '+' : '−') + Math.abs(v * 100).toFixed(3) + '%';
   const sec = t => `<tr><th colspan="2">${t}</th></tr>`, note = t => `<tr><td colspan="2" class="note">${t}</td></tr>`;
   const markTxt = v => Math.abs(v) < .0005 ? 'on the rim' : `${Math.abs(v).toFixed(3)} px ${v > 0 ? 'outside' : 'inside'} the rim`;
+  const rimExact = rimTestMode !== 'off' || (S.d3.mode === 'flat' && !S.motion.playing);
   let h = `<tr><td>Shown as</td><td>${vecOn ? good('Vector') + ' <span class="m">· box and symbol drawn together by the browser at screen resolution</span>' : 'Canvas bitmap <span class="m">· ' + (vecWhyNot() || 'drawn 1 ∶ 1') + '</span>'}</td></tr>` +
+    `<tr><td>Rim edge</td><td>${rimExact ? good('Exact pixel areas') + ' <span class="m">· the page works out how much of each rim pixel lies inside the circle, so the circle is the same on every graphics chip</span>' : S.d3.mode !== 'flat' ? 'Drawn by the 3-D view <span class="m">· the measurements below use the flat view</span>' : 'Graphics chip, while animating <span class="m">· pause (Space) for the exact rim</span>'}</td></tr>` +
     `<tr><td>Pixel ratio</td><td>${+BOX.dpr.toFixed(4)} <span class="m">screen px per CSS px</span></td></tr>` +
     `<tr><td>Box on screen</td><td>${side} × ${side} screen px <span class="m">(${(side / BOX.dpr).toFixed(2)} CSS px${side % 2 ? '' : ' · even, so the centre falls on a pixel corner'})</span></td></tr>`;
 
   // 1 ── The real screen, from a capture of this tab
   h += sec('Your screen · measured from a capture of this tab');
   const R = screenResult;
-  h += `<tr><td colspan="2"><button class="btn" type="button" data-act="screencheck"${R && R.state === 'running' ? ' disabled' : ''}>${R && R.state === 'running' ? 'Measuring…' : R && R.state === 'done' ? 'Check my screen again' : 'Check my screen'}</button></td></tr>`;
-  if (!R) h += note('Measures the pixels your screen actually shows, the same ones calipers touch. Chrome asks to share this tab; the box shows a grey test card for a moment, one frame is measured on this device, and sharing stops.');
-  else if (R.state === 'error') h += `<tr><td>Result</td><td>${R.msg}</td></tr>`;
+  h += `<tr><td colspan="2"><button class="btn" type="button" data-act="screencheck"${R && R.state === 'running' ? ' disabled' : ''}>${R && R.state === 'running' ? 'Measuring…' : R && R.state !== 'running' ? 'Check my screen again' : 'Check my screen'}</button></td></tr>`;
+  if (!R) h += note('Measures the pixels your screen actually shows, the same ones calipers touch. Chrome asks to share this tab; for a moment the box shows a plain test card (a white disc on grey), a frame of it is measured on this device, and sharing stops.');
+  else if (R.state === 'error') h += `<tr><td>Result</td><td><span class="warn">${R.msg}</span></td></tr>`;
   else if (R.state === 'done'){
-    // An exact capture resolves a few hundredths of a pixel. When Chrome resizes the capture (it does when the window is an
-    // odd number of screen pixels wide or high) the resampling blurs it by a fraction of a pixel, so allow for that.
-    const tol = R.exact ? .25 : .4, ok = R.worst < tol && Math.abs(R.off.x) < tol && Math.abs(R.off.y) < tol;
+    // An exact capture resolves a few hundredths of a pixel. When Chrome resizes the capture the resampling blurs it by a
+    // fraction of a pixel; areas are not changed by blur, so the rim stays accurate, but allow a little for it.
+    const tol = R.exact ? .1 : .25, ok = R.worst < tol && Math.abs(R.off.x) < tol && Math.abs(R.off.y) < tol;
+    const cssCap = R.dpr > 1.01 && Math.abs(R.kx * R.dpr - 1) < .01 && Math.abs(R.ky * R.dpr - 1) < .01;
+    const why = cssCap ? `Chrome captured the tab at CSS-pixel size (${R.kx.toFixed(4)} capture px per screen px)` : `Chrome resized the capture by ${R.kx.toFixed(4)} × ${R.ky.toFixed(4)}${R.W !== R.pageW || R.H !== R.pageH ? ` (a ${R.pageW} × ${R.pageH} px window delivered as ${R.W} × ${R.H})` : ''}`;
     h += `<tr><td>Captured</td><td>${R.W} × ${R.H} px <span class="m">· ${R.at.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></td></tr>` +
-      `<tr><td>Box found</td><td>${R.box.w.toFixed(3)} × ${R.box.h.toFixed(3)} px ${R.exact ? good('✓') + ' <span class="m">exactly ' + R.side + ' × ' + R.side + ': the capture is 1 ∶ 1 with the screen</span>' : `<span class="m">for a ${R.side} × ${R.side} box: Chrome resized the capture by ${R.kx.toFixed(4)} × ${R.ky.toFixed(4)}${R.W !== R.pageW || R.H !== R.pageH ? ` (a ${R.pageW} × ${R.pageH} px window delivered as ${R.W} × ${R.H})` : ''}. The figures below are rescaled to screen pixels by the box itself and are good to about ±0.25 px; maximise the window, or change its size by a pixel, for an exact capture.</span>`}</td></tr>` +
+      `<tr><td>Box found</td><td>${R.box.w.toFixed(3)} × ${R.box.h.toFixed(3)} px ${R.exact ? good('✓') + ' <span class="m">exactly ' + R.side + ' × ' + R.side + ': the capture is 1 ∶ 1 with the screen</span>' : `<span class="m">for a ${R.side} × ${R.side} box: ${why}. The figures below are rescaled to screen pixels by the box itself; the rim is measured from areas, which resizing doesn’t shift, so they stay good to about ±0.1 px.${cssCap ? '' : ' Maximise the window, or change its size by a pixel, for an exact capture.'}</span>`}</td></tr>` +
       `<tr><td>Symbol centre</td><td>x ${sg(R.off.x)} · y ${sg(R.off.y)} px <span class="m">from the box centre</span></td></tr>` +
-      `<tr><td>Rim radius</td><td>${R.R.toFixed(3)} px <span class="m">(${R.Rmin.toFixed(3)}–${R.Rmax.toFixed(3)}, circle through ${R.rays} rim points)</span></td></tr>` +
+      `<tr><td>Rim radius</td><td>${R.R.toFixed(3)} px <span class="m">(${R.Rmin.toFixed(3)}–${R.Rmax.toFixed(3)} over 8 directions, from pixel areas)</span></td></tr>` +
       R.corners.map(c => `<tr><td>${c.a} ${c.n}</td><td>centre → corner ∶ rim <span class="b">${c.ratio.toFixed(6)}</span><br><span class="m">the Φ mark lands ${markTxt(c.mark)}</span></td></tr>`).join('') +
       `<tr><td>Verdict</td><td>${ok ? good('✓') + ' all four corners agree with Φ to within ' + Math.max(R.worst, .001).toFixed(3) + ' px on this screen' + (R.exact ? '' : ' <span class="m">(within the capture’s accuracy)</span>') : `<span class="warn">✗ up to ${R.worst.toFixed(3)} px off</span> — please send these figures`}</td></tr>` +
       `<tr><td colspan="2"><button class="btn" type="button" data-act="copyscreen">${R.copied ? 'Copied ✓' : 'Copy these figures'}</button>${R.copyText ? `<textarea class="copy-out" readonly rows="6">${R.copyText.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</textarea>` : ''}</td></tr>`;
@@ -2634,39 +2828,50 @@ function updateLiveConst(){
       `<tr><td>Rim → corner</td><td>${A.gap.toFixed(3)} px · ∶ radius = <span class="b">${A.gapRatio.toFixed(6)}</span> <span class="m">(φ ${LIT_phi.toFixed(6)})</span></td></tr>` +
       `<tr><td>Centre → corner</td><td>${A.D.toFixed(3)} px · ∶ radius = <span class="b">${A.ratio.toFixed(6)}</span> <span class="m">(Φ ${BIG_PHI.toFixed(6)} · ${pct(A.ratio / BIG_PHI - 1)})</span></td></tr>` +
       `<tr><td>Four-corner Φ test</td><td>↖ ${A.cornerRatios[0].toFixed(6)} · ↗ ${A.cornerRatios[1].toFixed(6)} · ↙ ${A.cornerRatios[2].toFixed(6)} · ↘ ${A.cornerRatios[3].toFixed(6)} <span class="m">(Φ ${BIG_PHI.toFixed(6)})</span></td></tr>` +
-      `<tr><td>Corner spread</td><td>${A.cornerSpread.toFixed(3)} px <span class="m">between the closest and farthest Φ corner; directional asymmetry is preserved rather than averaged away</span></td></tr>` +
+      `<tr><td>Corner spread</td><td>${A.cornerSpread.toFixed(3)} px <span class="m">between the closest and farthest Φ corner; each corner is measured on its own, not averaged</span></td></tr>` +
       `<tr><td>Caliper miss</td><td>${pass ? good('✓') : '~'} ${A.miss.toFixed(3)} px <span class="m">largest gap, over the 4 corners, between the Φ mark and the independently measured rim</span></td></tr>`;
   } else h += `<tr><td>Pixel audit</td><td>${A === null ? 'could not run in this browser' : wait}</td></tr>`;
+  h += note('The rim is found from pixel areas: the covered area gives the radius, the centre of that area gives the symbol’s centre, and the covered area inside a narrow wedge (±7.5°) toward each side and corner gives the rim’s distance that way. Sampling along a line to the corner instead reads up to 0.05 px off, by an amount that changes with the box size, depending on where the rim crosses the pixel grid on the diagonal.');
 
   // 3 ── What calipers can see at each corner
-  const bgc = fillColor(S.bg), faint = [], stageCol = getComputedStyle(document.documentElement).getPropertyValue('--stage').trim(), cStage = /^#[0-9a-f]{6}$/i.test(stageCol) ? contrast(bgc, stageCol) : null;
+  const test = rimTestMode !== 'off' ? RIM_TEST[rimTestMode] : null, bgc = test ? test.bg : fillColor(S.bg), faint = [];
+  const dark = isDarkTheme(), stageCol = getComputedStyle(document.documentElement).getPropertyValue('--stage').trim();
+  const cStage = /^#[0-9a-f]{6}$/i.test(stageCol) ? contrast(bgc, stageCol) : null, cOther = contrast(bgc, STAGE_TONE[dark ? 'light' : 'dark']);
   h += sec('What calipers can see at each corner');
-  for (const C of CORNERS){
+  if (test){
+    const cr = contrast(test.disc, test.bg);
+    h += `<tr><td>All four corners</td><td>rim ${cr.toFixed(2)} ∶ 1 <span class="m">(the test disc against the test box; every corner is the same in this view)</span></td></tr>`;
+  } else for (const C of CORNERS){
     const f = rimFillAt(C.sx, C.sy), col = fillColor(S.fills[f]), cr = contrast(col, bgc);
     if (cr < 1.5) faint.push(C.a);
     h += `<tr><td>${C.a} ${C.n}</td><td>rim ${cr.toFixed(2)} ∶ 1${cr < 1.5 ? ' <span class="warn">· hard to see</span>' : ''} <span class="m">(Ear ${f === 'lobe1' ? 'A' : 'B'} against the box)</span></td></tr>`;
   }
-  if (cStage !== null) h += `<tr><td>Box corners</td><td>${cStage.toFixed(2)} ∶ 1 against the stage${cStage < 1.5 ? ' <span class="warn">· hard to see</span> <span class="m">(the Dark theme darkens only the stage around the box)</span>' : ''}</td></tr>`;
-  h += note(`${faint.length ? `At ${faint.join(' and ')} the rim barely stands out from the box, so a caliper point is hard to set there, and a rim brighter than its background also looks slightly larger than it is. ` : ''}With the box on the pixel grid, all four corners show the same Φ on screen to within a few hundredths of a pixel (<b>Check my screen</b> above measures this). If one corner still reads differently with calipers, the cause is on the glass, not in the image: the pixels sit under a cover glass, so a corner seen at a slant (usually a top corner on a laptop) shifts by parallax. Measure that corner with your eye straight over the caliper point. To confirm, turn the symbol 180° (<b>Transform</b>, ↻ 90° twice). Box and circle are unchanged by that; only the colour at each corner moves. If the same screen corner still reads best, the cause is where that corner sits on the glass (viewing angle, or a caliper point not resting flat), not the image. If the best corner moves with the colours, it is the rim contrast.`);
+  if (cStage !== null){
+    const theme = dark ? 'Light' : 'Dark';
+    h += `<tr><td>Box corners</td><td>${cStage.toFixed(2)} ∶ 1 against the stage${cStage < 1.5 ? ' <span class="warn">· hard to see</span> <span class="m">' + (cOther >= 1.5 ? `— the ${theme} theme (top bar) changes only the stage around the box, and there the corners stand out at ${cOther.toFixed(1)} ∶ 1` : '— in either theme') + '</span>' : ''}</td></tr>`;
+  }
+  h += note(`${faint.length ? `At ${faint.join(' and ')} the rim barely stands out from the box, so a caliper point is hard to set there, and a rim brighter than its background also looks slightly larger than it is. ` : ''}With the box on the pixel grid and the rim drawn from exact areas, all four corners show the same Φ on screen to within a few hundredths of a pixel (<b>Check my screen</b> above measures this). If one corner still reads differently with calipers, the cause is on the glass, not in the image: the pixels sit under a cover glass, so a corner seen at a slant (usually a top corner on a laptop) shifts by parallax. Measure that corner with your eye straight over the caliper point. To confirm, turn the symbol 180° (<b>Transform</b>, ↻ 90° twice). Box and circle are unchanged by that; only the colour at each corner moves. If the same screen corner still reads best, the cause is where that corner sits on the glass (viewing angle, or a caliper point not resting flat), not the image. If the best corner moves with the colours, it is the rim contrast.`);
 
   // 4 ── Controlled rim diagnostics
   h += sec('Controlled Φ rim diagnostic') +
     `<tr><td colspan="2"><div style="display:flex;gap:6px;flex-wrap:wrap">` +
-      `<button class="btn ${rimTestMode==='off'?'primary':''}" type="button" data-act="rimtest" data-v="off">Normal</button>` +
-      `<button class="btn ${rimTestMode==='target'?'primary':''}" type="button" data-act="rimtest" data-v="target">Caliper target</button>` +
-      `<button class="btn ${rimTestMode==='edge'?'primary':''}" type="button" data-act="rimtest" data-v="edge">Outer edge only</button>` +
+      `<button class="btn ${rimTestMode==='off'?'primary':''}" type="button" data-act="rimtest" data-v="off" aria-pressed="${rimTestMode==='off'}">Normal</button>` +
+      `<button class="btn ${rimTestMode==='target'?'primary':''}" type="button" data-act="rimtest" data-v="target" aria-pressed="${rimTestMode==='target'}">Caliper target</button>` +
+      `<button class="btn ${rimTestMode==='edge'?'primary':''}" type="button" data-act="rimtest" data-v="edge" aria-pressed="${rimTestMode==='edge'}">Outer edge only</button>` +
     `</div></td></tr>` +
-    note(rimTestMode === 'off' ? 'Normal Yin-Yang rendering.' : rimTestMode === 'target' ? 'A black disc of radius 1 on white, drawn by the same device-pixel canvas as the live display. The off-white centre circle has radius φ⁷ ≈ 0.034442 of the rim radius (1⁄Φ⁷ exactly), so a caliper point can be set on the centre against a light patch; the white cross hairs and the fine mark inside the circle meet at the exact centre. All four corners are identical in this view, and turning the symbol changes nothing.' : 'A pale-gold disc of radius 1 on an off-white field, drawn by the same device-pixel canvas as the live display, with white cross hairs at the centre. All four corners are identical in this view, so a corner that reads differently here is not caused by the yin yang’s lobes or colours.');
+    note(rimTestMode === 'off' ? 'Normal Yin-Yang rendering. The two test views draw a plain disc of radius 1 in the same box, by the same canvas, with the same exact rim; closing this panel while one is on leaves a small switcher on screen.'
+      : rimTestMode === 'target' ? 'A black disc of radius 1 on white. The off-white centre circle has radius φ⁷ ≈ 0.034442 of the rim radius (1⁄Φ⁷ exactly), so a caliper point can be set on the centre against a light patch; the white cross hairs and the light-yellow cross inside the circle meet at the exact centre. All four corners are identical in this view, and turning the symbol changes nothing. Closing this panel leaves a small switcher on screen.'
+      : 'A pale-gold disc of radius 1 on an off-white field, with white cross hairs and a tiny yellow dot on the exact centre. All four corners are identical in this view, so a corner that reads differently here is not caused by the yin yang’s lobes or colours. Closing this panel leaves a small switcher on screen.');
 
   // 5 ── Placement on the page
   h += sec('Placement on the page') +
-    `<tr><td>Layout frame</td><td>${BOX.frameCss.toFixed(2)} CSS px <span class="m">· ${!BOX.full ? 'shrunk to fit the stage' : Math.abs(BOX.frameCss - BOX_PX) < .01 ? 'the 610 px Fibonacci box' : 'the nearest to 610 px this display scale draws exactly'}</span></td></tr>` +
+    `<tr><td>Layout frame</td><td>${BOX.frameCss.toFixed(2)} CSS px <span class="m">· ${!BOX.full ? 'shrunk to fit the stage (a taller window, or Focus view with F, gives the full 610 px box; a bigger box makes a caliper error a smaller share of the radius)' : Math.abs(BOX.frameCss - BOX_PX) < .01 ? 'the 610 px Fibonacci box' : 'the nearest to 610 px this display scale draws exactly'}</span></td></tr>` +
     `<tr><td>Pixel-grid alignment</td><td>${BOX.grid ? good('✓') : '~'} ${BOX.gridErr.toFixed(3)} px <span class="m">· the canvas is nudged ${Math.abs(BOX.snapX || 0).toFixed(3)} × ${Math.abs(BOX.snapY || 0).toFixed(3)} screen px inside the frame so its corner sits on a whole pixel; Chrome then shows the box exactly ${side} × ${side} instead of rounding one edge and dropping a row or column</span></td></tr>` +
     `<tr><td>Page centring</td><td>${cMax <= 6 ? good('✓') : '~'} ${cMax.toFixed(3)} px <span class="m">(x ${sg(BOX.cx)} · y ${sg(BOX.cy)}) between the frame centre and stage centre — CSS centres the frame; only the canvas inside it is nudged, by under half a pixel</span></td></tr>` +
     `<tr><td>Live renderer</td><td><span class="b">Device-pixel Canvas</span> <span class="m">· SVG retained for vector/export use, not used for the live flat display</span></td></tr>` +
-    `<tr><td>Canvas drawing</td><td>${RASTER_CPU ? good('Software (CPU)') + ' <span class="m">· set by ?raster=cpu in the address; remove it to go back to the graphics chip</span>' : 'Graphics chip (GPU) <span class="m">· add ?raster=cpu to the address to draw in software and compare</span>'}</td></tr>`;
+    `<tr><td>Canvas drawing</td><td>${RASTER_CPU ? good('Software (CPU)') + ' <span class="m">· set by ?raster=cpu in the address; remove it to go back to the graphics chip</span>' : 'Graphics chip (GPU) <span class="m">· add ?raster=cpu to the address to draw in software and compare; the rim’s exact areas are the same either way</span>'}</td></tr>`;
 
-  // 5 ── The offscreen audit at other display scales
+  // 6 ── The offscreen audit at other display scales
   h += sec(`Same offscreen audit at other display scales · ${kind}`) +
     AUDIT_SCALES.map(sc => { const n = exactSide(sc, BOX_PX * sc), B = requestAudit(kind, n);
       return `<tr><td>${sc}× · ${n} px</td><td>${B && typeof B === 'object' ? `centre → corner ∶ radius <span class="b">${B.ratio.toFixed(6)}</span> · miss ${B.miss.toFixed(3)} px ${B.miss < .25 ? good('✓') : '~'}` : B === null ? '—' : wait}</td></tr>`; }).join('') +
@@ -2975,7 +3180,11 @@ function bindControls(){
   $('themeBtn').addEventListener('click', toggleTheme);
   $('proxInfoBtn').addEventListener('click', () => { const f = $('proxFloat'); if (f.hidden){ showFloat('proxFloat', 'left'); $('proxInfoBtn').setAttribute('aria-expanded', 'true'); } else { hideFloat('proxFloat'); } });
   $('geoClose').addEventListener('click', () => { $('measureSel').value = 'off'; setMeasureChoice('off'); });
-  $('constBtn').addEventListener('click', () => { if ($('constFloat').hidden){ showFloat('constFloat', innerWidth > 860 ? 'over' : 'left'); $('constBtn').setAttribute('aria-expanded', 'true'); updateLiveConst(); } else hideFloat('constFloat'); });
+  $('constBtn').addEventListener('click', () => { if ($('constFloat').hidden) openConstFloat(); else hideFloat('constFloat'); });
+  // the folded rim diagnostic: pick a view, reopen the full panel, or close it (✕ shows only in Normal)
+  $('rimSeg').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (b) setRimTest(b.dataset.v); });
+  $('rimExpand').addEventListener('click', openConstFloat);
+  $('rimClose').addEventListener('click', () => { if (rimTestMode === 'off') $('rimFloat').hidden = true; });
   // floats with a corner grip can be resized; the text scales gently with the box width
   document.querySelectorAll('[data-resize]').forEach(g => { const f = $(g.dataset.resize); let d = null;
     g.addEventListener('pointerdown', e => { const r = f.getBoundingClientRect(); d = {x:e.clientX, y:e.clientY, w:r.width, h:r.height, l:r.left, t:r.top}; g.setPointerCapture(e.pointerId); e.preventDefault(); });
@@ -3030,7 +3239,42 @@ function showFloat(id, side){
     else { f.style.left = '20px'; f.style.top = Math.max(60, innerHeight * .16) + 'px'; } }
   const r = f.getBoundingClientRect(); if (r.bottom > innerHeight - 8) f.style.top = Math.max(8, innerHeight - r.height - 8) + 'px';
 }
-function hideFloat(id){ const f = $(id); if (!f) return; f.hidden = true; if (id === 'proxFloat') $('proxInfoBtn').setAttribute('aria-expanded', 'false'); if (id === 'constFloat') $('constBtn').setAttribute('aria-expanded', 'false'); }
+function hideFloat(id){
+  const f = $(id); if (!f) return;
+  const r = id === 'constFloat' && !f.hidden ? f.getBoundingClientRect() : null;   // where to fold the rim diagnostic to
+  f.hidden = true;
+  if (id === 'proxFloat') $('proxInfoBtn').setAttribute('aria-expanded', 'false');
+  if (id === 'constFloat'){ $('constBtn').setAttribute('aria-expanded', 'false'); if (r && rimTestMode !== 'off') showRimFloat(r); }
+}
+function openConstFloat(){
+  $('rimFloat').hidden = true;
+  showFloat('constFloat', innerWidth > 860 ? 'over' : 'left'); $('constBtn').setAttribute('aria-expanded', 'true'); updateLiveConst();
+}
+
+// ── Φ rim diagnostic ────────────────────────────────────────────────
+// One switch for the test views, used by Design constants and by its folded-down form. Closing Design constants while a
+// test view is on folds the panel to a small switcher at its top-right corner; the switcher's ✕ appears once Normal is
+// chosen, so a test view can't be left on the stage with nothing on screen to turn it off.
+function setRimTest(v){
+  rimTestMode = v === 'target' || v === 'edge' ? v : 'off';
+  if (rimTestMode !== 'off' && measureMode !== 'off'){ $('measureSel').value = S.fx.guides ? 'guides' : 'off'; setMeasureMode('off'); }
+  needsDraw = true; renderVector(); updateLiveConst(); syncRimFloat();
+}
+function syncRimFloat(){
+  $('rimSeg').querySelectorAll('button[data-v]').forEach(b => setPressed(b, b.dataset.v === rimTestMode));
+  const off = rimTestMode === 'off', x = $('rimClose');
+  x.style.visibility = off ? '' : 'hidden'; x.disabled = !off; x.setAttribute('aria-hidden', off ? 'false' : 'true');
+  $('rimNote').textContent = RIM_NOTES[rimTestMode];
+}
+function showRimFloat(at){
+  const f = $('rimFloat'); f.hidden = false; syncRimFloat();
+  const w = f.offsetWidth, hgt = f.offsetHeight;
+  f.style.right = 'auto';
+  // at the folded panel's top-right corner, but below the top bar so the theme and menus stay reachable
+  const bar = document.querySelector('.top'), barB = bar && bar.offsetParent !== null ? bar.getBoundingClientRect().bottom + 8 : 8;
+  f.style.left = clamp(at.right - w, 8, Math.max(8, innerWidth - w - 8)) + 'px';
+  f.style.top = clamp(Math.max(at.top, barB), 8, Math.max(8, innerHeight - hgt - 8)) + 'px';
+}
 
 // ── Measurement / theme / scale ─────────────────────────────────────
 function setMeasureMode(m){ measureMode = m; $('measureSel').classList.toggle('on', m !== 'off' || S.fx.guides); if (m !== 'measure'){ geoSel = []; } renderOverlay(); updateSummaries(); needsDraw = true; }
@@ -3345,14 +3589,7 @@ function init(){
   bindControls(); buildSlots(); buildPresets(); renderMine(); updateHeaderConstants();
   $('constBody').addEventListener('click', e => {
     const rt = e.target.closest('[data-act="rimtest"]');
-    if (rt){
-      rimTestMode = rt.dataset.v || 'off';
-      if (rimTestMode !== 'off') measureMode = 'off';
-      needsDraw = true;
-      renderVector();
-      updateLiveConst();
-      return;
-    }
+    if (rt){ setRimTest(rt.dataset.v); return; }
     if (e.target.closest('[data-act="screencheck"]')) screenCheck();
     if (e.target.closest('[data-act="copyscreen"]')) copyScreenResult();
   });

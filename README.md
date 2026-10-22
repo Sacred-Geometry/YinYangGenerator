@@ -108,20 +108,42 @@ that side slightly off. With it, the box is shown at exactly its intended size.
 The live picture is always drawn on that canvas, at the screen's own
 resolution. The SVG vector form is used for export.
 
+### The exact rim
+
+The rim is where the Φ check is read, so its edge pixels are not left to the
+graphics chip's edge smoothing (which, on some machines, draws the circle a few
+hundredths of a pixel small, and by different amounts in different directions).
+Whenever the picture is still, and in every export and audit, the page works out
+how much of each rim pixel lies inside the circle and uses exactly that as the
+pixel's coverage; the colour stays what was drawn there. The circle is then the
+same at every box size and on every machine. While the symbol is animating, the
+graphics chip draws it as before.
+
 ### Live checks
 
 Each section of the panel tests one layer, so a problem says where it is:
 
 - **Your screen** — **Check my screen** asks Chrome to share this tab, shows a
-  grey test card for a moment, measures one frame of the real screen pixels, and
-  stops sharing. It reports the symbol's center and, for each of the four
-  corners, where the Φ mark lands relative to the rim. **Copy these figures**
-  copies the result as text.
+  plain test card for a moment (a white disc on a grey box, black around it),
+  measures a frame of the real screen pixels, and stops sharing. Each captured
+  frame is checked before it is used, because Chrome can hand back a picture of
+  the tab from before the test card appeared. It reports the symbol's center
+  and, for each of the four corners, where the Φ mark lands relative to the rim.
+  **Copy these figures** copies the result as text.
 - **The picture the page draws** — the same scene drawn offscreen and measured
   from its own pixels: box, rim, center, the **Four-corner Φ test** (center →
   corner ÷ rim radius at ↖ ↗ ↙ ↘ separately), **Corner spread** and
   **Caliper miss**. No design constant enters the measurement; Φ appears only as
   the answer it is compared with.
+
+Both checks find the rim from pixel areas: the covered area gives the radius,
+the center of that area gives the symbol's center, and the covered area inside a
+narrow wedge (±7.5°) toward each side and corner gives the rim's distance in that
+direction. Sampling the picture along a line to the corner instead reads the rim
+up to 0.05 px off, by an amount that changes with the box size (it depends on
+where the rim crosses the pixel grid on the diagonal), so even a perfect circle
+reads better at some sizes than others that way. Areas don't have that problem,
+and resizing or blurring a capture doesn't shift them.
 - **What calipers can see at each corner** — the contrast between the rim and
   the box at each corner. A rim that is close to the box color (for example
   white on cream, or a light metallic highlight on a near-white box) is hard to
@@ -137,25 +159,35 @@ Three views of the same geometry, for physical measurement:
 - **Normal** — the symbol as styled.
 - **Caliper target** — a black disc on white with white cross hairs and an
   off-white center circle of radius φ⁷ (exactly 1⁄Φ⁷ of the outer radius), so a
-  caliper point can be set on the center against a light patch.
+  caliper point can be set on the center against a light patch; a light-yellow
+  cross inside that circle marks the exact center.
 - **Outer edge only** — a pale-gold disc on an off-white field with white cross
-  hairs at the center.
+  hairs and a tiny yellow dot on the exact center.
 
 In both test views the four corners are identical and turning the symbol
 changes nothing, so they separate the geometry from the colors at each corner.
+Closing Design Constants while a test view is on folds the panel down to a small
+switcher with the three views; its ✕ appears once **Normal** is chosen, and ⤢
+opens the full panel again.
 
 ### Graphics-chip comparison
 
 Adding `?raster=cpu` to the address (for example
 `…/YinYangGenerator/?raster=cpu`) makes every canvas draw in software instead
 of on the graphics chip. The panel's **Canvas drawing** row shows which is in
-use. Remove it to go back.
+use. Remove it to go back. The rim's exact areas are worked out by the page
+itself, so they are the same either way.
 
 ### What can and cannot be exact
 
-- On-screen drawing is anti-aliased, so a measured edge can differ from the
-  ideal by a fraction of a pixel (the panel shows these as, for example,
-  "+0.020"). A quarter pixel is below what calipers on a screen can resolve.
+- A screen pixel can only be partly covered, so the rim is drawn as exact
+  partial coverage rather than as a hard line; measured from those areas it
+  lands within about a thousandth of a pixel of the ideal. A captured frame that
+  Chrome has resized is good to about a tenth of a pixel. A quarter pixel is
+  below what calipers on a screen can resolve.
+- No box size is more exact than another: every size measures Φ to six
+  decimals. A bigger box still helps physical measurement, because a given
+  caliper error is then a smaller share of the radius.
 - CSS sizes are stored in 1⁄64 CSS px, so at some display scales not every
   screen pixel can be addressed exactly; the remaining grid error is shown, and
   is a few hundredths of a pixel at most.
