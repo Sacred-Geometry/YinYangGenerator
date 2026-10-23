@@ -151,9 +151,7 @@ and resizing or blurring a capture doesn't shift them.
   white on cream, or a light metallic highlight on a near-white box) is hard to
   set a caliper point against, even when it is exactly in place. The panel also
   rates the box corners against the stage, and recommends the Light theme for
-  caliper work. **Set up for calipers** applies everything it recommends in one
-  click: the symbol still, Flat style and the flat view, the aura off, the Light
-  theme, and the calipers drawn. Colours and eye size stay as they are.
+  caliper work.
 - **Placement on the page** — pixel-grid alignment (and the nudge applied),
   page centering, and which drawing path the canvas uses.
 - **Other display scales** — the offscreen test repeated at 1× to 2×, each at
