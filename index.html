@@ -2701,12 +2701,22 @@ async function screenCheck(){
 // Everything Inspect recommends for caliper work, in one click: the symbol still, the Flat style and view (Glow spreads
 // light past the rim, Bevel shades it unevenly), no aura, the Light theme (metal caliper points are lost against dark) and
 // the calipers drawn. The colours and eye size are left as they are.
+let calKeep = null;   // the look before Set up for calipers, so a second click puts it back
 function caliperSetup(){
+  if (calKeep){
+    const k = calKeep; calKeep = null;
+    S.motion.playing = k.playing; S.d3.mode = k.d3; S.fx.aura = k.aura; S.style = k.style;
+    if (k.theme === null) document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', k.theme);
+    store.set('yyg.theme', k.theme); syncThemeLbl();
+    setMeasureChoice(k.guides ? 'guides' : 'off'); syncAll(); queueLiveConst();
+    toast('Caliper setup off: the previous look is back.'); return;
+  }
+  calKeep = {playing:S.motion.playing, d3:S.d3.mode, aura:S.fx.aura, style:S.style, theme:document.documentElement.getAttribute('data-theme'), guides:S.fx.guides};
   S.motion.playing = false; S.d3.mode = 'flat'; d3FromPreset = false; S.fx.aura = false;
   if (S.style === 'glow' || S.style === 'bevel'){ S.style = 'flat'; styleFromPreset = false; }
   if (isDarkTheme()){ document.documentElement.setAttribute('data-theme', 'light'); store.set('yyg.theme', 'light'); syncThemeLbl(); }
   setMeasureChoice('guides'); syncAll(); queueLiveConst();
-  toast('Set up for calipers: still, flat, Light theme, calipers drawn.');
+  toast('Set up for calipers: still, flat, Light theme, calipers drawn. Click again to undo.');
 }
 // The screen-check figures as plain text, for pasting into a message
 function screenResultText(R){
@@ -2846,7 +2856,7 @@ function updateLiveConst(){
       : cStage < 1.5 ? ' <span class="m">— keep the Light theme for calipers (their points are lost against dark); find the corner where the box’s top or bottom edge meets its side edge</span>' : '';
     h += `<tr><td>Box corners</td><td>${cStage.toFixed(2)} ∶ 1 against the stage${cStage < 1.5 ? ' <span class="warn">· faint</span>' : ''}${tip}</td></tr>`;
   }
-  h += `<tr><td colspan="2"><button class="btn" type="button" data-act="calipers">Set up for calipers</button> <span class="m">pauses, sets Flat style and the flat view, turns the aura off, switches to the Light theme and draws the calipers</span></td></tr>`;
+  h += `<tr><td colspan="2"><button class="btn" type="button" data-act="calipers" aria-pressed="${!!calKeep}">${calKeep ? 'Undo caliper setup' : 'Set up for calipers'}</button> <span class="m">pauses, sets Flat style and the flat view, turns the aura off, switches to the Light theme and draws the calipers</span></td></tr>`;
   h += note(`${faint.length ? `At ${faint.join(' and ')} the rim barely stands out from the box, so a caliper point is hard to set there, and a rim brighter than its background also looks slightly larger than it is. ` : ''}With the box on the pixel grid and the rim drawn from exact areas, all four corners show the same Φ on screen to within a few hundredths of a pixel (<b>Check my screen</b> above measures this). If one corner still reads differently with calipers, the cause is on the glass, not in the image: the pixels sit under a cover glass, so a corner seen at a slant (usually a top corner on a laptop) shifts by parallax. Measure that corner with your eye straight over the caliper point. To confirm, turn the symbol 180° (<b>Transform</b>, ↻ 90° twice). Box and circle are unchanged by that; only the colour at each corner moves. If the same screen corner still reads best, the cause is where that corner sits on the glass (viewing angle, or a caliper point not resting flat), not the image. If the best corner moves with the colours, it is the rim contrast.`);
 
   // 4 ── Controlled rim diagnostics
