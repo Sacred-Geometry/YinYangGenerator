@@ -111,13 +111,15 @@ resolution. The SVG vector form is used for export.
 ### The exact rim
 
 The rim is where the Φ check is read, so its edge pixels are not left to the
-graphics chip's edge smoothing (which, on some machines, draws the circle a few
-hundredths of a pixel small, and by different amounts in different directions).
-Whenever the picture is still, and in every export and audit, the page works out
-how much of each rim pixel lies inside the circle and uses exactly that as the
-pixel's coverage; the colour stays what was drawn there. The circle is then the
-same at every box size and on every machine. While the symbol is animating, the
-graphics chip draws it as before.
+graphics chip's edge smoothing (which draws the circle up to a tenth of a pixel
+small, and by different amounts in different directions). The page paints the
+symbol a little past the rim, then cuts it with a mask whose value at each rim
+pixel is exactly how much of that pixel lies inside the circle; the colour stays
+what was painted there. The cut is a single image draw, so it is made on every
+frame, still or animating, on the stage and in every export and audit. The
+circle is then the same at every box size, at every moment and on every
+machine. (Only the 3-D views draw their own edge; the calipers are drawn in the
+flat view.)
 
 ### Live checks
 
@@ -130,10 +132,10 @@ Each section of the panel tests one layer, so a problem says where it is:
   the tab from before the test card appeared. It reports the symbol's center
   and, for each of the four corners, where the Φ mark lands relative to the rim.
   **Copy these figures** copies the result as text.
-- **The picture the page draws** — the same scene drawn offscreen and measured
-  from its own pixels: box, rim, center, the **Four-corner Φ test** (center →
-  corner ÷ rim radius at ↖ ↗ ↙ ↘ separately), **Corner spread** and
-  **Caliper miss**. No design constant enters the measurement; Φ appears only as
+- **The picture the page draws** — the same scene drawn offscreen, by the same
+  code as the stage, and measured from its own pixels: box, rim, center, the
+  **Four-corner Φ test** (center → corner ÷ rim radius at ↖ ↗ ↙ ↘ separately),
+  **Corner spread** and **Caliper miss**. No design constant enters the measurement; Φ appears only as
   the answer it is compared with.
 
 Both checks find the rim from pixel areas: the covered area gives the radius,
@@ -152,7 +154,8 @@ and resizing or blurring a capture doesn't shift them.
   caliper work.
 - **Placement on the page** — pixel-grid alignment (and the nudge applied),
   page centering, and which drawing path the canvas uses.
-- **Other display scales** — the offscreen test repeated at 1× to 2×.
+- **Other display scales** — the offscreen test repeated at 1× to 2×, each at
+  the box size the page uses at that scale.
 
 ### Controlled Φ rim diagnostic
 
@@ -192,16 +195,19 @@ itself, so they are the same either way.
 - CSS sizes are stored in 1⁄64 CSS px, so at some display scales not every
   screen pixel can be addressed exactly; the remaining grid error is shown, and
   is a few hundredths of a pixel at most.
-- The box aims for **610 CSS px** (a Fibonacci number) when the window has room,
-  and shrinks to fit otherwise. The panel's "Box on screen" line shows the
-  actual size.
+- The box aims for **610 CSS px** (a Fibonacci number) when the window has room:
+  the even number of screen pixels nearest to it, so the centre falls on a
+  pixel corner. It shrinks to fit otherwise. The panel's "Box on screen" line
+  shows the actual size.
 - For a reference that needs no screen at all, export a PNG at 2584 px and
   print it at 100%.
 - The SVG export states the geometry exactly (radius 437.016024 in a 1000-unit
   box, each half drawn as its own path), but how it looks depends on the program
   that displays it: browsers smooth vector edges their own way, typically a
   tenth of a pixel or so. A PNG export carries the page's exact rim in its
-  pixels, so it is the better file to measure.
+  pixels, so it is the better file to measure. The SVG is the still, flat
+  symbol: 3-D views, motion, the Glow and Bevel styles, lightning and the aura
+  are left out, and patterns or images become their main colour.
 - The symbol-to-box area ratio is π⁄(2Φ²) ≈ 0.599991. It is close to ⅗ but not
   equal to it; π is about 0.0015% below 6Φ²⁄5.
 
@@ -231,70 +237,23 @@ of foundational knowledge is what allows tools like this to exist. Golden-Sectio
 
 ---
 
-## Hosting this on GitHub
+## Working on the code
 
-This repo (`Sacred-Geometry/YinYangGenerator`) is the right place for the
-tool. Here's how to get the HTML file in and live.
-
-### 1. Add the file to the repo
-
-**Easiest — directly in the GitHub web UI:**
-
-1. Go to https://github.com/Sacred-Geometry/YinYangGenerator
-2. Click **Add file → Upload files**
-3. Drag in `index.html` (rename the file to exactly `index.html` if it
-   isn't already — this matters for step 3 below)
-4. Scroll down, add a commit message like `Add Yin Yang Generator app`,
-   and click **Commit changes** (committing straight to `main` is fine
-   for a small repo like this)
-
-**Or from the command line, if you have git installed:**
-
-```bash
-git clone https://github.com/Sacred-Geometry/YinYangGenerator.git
-cd YinYangGenerator
-# copy the HTML file into this folder, named index.html
-git add index.html
-git commit -m "Add Yin Yang Generator app"
-git push origin main
-```
-
-### 2. Add this README
-
-If you're reading this file locally, upload it the same way (**Add
-file → Upload files**, or `git add README.md`) so it replaces the
-placeholder README already in the repo.
-
-### 3. Turn on GitHub Pages
-
-GitHub Pages serves static files straight out of the repo — no build
-step needed for a single HTML file like this one.
-
-1. In the repo, go to **Settings → Pages** (left sidebar, under "Code
-   and automation")
-2. Under **Build and deployment → Source**, choose **Deploy from a
-   branch**
-3. Under **Branch**, select `main` and folder `/ (root)`, then **Save**
-4. Wait a minute or two, then refresh the page — GitHub will show
-   **"Your site is live at..."** with the URL
-
-Because the org name is `Sacred-Geometry` and Pages URLs are always
-lowercased, the live URL is:
-
-```
-https://sacred-geometry.github.io/YinYangGenerator/
-```
-
-GitHub automatically serves `index.html` as the default page for that
-URL — which is why the file needs to be named exactly `index.html` (not
-`YinYang_Generator.html` or similar) for the clean URL above to work
-without extra configuration.
-
-### 4. Updating the tool later
-
-Any time you upload a new version of `index.html` (web UI upload, or
-`git push`), GitHub Pages rebuilds automatically within a few minutes —
-no other steps needed.
+- **One file.** The whole tool (markup, styles and script) is `index.html`.
+  There is no build step and nothing to install; the only outside request is
+  for the Google Fonts.
+- **Leave the geometry constants alone.** `R`, `SYM_K` and `viewHalf()` define
+  the Φ box: the symbol radius is √2⁄Φ (≈ 0.874) of the box half-side, so the
+  half-side is Φ⁄√2 radii and centre → corner is exactly Φ radii. Everything
+  else (the stage, exports, overlays, calipers and audits) is drawn from them.
+- **Check a change with Inspect.** Under *The picture the page draws*, every
+  corner of the Four-corner Φ test should read 1.618034 and the caliper miss
+  0.000 px; every row of *Other display scales* should show a miss of 0.000 px.
+  **Check my screen** then measures what actually reaches your screen.
+- **Publishing.** GitHub Pages serves `index.html` from `main` at the live URL
+  and rebuilds a few minutes after each change. An update can also be uploaded
+  as a `.zip` through **Add file → Upload files**: the *Unpack uploaded update*
+  workflow extracts it into the repository and removes the zip.
 
 ---
 

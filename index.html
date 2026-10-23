@@ -740,7 +740,10 @@ const EYE_RATIO_MIN = 0.01, EYE_RATIO_MAX = 0.995;
 const SZ = 1000, CX = 500, CY = 500;
 const R  = (SZ / 2) * Math.SQRT2 / BIG_PHI;   // ≈ 437.016 units — symbol radius in the 1000-unit geometry box
 const LR = R / 2;
-const SYM_K = R / (SZ / 2);                     // symbol radius ÷ half-box ≈ 0.874
+// The fraction of the box half-side taken by the symbol radius: √2⁄Φ ≈ 0.874. The box half-side is therefore Φ⁄√2 symbol
+// radii, so its half-diagonal (centre → corner) is exactly Φ radii: centre → edge 1, edge → corner φ.
+const SYM_K = R / (SZ / 2);
+function viewHalf(){ return 1 / SYM_K; }        // the box half-side in symbol radii, Φ⁄√2 ≈ 1.144
 function getER(){ return LR * S.eyeRatio; }
 
 // ── Small helpers ───────────────────────────────────────────────────
@@ -1312,18 +1315,19 @@ function geomAt(t){
 const spinAngle = t => S.motion.spin ? S.motion.dir * TAU * t / SPIN_PERIOD : 0;
 const swirlAngle = t => S.motion.swirl ? S.motion.dir * TAU * t / SWIRL_PERIOD : 0;
 
-// lobe A (Ear A / yang): left half + upper lobe − lower lobe
-function pathLobe1(c, G){
-  c.moveTo(0, -1);
-  c.arc(0, 0, 1, -Math.PI / 2, Math.PI / 2, true);
+// lobe A (Ear A / yang): left half + upper lobe − lower lobe. ro > 1 carries the half on past the rim to radius ro (the two
+// halves then meet along the vertical axis out there), for a layer whose rim is cut exactly afterwards.
+function pathLobe1(c, G, ro = 1){
+  c.moveTo(0, -ro);
+  c.arc(0, 0, ro, -Math.PI / 2, Math.PI / 2, true);
   c.arc(0, G.c2, G.r2, Math.PI / 2, -Math.PI / 2, false);
   c.arc(0, G.c1, G.r1, Math.PI / 2, -Math.PI / 2, true);
   c.closePath();
 }
 // lobe B (Ear B / yin): right half + lower lobe − upper lobe
-function pathLobe2(c, G){
-  c.moveTo(0, -1);
-  c.arc(0, 0, 1, -Math.PI / 2, Math.PI / 2, false);
+function pathLobe2(c, G, ro = 1){
+  c.moveTo(0, -ro);
+  c.arc(0, 0, ro, -Math.PI / 2, Math.PI / 2, false);
   c.arc(0, G.c2, G.r2, Math.PI / 2, -Math.PI / 2, false);
   c.arc(0, G.c1, G.r1, Math.PI / 2, -Math.PI / 2, true);
   c.closePath();
@@ -1491,10 +1495,14 @@ function drawSymbol(ctx, env, G, F, level){
   // Each half is filled with its own exact path, so the outer edge antialiases straight
   // against the background (no colored fringe). A Lobe-B underlay stops 1.25 px inside
   // the rim; it only backs the shared S-curve so that seam stays clean too.
-  fillShape(ctx, c => pathLobe2(c, G), F.lobe2, env, {swirl:sw});
-  const inset = 1 - 1.25 / px; if (inset > .5) fillShape(ctx, pathDisc(0, 0, inset), F.lobe2, env, {swirl:sw});
-  fillShape(ctx, c => pathLobe1(c, G), F.lobe1, env, {swirl:sw});
-  if (S.style === 'bevel' && !env.flat){ bevel(ctx, c => pathLobe2(c, G), px); bevel(ctx, c => pathLobe1(c, G), px); }
+  // When the layer's rim is cut exactly afterwards (env.over, in screen px), the outer symbol is instead painted that far
+  // past the rim and the underlay reaches just as far, so every rim pixel is solid colour before the cut.
+  const ro = level === 0 && env.over ? 1 + env.over / px : 1, under = ro > 1 ? ro : 1 - 1.25 / px;
+  const half1 = c => pathLobe1(c, G, ro), half2 = c => pathLobe2(c, G, ro);
+  fillShape(ctx, half2, F.lobe2, env, {swirl:sw, ext:ro});
+  if (under > .5) fillShape(ctx, pathDisc(0, 0, under), F.lobe2, env, {swirl:sw, ext:ro});
+  fillShape(ctx, half1, F.lobe1, env, {swirl:sw, ext:ro});
+  if (S.style === 'bevel' && !env.flat){ bevel(ctx, half2, px); bevel(ctx, half1, px); }
   if (S.stars) drawStars(ctx, env.t, px);
   const eyes = [{k:'eye1', cy:G.c1, r:G.e1, w:'upper'}, {k:'eye2', cy:G.c2, r:G.e2, w:'lower'}];
   for (const E of eyes){
@@ -1521,7 +1529,8 @@ function drawGuides(ctx, G, px){
   ctx.beginPath(); ctx.arc(0, 0, 1, 0, TAU); ctx.moveTo(G.r1, G.c1); ctx.arc(0, G.c1, G.r1, 0, TAU); ctx.moveTo(G.r2, G.c2); ctx.arc(0, G.c2, G.r2, 0, TAU);
   ctx.moveTo(G.e1, G.c1); ctx.arc(0, G.c1, G.e1, 0, TAU); ctx.moveTo(G.e2, G.c2); ctx.arc(0, G.c2, G.e2, 0, TAU);
   ctx.moveTo(0, -1.04); ctx.lineTo(0, 1.04); ctx.moveTo(-1.04, 0); ctx.lineTo(1.04, 0); strokeAll();
-  // A (1,0) through the lower lobe centre to the far rim: AB = φ·R, AG = Φ·R
+  // A (1,0) through the lower lobe centre to the far rim, 4R⁄√5 from A. It crosses the lower lobe φ·R and Φ·R from A
+  // (the near and far crossings; G in Other Segments is the far one).
   const dx = -1, dy = G.c2, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, b = 2 * ux, tFar = -b;
   ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(1, 0); ctx.lineTo(1 + ux * tFar, uy * tFar); strokeAll();
   ctx.fillStyle = ink; ctx.font = `italic ${14 / px}px Georgia, serif`;
@@ -1530,9 +1539,11 @@ function drawGuides(ctx, G, px){
 
 // ── Exact outer rim ─────────────────────────────────────────────────
 // The rim is where the Φ check is read, so its edge pixels are not left to the graphics chip's edge smoothing, which can
-// draw the circle a few hundredths of a pixel small, and by different amounts in different directions. Once the symbol is
-// drawn, every pixel near the rim is given an alpha equal to the exact area of that pixel inside the circle, worked out in
-// the page; its colour stays what was drawn there. The circle is then the same at every size and on every machine.
+// draw the circle up to a tenth of a pixel small, and by different amounts in different directions. The symbol is painted
+// a little past the rim, then cut by a mask whose alpha at each rim pixel is the exact area of that pixel inside the circle,
+// worked out in the page; each pixel's colour stays what was painted there. The cut is one image draw, so it is made on
+// every frame, still or moving, on the stage and in every export and audit: the circle is the same at every size, at every
+// moment and on every machine.
 // discArea: exact area of the disc x² + y² ≤ r² inside the rectangle [x0, x1] × [y0, y1]
 function discArea(x0, x1, y0, y1, r){
   const r2 = r * r, H = x => { x = x < -r ? -r : x > r ? r : x; return .5 * (x * Math.sqrt(Math.max(0, r2 - x * x)) + r2 * Math.asin(x / r)); };
@@ -1545,59 +1556,68 @@ function discArea(x0, x1, y0, y1, r){
   let s = 0; for (const [a0, a1] of split(x0, x1)) for (const [b0, b1] of split(y0, y1)) s += quad(a0, a1, b0, b1);
   return s;
 }
-// The pixels from 1.5 px inside to 2.5 px outside a rim of radius r centred on a W px box, with each one's exact alpha
-// and a pixel 1.5 px further in (whose colour stands in where almost nothing was drawn). Kept per size.
+// The pixels from 1.5 px inside to 2.5 px outside a rim of radius r centred on a W px box, each with its exact alpha
+// (255 well inside, 0 well outside). Kept per size.
 const RIM_LISTS = new Map();
 function rimList(W, r){
   const key = W + '|' + r.toFixed(9); let L = RIM_LISTS.get(key); if (L) return L;
   if (RIM_LISTS.size > 12) RIM_LISTS.clear();
-  const c = W / 2, lo = Math.max(0, r - 1.5), hi = r + 2.5, idx = [], al = [], nb = [];
+  const c = W / 2, lo = Math.max(0, r - 1.5), hi = r + 2.5, idx = [], al = [];
   for (let j = Math.max(0, Math.floor(c - hi)); j <= Math.min(W - 1, Math.ceil(c + hi)); j++){
     const y = j + .5 - c; if (Math.abs(y) > hi) continue;
     const xo = Math.sqrt(hi * hi - y * y), xi = Math.abs(y) < lo ? Math.sqrt(lo * lo - y * y) : 0;
     const spans = xi > 0 ? [[-xo, -xi], [xi, xo]] : [[-xo, xo]];
     for (const [a, b] of spans) for (let i = Math.max(0, Math.floor(c + a - .5)); i <= Math.min(W - 1, Math.ceil(c + b - .5)); i++){
       const x = i + .5 - c, d = Math.hypot(x, y); if (d < lo || d > hi) continue;
-      const m = d < r - .75 ? 1 : d > r + .75 ? 0 : discArea(i - c, i + 1 - c, j - c, j + 1 - c, r), k = d > 0 ? 1.5 / d : 0;
+      const m = d < r - .75 ? 1 : d > r + .75 ? 0 : discArea(i - c, i + 1 - c, j - c, j + 1 - c, r);
       idx.push(j * W + i); al.push(Math.round(m * 255));
-      nb.push(clamp(Math.floor(c + y * (1 - k)), 0, W - 1) * W + clamp(Math.floor(c + x * (1 - k)), 0, W - 1));
     }
   }
-  L = {idx:Int32Array.from(idx), al:Uint8Array.from(al), nb:Int32Array.from(nb)}; RIM_LISTS.set(key, L); return L;
+  L = {idx:Int32Array.from(idx), al:Uint8Array.from(al)}; RIM_LISTS.set(key, L); return L;
 }
-// Give a drawn layer (on a canvas the page can read) its exact rim
-function exactRim(g, W, r){
-  const L = rimList(W, r), im = g.getImageData(0, 0, W, W), d = im.data, n = L.idx.length;
-  for (let k = 0; k < n; k++){
-    const p = L.idx[k] * 4, a = L.al[k];
-    if (a && d[p + 3] < 12){ const s = L.nb[k] * 4; d[p] = d[s]; d[p + 1] = d[s + 1]; d[p + 2] = d[s + 2]; }
-    d[p + 3] = a;
-  }
-  g.putImageData(im, 0, 0);
+// The rim as a mask the size of the box: opaque inside the circle, each rim pixel's alpha its exact area inside it, clear
+// outside. Built once per size and kept for the few sizes in use (the stage, an export, the audits).
+const RIM_MASKS = new Map();
+function rimMask(W, r){
+  const key = W + '|' + r.toFixed(9); let m = RIM_MASKS.get(key);
+  if (m){ RIM_MASKS.delete(key); RIM_MASKS.set(key, m); return m; }   // most recently used last
+  const id = new ImageData(W, W), d = id.data, c = W / 2, ri = Math.max(0, r - 1), L = rimList(W, r);
+  // inside: opaque (the pixels from 1.5 px in, which rimList holds, are then set to their exact values)
+  for (let j = 0; j < W; j++){ const y = j + .5 - c; if (Math.abs(y) >= ri) continue; const h = Math.sqrt(ri * ri - y * y);
+    d.fill(255, (j * W + Math.max(0, Math.ceil(c - h - .5))) * 4, (j * W + Math.min(W, Math.floor(c + h - .5) + 1)) * 4); }
+  for (let k = 0; k < L.idx.length; k++) d[L.idx[k] * 4 + 3] = L.al[k];
+  m = document.createElement('canvas'); m.width = m.height = W; m.getContext('2d').putImageData(id, 0, 0);
+  RIM_MASKS.set(key, m); if (RIM_MASKS.size > 8) RIM_MASKS.delete(RIM_MASKS.keys().next().value);
+  return m;
 }
-// Still frames, exports and audits are drawn on this readable canvas so the rim can be made exact; while the symbol is
-// animating, the faster graphics-chip canvas (symCv) is used instead.
-const symCvX = document.createElement('canvas'); symCvX.getContext('2d', {willReadFrequently:true});
-// A plain disc of one colour with an exact rim (the rim diagnostics)
+// Cut a drawn layer (W px square, circle centred) to the exact rim of radius r px: each pixel keeps its colour and takes
+// the mask's alpha. The layer must be solid out past r + 1.5 px (drawSymbol's env.over), so the mask alone sets the rim.
+function applyRimMask(g, W, r){
+  g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'destination-in'; g.globalAlpha = 1; g.imageSmoothingEnabled = false;
+  g.drawImage(rimMask(W, r), 0, 0); g.restore();
+}
+// The flat symbol's layer, drawn on the graphics chip and composited onto the stage, an export or an audit
+const symCv = document.createElement('canvas');
+// A plain disc of one colour with the exact rim (the Caliper target)
 function exactDisc(W, r, col){
-  const g = sizeCanvas(symCvX, W); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.clearRect(0, 0, W, W);
-  g.fillStyle = col; g.beginPath(); g.arc(W / 2, W / 2, r + 1.5, 0, TAU); g.fill();   // a little oversize, so every rim pixel holds the colour
-  exactRim(g, W, r); return symCvX;
+  const g = sizeCanvas(symCv, W); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.clearRect(0, 0, W, W);
+  g.fillStyle = col; g.beginPath(); g.arc(W / 2, W / 2, r + 2, 0, TAU); g.fill();   // a little oversize, so every rim pixel is solid colour
+  applyRimMask(g, W, r); return symCv;
 }
 
 // Draw the full symbol layer into ctx (cleared) — W px square covering [-ext, ext]².
-// o.exactRim: give the outer rim exact pixel areas (ctx must be readable, i.e. symCvX)
+// o.exactRim: give the outer rim exact pixel areas
 function drawSymbolLayer(ctx, W, t, q, ext, o = {}){
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, W);
-  const px = W / (2 * ext), G = geomAt(t), F = effFills(), fr = S.fractal;
-  const env = {t, q, swirl:swirlAngle(t), maxDepth:diveOn() ? 14 : fr.depth, W, noFx:!!o.noFx};
+  const px = W / (2 * ext), G = geomAt(t), F = effFills(), fr = S.fractal, over = o.exactRim ? 2 : 0;
+  const env = {t, q, swirl:swirlAngle(t), maxDepth:diveOn() ? 14 : fr.depth, W, noFx:!!o.noFx, over};
   ctx.setTransform(px, 0, 0, px, W / 2, W / 2);
   if (!o.noRot){
     if (S.flipH) ctx.scale(-1, 1);
     if (S.flipV) ctx.scale(1, -1);
     ctx.rotate((S.rot + dragAngle) * Math.PI / 180 + spinAngle(t));
   }
-  ctx.save(); ctx.beginPath(); ctx.arc(0, 0, diveOn() ? 1 : 1 + 1.5 / px, 0, TAU); ctx.clip();
+  ctx.save(); ctx.beginPath(); ctx.arc(0, 0, over ? 1 + (over + .5) / px : diveOn() ? 1 : 1 + 1.5 / px, 0, TAU); ctx.clip();
   let F0 = F, lv0 = 0;
   if (diveOn()){
     // Endless zoom along the logarithmic spiral of T(z) = c + a·z (a = s·e^{iρ}),
@@ -1611,9 +1631,10 @@ function drawSymbolLayer(ctx, W, t, q, ext, o = {}){
     if (inv) F0 = invertFills(F);
   }
   drawSymbol(ctx, env, G, F0, lv0);
-  if (o.exactRim) exactRim(ctx, W, px);   // alpha at the rim = exact pixel area (the transform and clip don't apply to pixel access)
-  if (S.fx.guides && !diveOn()) drawGuides(ctx, G, Math.hypot(ctx.getTransform().a, ctx.getTransform().b));
   ctx.restore();
+  // alpha at the rim = exact pixel area; cut outside the clip, so nothing painted past the rim is left behind
+  if (over) applyRimMask(ctx, W, px);
+  if (S.fx.guides && !diveOn()){ ctx.save(); ctx.beginPath(); ctx.arc(0, 0, 1 + 1.5 / px, 0, TAU); ctx.clip(); drawGuides(ctx, G, px); ctx.restore(); }
   if (S.style === 'glow' && !o.noGlow) glowPass(ctx, W, px);
 }
 const glowCv = document.createElement('canvas');
@@ -1634,7 +1655,6 @@ const BAGUA = {
   fuxi:   ['qian','xun','kan','gen','kun','zhen','li','dui'],
   kingwen:['li','kun','dui','qian','kan','gen','zhen','xun'],
 };
-function viewHalf(){ return 1 / SYM_K; }   // symbol always sits in Phi relation to its square box
 // Compact ring that fits the margin between the symbol (R) and the box edge (Φ⁄√2 · R ≈ 1.144 R)
 function drawBagua(ctx, W, px){
   const order = BAGUA[S.fx.bagua]; if (!order) return;
@@ -1870,7 +1890,6 @@ function drawHalves(ctx, W, t, q, cx, cy, Rp){
 }
 
 // ── Scene ───────────────────────────────────────────────────────────
-const symCv = document.createElement('canvas');
 let perfScale = 1;
 function drawScene(ctx, W, t, q, o = {}){
   const Hh = viewHalf(), px = W / (2 * Hh);
@@ -1881,7 +1900,7 @@ function drawScene(ctx, W, t, q, o = {}){
     fillShape(ctx, c => c.rect(-Hh, -Hh, 2 * Hh, 2 * Hh), S.bg, {t, q}, {ext:Hh});
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
-  const mode = S.d3.mode, solid3d = mode !== 'flat';
+  const mode = S.d3.mode;
   const Rp = px, cx = W / 2, cy = W / 2;
 
   // Caliper target: the controlled rim diagnostic, drawn by the same device-pixel canvas as the live display, so the test
@@ -1914,9 +1933,8 @@ function drawScene(ctx, W, t, q, o = {}){
   else if (mode === 'orb') drawOrb(ctx, W, t, q, cx, cy, Rp);
   else if (mode === 'halves'){ drawHalves(ctx, W, t, q, cx, cy, Rp); if (S.style === 'glow') glowPass(ctx, W, px); }
   else {
-    // A still picture (and every export and audit) gets the exact rim; an animating one is left to the graphics chip
-    const exact = q !== 'live' || !S.motion.playing, lay = exact ? symCvX : symCv;
-    drawSymbolLayer(sizeCanvas(lay, W), W, t, q, Hh, {exactRim:exact}); ctx.drawImage(lay, 0, 0);
+    // The flat symbol always gets the exact rim: still or animating, on the stage, in every export and in every audit
+    drawSymbolLayer(sizeCanvas(symCv, W), W, t, q, Hh, {exactRim:true}); ctx.drawImage(symCv, 0, 0);
   }
   if (S.fx.bagua !== 'off') drawBagua(ctx, W, px);
   // Calipers ride on the same canvas, in the same pixel grid and transform as the symbol, so they cannot drift from it
@@ -1979,21 +1997,14 @@ function caliperSVG(lw = .0042, fs = .056){
 }
 
 // ── Vector view ─────────────────────────────────────────────────────
-// A still, flat look in solid colours (Classic and most palettes, whenever the animation is paused) is shown as SVG
-// rather than as a canvas bitmap. The SVG's viewBox IS the box, in the construction's own units: the symbol has radius 1
-// and sits at the origin, the box's half-side is Φ⁄√2, so centre → corner is exactly Φ in the file itself. The browser
-// rasterises box and symbol together, straight at the screen's resolution — no intermediate bitmap and no resampling at
-// any browser zoom or display scale. Anything the vector view cannot show (animation, patterns, images, gradients, 3-D,
-// glow and bevel, effects, fractal eyes) is drawn on the canvas, exactly as before.
-// Live display uses the device-pixel Canvas path by default; SVG remains available for exports and audits.
+// The same picture as SVG: the viewBox IS the box, in the construction's own units (the symbol has radius 1 and sits at
+// the origin, the box's half-side is Φ⁄√2, so centre → corner is exactly Φ in the markup itself). The live stage does not
+// use it: the browser smooths SVG edges its own way, while the canvas gives the rim exact pixel areas, so the canvas is the
+// authoritative on-screen renderer. The vector form remains for the vector audit, and setting
+// window.PRECISION_CANVAS_LIVE = false shows it for a still, flat look in solid colours, for comparison.
 window.PRECISION_CANVAS_LIVE = true;
 let vecOn = false;
 function vecWhyNot(){
-  // Precision display mode: keep the live stage on the device-pixel Canvas path.
-  // The SVG renderer remains available for export/audit, but Chrome's live SVG
-  // rasterisation can place a fractional viewBox edge differently from the
-  // device-pixel canvas. For a metrology-oriented display, Canvas is the
-  // authoritative on-screen renderer.
   if (window.PRECISION_CANVAS_LIVE !== false) return 'precision canvas live mode';
   if (measureMode !== 'off') return 'a measurement overlay is open';
   if (S.motion.playing) return 'animating';
@@ -2515,9 +2526,10 @@ function onMargin(src, W){
   const g = b.getContext('2d', {willReadFrequently:true}); g.fillStyle = '#00ff00'; g.fillRect(0, 0, N, N); g.drawImage(src, AUDIT_M, AUDIT_M, W, W);
   return g.getImageData(0, 0, N, N).data;
 }
+// drawn by the stage's own path ('live'): the flat symbol and its exact rim are made the same way still or moving
 function canvasAuditImage(W){
   const c = document.createElement('canvas'); c.width = c.height = W;
-  withAuditLook(() => drawScene(c.getContext('2d'), W, 0, 'export'));
+  withAuditLook(() => drawScene(c.getContext('2d'), W, 0, 'live'));
   return Promise.resolve(onMargin(c, W));
 }
 function vectorAuditImage(W){
@@ -2533,7 +2545,7 @@ function analyseAudit(img, W){
   const cov = i => { const r = img[i], g = img[i + 1]; return r + g ? r / (r + g) : 0; };
   const pureRed = i => img[i] > 250 && img[i + 1] < 5 && img[i + 2] < 5;
   const edgeIn = (start, stepI) => { let s = 0, i = start, run = 0, n = 0;
-    while (n++ < N){ s += 1 - cov(i); run = pureRed(i) ? run + 1 : 0; if (run >= 3) return s - 0; i += stepI; } return NaN; };
+    while (n++ < N){ s += 1 - cov(i); run = pureRed(i) ? run + 1 : 0; if (run >= 3) return s; i += stepI; } return NaN; };
   const lines = []; for (let k = 1; k < 20; k++) lines.push(Math.round(M + W * k / 20));
   const avg = a => a.reduce((p, v) => p + v, 0) / a.length, row = N * 4, col = 4;
   const left = avg(lines.map(y => edgeIn(P(0, y), col))), right = N - avg(lines.map(y => edgeIn(P(N - 1, y), -col)));
@@ -2577,22 +2589,10 @@ function runAuditJob(){
 }
 let liveConstTimer = 0;
 function queueLiveConst(){ clearTimeout(liveConstTimer); liveConstTimer = setTimeout(updateLiveConst, 30); }
-// The box side the layout uses at display scale d for a target of t screen px: even, and a whole number of CSS px too
-function exactSide(d, t){
-  let best = Math.max(2, Math.round(t / 2) * 2), bc = 1e9;
-  for (let n = Math.round(t) - 40; n <= Math.round(t) + 40; n++){ if (n < 2 || n % 2) continue;
-    const off = Math.abs(n / d - Math.round(n / d)) * d, c = Math.abs(n - t) + (off < 5e-4 ? 0 : 100 + 1000 * off); if (c < bc){ bc = c; best = n; } }
-  return best;
-}
 // WCAG contrast ratio of two hex colours
 function contrast(a, b){
   const Y = h => { const [r, g, bb] = h2rgb(h).map(v => { v /= 255; return v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * r + .7152 * g + .0722 * bb; };
   const y1 = Y(a), y2 = Y(b); return (Math.max(y1, y2) + .05) / (Math.min(y1, y2) + .05);
-}
-// Which side of the box Ear A (lobe 1) faces right now, after rotation, spin and flips
-function earASide(){
-  const th = (S.rot + dragAngle) * Math.PI / 180 + spinAngle(simTime), x = -Math.cos(th) * (S.flipH ? -1 : 1), y = -Math.sin(th) * (S.flipV ? -1 : 1);
-  return Math.abs(x) >= Math.abs(y) ? (x < 0 ? 'left' : 'right') : (y < 0 ? 'top' : 'bottom');
 }
 // ── Per-corner visibility ───────────────────────────────────────────
 // The four box corners in screen order, with the fill that meets the rim on the way to each one (after rotation, spin
@@ -2772,9 +2772,11 @@ function updateLiveConst(){
   const cMax = Math.max(Math.abs(BOX.cx), Math.abs(BOX.cy)), pct = v => (v >= 0 ? '+' : '−') + Math.abs(v * 100).toFixed(3) + '%';
   const sec = t => `<tr><th colspan="2">${t}</th></tr>`, note = t => `<tr><td colspan="2" class="note">${t}</td></tr>`;
   const markTxt = v => Math.abs(v) < .0005 ? 'on the rim' : `${Math.abs(v).toFixed(3)} px ${v > 0 ? 'outside' : 'inside'} the rim`;
-  const rimExact = rimTestMode !== 'off' || (S.d3.mode === 'flat' && !S.motion.playing);
+  const rimExact = rimTestMode !== 'off' || S.d3.mode === 'flat';
+  // the rim's alpha stays exact under every style, but these change how the edge looks, differently at each corner
+  const looks = rimTestMode !== 'off' ? [] : [S.style === 'glow' && 'the Glow style spreads light past the rim', S.style === 'bevel' && 'the Bevel style shades the rim light on one side and dark on the other', S.fx.aura && 'the aura lights the box just outside the rim'].filter(Boolean);
   let h = `<tr><td>Shown as</td><td>${vecOn ? good('Vector') + ' <span class="m">· box and symbol drawn together by the browser at screen resolution</span>' : 'Canvas bitmap <span class="m">· ' + (vecWhyNot() || 'drawn 1 ∶ 1') + '</span>'}</td></tr>` +
-    `<tr><td>Rim edge</td><td>${rimExact ? good('Exact pixel areas') + ' <span class="m">· the page works out how much of each rim pixel lies inside the circle, so the circle is the same on every graphics chip</span>' : S.d3.mode !== 'flat' ? 'Drawn by the 3-D view <span class="m">· the measurements below use the flat view</span>' : 'Graphics chip, while animating <span class="m">· pause (Space) for the exact rim</span>'}</td></tr>` +
+    `<tr><td>Rim edge</td><td>${rimExact ? good('Exact pixel areas') + ' <span class="m">· still or moving, the page works out how much of each rim pixel lies inside the circle, so the circle is the same on every graphics chip</span>' + (looks.length ? `<br><span class="warn">${looks.join('; ')}</span> <span class="m">— choose Flat style${S.fx.aura ? ' and turn the aura off' : ''} for calipers</span>` : '') : 'Drawn by the 3-D view <span class="m">· the measurements below use the flat view</span>'}</td></tr>` +
     `<tr><td>Pixel ratio</td><td>${+BOX.dpr.toFixed(4)} <span class="m">screen px per CSS px</span></td></tr>` +
     `<tr><td>Box on screen</td><td>${side} × ${side} screen px <span class="m">(${(side / BOX.dpr).toFixed(2)} CSS px${side % 2 ? '' : ' · even, so the centre falls on a pixel corner'})</span></td></tr>`;
 
@@ -2813,7 +2815,7 @@ function updateLiveConst(){
       `<tr><td>Corner spread</td><td>${A.cornerSpread.toFixed(3)} px <span class="m">between the closest and farthest Φ corner; each corner is measured on its own, not averaged</span></td></tr>` +
       `<tr><td>Caliper miss</td><td>${pass ? good('✓') : '~'} ${A.miss.toFixed(3)} px <span class="m">largest gap, over the 4 corners, between the Φ mark and the independently measured rim</span></td></tr>`;
   } else h += `<tr><td>Pixel audit</td><td>${A === null ? 'could not run in this browser' : wait}</td></tr>`;
-  h += note('The rim is found from pixel areas: the covered area gives the radius, the centre of that area gives the symbol’s centre, and the covered area inside a narrow wedge (±7.5°) toward each side and corner gives the rim’s distance that way. Sampling along a line to the corner instead reads up to 0.05 px off, by an amount that changes with the box size, depending on where the rim crosses the pixel grid on the diagonal.');
+  h += note('Drawn offscreen by the same code as the stage, which gives the rim its exact areas whether the symbol is still or moving. The rim is found from pixel areas: the covered area gives the radius, the centre of that area gives the symbol’s centre, and the covered area inside a narrow wedge (±7.5°) toward each side and corner gives the rim’s distance that way. Sampling along a line to the corner instead reads up to 0.05 px off, by an amount that changes with the box size, depending on where the rim crosses the pixel grid on the diagonal.');
 
   // 3 ── What calipers can see at each corner
   const test = rimTestMode !== 'off' ? RIM_TEST[rimTestMode] : null, bgc = test ? test.bg : fillColor(S.bg), faint = [];
@@ -2855,7 +2857,7 @@ function updateLiveConst(){
 
   // 6 ── The offscreen audit at other display scales
   h += sec(`Same offscreen audit at other display scales · ${kind}`) +
-    AUDIT_SCALES.map(sc => { const n = exactSide(sc, BOX_PX * sc), B = requestAudit(kind, n);
+    AUDIT_SCALES.map(sc => { const n = boxSide(sc), B = requestAudit(kind, n);
       return `<tr><td>${sc}× · ${n} px</td><td>${B && typeof B === 'object' ? `centre → corner ∶ radius <span class="b">${B.ratio.toFixed(6)}</span> · miss ${B.miss.toFixed(3)} px ${B.miss < .25 ? good('✓') : '~'}` : B === null ? '—' : wait}</td></tr>`; }).join('') +
     note('Nothing in these measurements is taken from the design: box, centre, corners and rim are all found in the pixels, and Φ appears only as the answer they are compared with. A quarter pixel is below what calipers on glass can resolve. The calipers drawn by Construction guides are a diagram of the construction, not a measurement; these audits are the test. Use Controlled Φ rim diagnostic above to separate geometry from lobe contrast.');
   el.innerHTML = h;
@@ -3326,6 +3328,8 @@ async function exportImage(sizeArg){
 }
 function buildVectorSVG(){
   const F = effFills(), G = {r1:.5, r2:.5, e1:.5 * S.eyeRatio, e2:.5 * S.eyeRatio, c1:-.5, c2:.5}, fr = S.fractal;
+  // file units per symbol radius (= R ≈ 437.016): the file is 1000 units wide, the box half-side is Φ⁄√2 radii
+  const Hh = viewHalf(), K = 500 / Hh;
   let defs = '', gid = 0; const n = v => +v.toFixed(6);
   const ref = f => { if (f.mode !== 'gradient') return fillColor(f); const id = 'g' + (gid++), st = f.stops.map(s => `<stop offset="${s.p}%" stop-color="${s.c}"/>`).join('');
     defs += f.gtype === 'lg' ? `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${f.x1}" y1="${f.y1}" x2="${f.x2}" y2="${f.y2}">${st}</linearGradient>` : `<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="${f.cx}" cy="${f.cy}" r="${f.r}">${st}</radialGradient>`; return `url(#${id})`; };
@@ -3337,22 +3341,22 @@ function buildVectorSVG(){
   const P1 = 'M0 -1A1 1 0 0 0 0 1A0.5 0.5 0 0 1 0 0A0.5 0.5 0 0 0 0 -1Z', P2 = 'M0 -1A1 1 0 0 1 0 1A0.5 0.5 0 0 1 0 0A0.5 0.5 0 0 0 0 -1Z';
   const sym = (Fs, level) => {
     let o;
-    if (level === 0){ const l2 = ref(Fs.lobe2); o = `<path d="${P2}" fill="${l2}"/><circle r="${n(1 - 1.25 / 437)}" fill="${l2}"/><path d="${P1}" fill="${ref(Fs.lobe1)}"/>`; }
+    if (level === 0){ const l2 = ref(Fs.lobe2); o = `<path d="${P2}" fill="${l2}"/><circle r="${n(1 - 1.25 / K)}" fill="${l2}"/><path d="${P1}" fill="${ref(Fs.lobe1)}"/>`; }
     else o = `<circle r="1" fill="${ref(Fs.lobe2)}"/><rect x="-1" y="-1" width="1" height="2" fill="${ref(Fs.lobe1)}"/><circle cy="-0.5" r="0.5" fill="${ref(Fs.lobe1)}"/><circle cy="0.5" r="0.5" fill="${ref(Fs.lobe2)}"/>`;
     if (S.stars){ let st = ''; STARS.forEach(s => { st += `<circle cx="${n(s.x)}" cy="${n(s.y)}" r="${n(s.r)}" fill="${s.c}" opacity="${s.o.toFixed(2)}"/>`; }); o += level === 0 ? `<g clip-path="url(#uc)">${st}</g>` : st; }
     [['eye1', G.c1, G.e1, 'upper'], ['eye2', G.c2, G.e2, 'lower']].forEach(([k, cy, r, w]) => {
-      const inner = level < Math.min(5, fr.depth) && (fr.eyes === 'both' || fr.eyes === w) && r * (1 - fr.ring) * 437 * Math.pow(.3, level) > .5;
+      const inner = level < Math.min(5, fr.depth) && (fr.eyes === 'both' || fr.eyes === w) && r * (1 - fr.ring) * K * Math.pow(.3, level) > .5;
       if (!inner || fr.ring >= .005) o += `<circle cy="${cy}" r="${n(r)}" fill="${ref(Fs[k])}"/>`;
       if (inner)
         o += `<g transform="translate(0 ${cy}) scale(${n(r * (1 - fr.ring))}) rotate(${fr.rot})" clip-path="url(#uc)">${sym(fr.colors === 'invert' ? invertFills(Fs) : Fs, level + 1)}</g>`;
     });
     return o;
   };
-  const Hh = viewHalf(), k = 500 / Hh, flips = `${S.flipH ? 'scale(-1 1) ' : ''}${S.flipV ? 'scale(1 -1) ' : ''}rotate(${n(S.rot + dragAngle)})`;
+  const flips = `${S.flipH ? 'scale(-1 1) ' : ''}${S.flipV ? 'scale(1 -1) ' : ''}rotate(${n(S.rot + dragAngle)})`;
   let body = sym(F, 0); const bg = S.exp.transp ? '' : `<rect width="1000" height="1000" fill="${fillColor(S.bg)}"/>`;
   if (S.fx.guides){
     // construction circles and axes turn with the symbol, as on the stage
-    const dash = `stroke-dasharray="${n(7 / 437)} ${n(5 / 437)}"`, sw = n(1.1 / 437), gl = `stroke="rgba(213,181,122,.9)" stroke-width="${sw}" fill="none"`;
+    const dash = `stroke-dasharray="${n(7 / K)} ${n(5 / K)}"`, sw = n(1.1 / K), gl = `stroke="rgba(213,181,122,.9)" stroke-width="${sw}" fill="none"`;
     const tF = 2 / Math.hypot(1, G.c2);
     body += `<g clip-path="url(#uc)"><g ${gl} ${dash}><circle r="1"/><circle cy="${G.c1}" r="${G.r1}"/><circle cy="${G.c2}" r="${G.r2}"/><circle cy="${G.c1}" r="${n(G.e1)}"/><circle cy="${G.c2}" r="${n(G.e2)}"/>` +
       `<line x1="0" y1="-1.04" x2="0" y2="1.04"/><line x1="-1.04" y1="0" x2="1.04" y2="0"/></g><line ${gl} x1="1" y1="0" x2="${n(1 - tF / Math.hypot(1, G.c2))}" y2="${n(G.c2 * tF / Math.hypot(1, G.c2))}"/></g>`;
@@ -3364,11 +3368,13 @@ function buildVectorSVG(){
       bag += `<g transform="rotate(${n(deg)})" fill="${S.fx.baguaCol}">${lines}</g>`; });
     bag += `<circle r="1.012" fill="none" stroke="${S.fx.baguaCol}" stroke-opacity=".45" stroke-width="0.0025"/><circle r="1.111" fill="none" stroke="${S.fx.baguaCol}" stroke-opacity=".45" stroke-width="0.0025"/>`;
   }
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<!-- Yin Yang Generator · github.com/Sacred-Geometry/YinYangGenerator · Eye:Lobe = ${S.eyeRatio.toFixed(9)} -->\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">\n<defs><clipPath id="uc" clipPathUnits="userSpaceOnUse"><circle r="1"/></clipPath>${defs}</defs>\n${bg}\n<g transform="translate(500 500) scale(${n(k)})">\n<g transform="${flips}">${body}</g>${bag}${S.fx.guides ? caliperSVG() : ''}\n</g>\n</svg>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<!-- Yin Yang Generator · github.com/Sacred-Geometry/YinYangGenerator · Eye:Lobe = ${S.eyeRatio.toFixed(9)} -->\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">\n<defs><clipPath id="uc" clipPathUnits="userSpaceOnUse"><circle r="1"/></clipPath>${defs}</defs>\n${bg}\n<g transform="translate(500 500) scale(${n(K)})">\n<g transform="${flips}">${body}</g>${bag}${S.fx.guides ? caliperSVG() : ''}\n</g>\n</svg>`;
 }
 function exportSVG(){
   const txt = buildVectorSVG();
-  const note = [S.bg, ...Object.values(S.fills)].some(f => f.mode === 'pattern' || f.mode === 'image') ? 'Patterns and images become their main color in vector form.' : 'Vector export of the flat geometry.';
+  const lost = [S.d3.mode !== 'flat' && 'the 3-D view (the file is the flat symbol)', [S.bg, ...Object.values(S.fills)].some(f => f.mode === 'pattern' || f.mode === 'image') && 'patterns and images (each becomes its main color)',
+    (S.style === 'glow' || S.style === 'bevel') && `the ${S.style} style`, (S.fx.bolt || S.fx.aura) && 'lightning and the aura'].filter(Boolean);
+  const note = 'Vector export of the still, flat geometry, turned and flipped as set in Transform' + (lost.length ? '. Not in vector form: ' + lost.join('; ') + '.' : '.');
   showMedia('image', new Blob([txt], {type:'image/svg+xml'}), 'yinyang.svg', note);
 }
 function csvOf(rows){ return rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n'); }
@@ -3437,14 +3443,10 @@ function shuffle(){
 // ── Layout & render loop ────────────────────────────────────────────
 const BOX_PX = 610;                              // box side in CSS px whenever the stage has room: a Fibonacci number
 const EXPORT_SIZES = [610, 987, 1597, 2584];     // image export sides, Fibonacci numbers
-const BOX = {dev:0, dpr:1, css:0, full:true, exact:true, x:0, y:0, grid:true, gridErr:0, cx:0, cy:0, fx:0, fy:0, frameCss:0};
-// An element's own layout box in CSS px (1/64 steps), measured with its snap offset cleared so that the result never
-// depends on the offset layout() gave it last time (reading it back made the box flip by 1/64 px every frame)
-function baseRect(el){
-  el.style.left = ''; el.style.top = '';
-  const r = el.getBoundingClientRect();
-  return {left:Math.round(r.left * 64) / 64, top:Math.round(r.top * 64) / 64, w:r.width, h:r.height};
-}
+const BOX = {dev:0, dpr:1, css:0, full:true, x:0, y:0, grid:true, gridErr:0, cx:0, cy:0, fx:0, fy:0, frameCss:0};
+// The box side in screen px at display scale dpr when the stage has room: the even number nearest 610 CSS px (the
+// smaller one on a tie), so the centre falls on a pixel corner. The audit table at other display scales uses it too.
+function boxSide(dpr){ return Math.max(2, 2 * Math.ceil(BOX_PX * dpr / 2 - .5)); }
 // What makes the box need re-laying out: the sizes and place of things layout() does not itself move
 const stageCol = document.querySelector('.stage-col');
 function layoutSig(){
@@ -3482,16 +3484,11 @@ function layout(){
   const natural = frame.getBoundingClientRect();
   const fw = Math.max(2, natural.width);
   const full = fw >= BOX_PX - .01;
-  const targetCss = full ? BOX_PX : fw;
-  const targetDev = Math.max(2, Math.round(targetCss * dpr));
 
-  // Prefer an even device-pixel side so the mathematical centre falls between
-  // device pixels rather than through a pixel. Stay close to the natural 610 px
-  // target (or the constrained CSS size on a small stage).
-  let dev = targetDev;
-  if (dev > 2 && dev % 2) dev += 1;
-  if (!full) dev = Math.max(2, Math.min(dev, Math.floor(fw * dpr + 1e-6)));
-  if (dev % 2 && dev > 2) dev -= 1;
+  // An even device-pixel side, so the mathematical centre falls between device pixels
+  // rather than through a pixel: the nearest to the 610 px target, or on a small stage
+  // the largest that fits.
+  const dev = full ? boxSide(dpr) : Math.max(2, 2 * Math.floor(fw * dpr / 2 + 1e-6));
 
   const css = q64(dev / dpr);
   frame.style.width = frame.style.height = css + 'px';
