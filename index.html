@@ -2649,6 +2649,11 @@ function buildFullGeometryOverlay(){
     .forEach(([l, s, p, c]) => { if (s) named.push({label:l, pt:s, mx:p.x, my:p.y, col:c, group:'diag'}); });
   named.push({label:'X', pt:sXpt, mx:Xpt.x, my:Xpt.y, col:cInk, group:'diag'});
   if (sQpt) named.push({label:'Q', pt:sQpt, mx:Qpt.x, my:Qpt.y, col:cMut, group:'diag'});
+  // The square display box: its 4 corners and the 4 midpoints of its sides (the box edge sits FG_PAD outside the 1000 unit square).
+  // Model coordinates are the display positions mapped back through the symbol's scale, so distances read in R like every other point.
+  const bh = SZ / 2 + FG_PAD, boxPts = [['TL', -1, -1], ['TR', 1, -1], ['BR', 1, 1], ['BL', -1, 1], ['MT', 0, -1], ['MR', 1, 0], ['MB', 0, 1], ['ML', -1, 0]]
+    .map(([label, ux, uy]) => { const pt = {x:CX + ux * bh, y:CY + uy * bh}; return {label, ux, uy, pt, mx:CX + (pt.x - CX) / sc, my:CY + (pt.y - CY) / sc}; });
+  boxPts.forEach(b => named.push({label:b.label, pt:b.pt, mx:b.mx, my:b.my, col:cGld, group:'box'}));
   const cross = [], eyeDefs = [{cx:CX, cy:CY - mLR, er:mER, col:cBlue}, {cx:CX, cy:CY + mLR, er:mER, col:cGrn}];
   for (const eye of eyeDefs){
     const lines = [{kind:'H', val:eye.cy - eye.er}, {kind:'H', val:eye.cy}, {kind:'H', val:eye.cy + eye.er}, {kind:'V', val:eye.cx - eye.er}, {kind:'V', val:eye.cx + eye.er}];
@@ -2680,8 +2685,9 @@ function buildFullGeometryOverlay(){
   }
   o += `<line x1="${f2(sE.x)}" y1="${f2(sE.y)}" x2="${f2(sXpt.x)}" y2="${f2(sXpt.y)}" stroke="${cRed}" stroke-width="0.8" opacity="0.5"/>`;
   if (sQpt) o += `<line x1="${f2(sE.x)}" y1="${f2(sE.y)}" x2="${f2(sQpt.x)}" y2="${f2(sQpt.y)}" stroke="${cBlue}" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.4"/>`;
+  o += `<rect x="${f2(CX - bh)}" y="${f2(CY - bh)}" width="${f2(2 * bh)}" height="${f2(2 * bh)}" fill="none" stroke="${cGld}" stroke-width="0.8" stroke-dasharray="6,4" opacity="0.6"/>`;
   o += `<line x1="${f2(sO.x)}" y1="${f2(sZ.y)}" x2="${f2(sO.x)}" y2="${f2(sN.y)}" stroke="${cMut}" stroke-width="0.6" stroke-dasharray="3,4" opacity="0.5"/>`;
-  all.forEach((p, i) => { const r = p.group === 'cardinal' ? 4.5 : p.group === 'lobe' ? 3.5 : p.group === 'cross' ? 2.5 : 3;
+  all.forEach((p, i) => { const r = p.group === 'cardinal' ? 4.5 : p.group === 'box' ? 4 : p.group === 'lobe' ? 3.5 : p.group === 'cross' ? 2.5 : 3;
     o += `<circle cx="${f2(p.pt.x)}" cy="${f2(p.pt.y)}" r="9" fill="transparent" data-gpt="${i}" style="cursor:pointer"/><circle id="gpt${i}" cx="${f2(p.pt.x)}" cy="${f2(p.pt.y)}" r="${r}" fill="${p.col}" pointer-events="none"/>`; });
   o += txt(sZ.x, sZ.y - 12, 'Z', cInk, 11) + txt(sZ.x, sZ.y - 22, 'Zenith', cMut, 9.5, 'middle', 'italic');
   o += txt(sN.x, sN.y + 18, 'N', cInk, 11) + txt(sN.x, sN.y + 29, 'Nadir', cMut, 9.5, 'middle', 'italic');
@@ -2703,6 +2709,11 @@ function buildFullGeometryOverlay(){
     const isH = p.lineKind === 'H', above = isH && p.lineVal <= CY;
     const lx = isH ? p.pt.x : p.pt.x + (p.mx < CX ? -8 : 8), ly = isH ? p.pt.y + (above ? -7 : 11) : p.pt.y + 4, anc = isH ? 'middle' : (p.mx < CX ? 'end' : 'start');
     o += `<text x="${f2(lx)}" y="${f2(ly)}" font-size="8" fill="${p.col}" font-family="${SERIF}" text-anchor="${anc}" pointer-events="none">${p.label}</text>`;
+  }
+  for (const b of boxPts){
+    const lx = b.ux < 0 ? b.pt.x + 8 : b.ux > 0 ? b.pt.x - 8 : b.pt.x, anc = b.ux < 0 ? 'start' : b.ux > 0 ? 'end' : 'middle';
+    const ly = b.uy < 0 ? b.pt.y + 12 : b.uy > 0 ? b.pt.y - 7 : b.pt.y + 3;
+    o += txt(lx, ly, b.label, cGld, 9, anc);
   }
   const titleY = sZ.y - 60;
   o += `<rect x="${CX - 270}" y="${titleY}" width="540" height="22" rx="4" fill="${cBg}" opacity="0.93"/>` + txt(CX, titleY + 15, 'Click To Measure  ·  1 pt: identify  ·  2 pts: distance  ·  3 pts: angle + ratio', cInk, 10.5);
@@ -2727,7 +2738,7 @@ function recordHistory(){
     e.angle = (Math.acos(clamp((bax * bcx + bay * bcy) / (Math.hypot(bax, bay) * Math.hypot(bcx, bcy)), -1, 1)) * 180 / Math.PI).toFixed(3); }
   measureHistory.unshift(e); if (measureHistory.length > 12) measureHistory.pop();
 }
-function geoDotR(p){ return p.group === 'cardinal' ? 4.5 : p.group === 'lobe' ? 3.5 : p.group === 'cross' ? 2.5 : 3; }
+function geoDotR(p){ return p.group === 'cardinal' ? 4.5 : p.group === 'box' ? 4 : p.group === 'lobe' ? 3.5 : p.group === 'cross' ? 2.5 : 3; }
 function updateGeoHighlights(){
   const svg = $('ov');
   geoPoints.forEach((p, i) => { const el = document.getElementById('gpt' + i); if (!el) return; const on = geoSel.includes(i);
@@ -2850,6 +2861,7 @@ function renderOverlay(){
   const body = measureMode === 'vertical' ? buildVerticalOverlay() : measureMode === 'segments' ? buildSegmentOverlay() : buildFullGeometryOverlay();
   svg.setAttribute('viewBox', fg ? `${-FG_PAD} ${-FG_PAD} ${SZ + 2 * FG_PAD} ${SZ + 2 * FG_PAD}` : `0 0 ${SZ} ${SZ}`);
   svg.innerHTML = `<defs><clipPath id="oc"><circle cx="${CX}" cy="${CY}" r="${R.toFixed(3)}"/></clipPath></defs>${body}`;
+  svg.style.overflow = fg ? 'visible' : '';   // the box-edge points sit on the viewBox border; let their dots show in full
   svg.toggleAttribute('hidden', false); cv.style.visibility = 'hidden'; $('vec').toggleAttribute('hidden', true); vecOn = false;
   if (fg){ showFloat('geoFloat', 'right'); updateGeoHighlights(); renderGeoPanel(); } else hideFloat('geoFloat');
 }
