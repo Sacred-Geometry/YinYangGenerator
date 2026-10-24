@@ -1380,6 +1380,18 @@ function paintMetal(cv, N, stops, salt, grain, lo){
   });
 }
 
+function addMottle(cv, amt){   // fine multiplicative mottling at leaf scale, so painted foliage does not look flat
+  const N = cv.width, c = cv.getContext('2d'), id = c.getImageData(0, 0, N, N), d = id.data;
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++){ const k = (j * N + i) * 4, u = i / N, v = j / N;
+    const m = 1 + ((tnoise(u, v, 200, 200, 3) - .5) * .55 + (tnoise(u, v, 70, 70, 4) - .5) * .4) * amt; d[k] *= m; d[k+1] *= m; d[k+2] *= m; }
+  c.putImageData(id, 0, 0);
+}
+function addGrain(cv, amt){   // a little sensor grain, so painted pictures do not look airbrushed
+  const N = cv.width, c = cv.getContext('2d'), id = c.getImageData(0, 0, N, N), d = id.data;
+  for (let k = 0, n = 0; k < d.length; k += 4, n++){ const g = (hash2(n, 4242) - .5) * amt; d[k] += g; d[k+1] += g; d[k+2] += g; }
+  c.putImageData(id, 0, 0);
+}
+
 const PRESET_IMAGES = {
   earth:{name:'Earth', title:'Earth from space', paint(cv, N){
     paintPlanet(cv, N, {tilt:.38, spin:2.2, atm:[90, 160, 255], surf(u, v, lat){
@@ -1437,52 +1449,92 @@ const PRESET_IMAGES = {
       return ramp([[0, [128, 84, 34]], [.3, [190, 134, 58]], [.62, [232, 192, 120]], [1, [248, 228, 176]]], clamp(s * .85 + (q - .5) * .5 + .08));
     }});
   }},
-  roses:{big:1, name:'Roses', title:'Roses in bloom, from above', paint(cv, N){
+  roses:{big:1, name:'Roses', title:'Bouquet of roses, from above', paint(cv, N){
+    const pals = {
+      crimson:{dark:'#230107', mid:'#8f0a22', light:'#c61c39', rim:'#dd4558'},
+      ivory:{dark:'#a39482', mid:'#e4d8c6', light:'#f7f0e4', rim:'#fffdf8'},
+      lavender:{dark:'#4a1f58', mid:'#9c74b2', light:'#c9a2d6', rim:'#d63a86'},
+      pink:{dark:'#66143a', mid:'#cc4684', light:'#e888b2', rim:'#fbc3d8'}};
+    const petal = (c, cx, cy, R, a0, span, pal, wob) => {
+      const pt = (a, r) => [cx + Math.cos(a) * r, cy + Math.sin(a) * r], B = pt(a0 + span / 2, R * .1), c1 = pt(a0 - .2, R * .55), c2 = pt(a0 + span + .2, R * .55), s0 = pt(a0, R);
+      const rim = []; for (let t = 0; t <= 24; t++){ const th = a0 + span * t / 24; rim.push(pt(th, R * (1 + wob * (Math.sin(th * 7 + a0 * 5) + .6 * Math.sin(th * 13 + a0 * 2))))); }
+      c.save(); c.shadowColor = 'rgba(0,0,0,.45)'; c.shadowBlur = N * .016; c.shadowOffsetX = N * .002; c.shadowOffsetY = N * .005;
+      c.beginPath(); c.moveTo(B[0], B[1]); c.quadraticCurveTo(c1[0], c1[1], s0[0], s0[1]); rim.forEach(q => c.lineTo(q[0], q[1])); c.quadraticCurveTo(c2[0], c2[1], B[0], B[1]); c.closePath();
+      const g = c.createRadialGradient(cx, cy, R * .15, cx, cy, R * 1.04); g.addColorStop(0, pal.dark); g.addColorStop(.42, pal.mid); g.addColorStop(.8, pal.light); g.addColorStop(1, pal.rim);
+      c.fillStyle = g; c.fill(); c.restore();
+      const fg = c.createLinearGradient(...pt(a0, R * .7), ...pt(a0 + span, R * .7)); fg.addColorStop(0, 'rgba(0,0,0,.34)'); fg.addColorStop(.3, 'rgba(0,0,0,0)'); fg.addColorStop(.75, 'rgba(255,255,255,.08)'); fg.addColorStop(1, 'rgba(0,0,0,.22)');
+      c.fillStyle = fg; c.fill();
+      c.lineWidth = R * .026; c.lineCap = 'round'; for (let t = 0; t < 24; t++){ const q = rim[t], q2 = rim[t + 1], lit = clamp(.5 - (((q[0] - cx) * .6 + (q[1] - cy) * .7) / R) * .9);
+        c.strokeStyle = rgbaA(h2rgb(pal.rim), .12 + .6 * lit); c.beginPath(); c.moveTo(q[0], q[1]); c.lineTo(q2[0], q2[1]); c.stroke(); }
+    };
     paintCtx(cv, N, c => {
-      const rnd = mulberry(2024), g = c.createRadialGradient(.5, .5, 0, .5, .5, .8);
-      g.addColorStop(0, '#1e4a26'); g.addColorStop(1, '#0c2814'); c.fillStyle = g; c.fillRect(0, 0, 1, 1);
-      for (let i = 0; i < 90; i++){          // leaves between the blooms
-        const x = rnd(), y = rnd(), s = .05 + rnd() * .06, a = rnd() * TAU, gr = 34 + rnd() * 50;
-        c.save(); c.translate(x, y); c.rotate(a); c.scale(s, s * .5);
-        const lg = c.createLinearGradient(-1, 0, 1, 0); lg.addColorStop(0, `rgb(${gr * .5},${gr + 30},${gr * .6})`); lg.addColorStop(1, `rgb(${gr * .8},${gr + 80},${gr})`);
-        c.fillStyle = lg; c.beginPath(); c.moveTo(-1, 0); c.quadraticCurveTo(-.2, -1, 1, 0); c.quadraticCurveTo(-.2, 1, -1, 0); c.fill();
-        c.strokeStyle = 'rgba(190,230,160,.35)'; c.lineWidth = .06; c.beginPath(); c.moveTo(-1, 0); c.lineTo(.9, 0); c.stroke(); c.restore();
+      const rnd = mulberry(2024); c.fillStyle = '#06130a'; c.fillRect(0, 0, 1, 1);
+      for (let i = 0; i < 520; i++){          // small glossy leaves behind the blooms
+        const x = rnd() * 1.1 - .05, y = rnd() * 1.1 - .05, len = .035 + rnd() * .045, a = rnd() * TAU, gr = 40 + rnd() * 70;
+        c.save(); c.translate(x, y); c.rotate(a); c.scale(len, len * .42);
+        const lg = c.createLinearGradient(-1, -.6, 1, .6); lg.addColorStop(0, `rgb(${gr * .3},${gr * .85},${gr * .35})`); lg.addColorStop(1, `rgb(${gr * .8},${gr * 1.9},${gr * .8})`);
+        c.fillStyle = lg; c.beginPath(); c.moveTo(-1, 0); c.quadraticCurveTo(-.1, -.7, 1, 0); c.quadraticCurveTo(-.1, .7, -1, 0); c.fill();
+        c.strokeStyle = 'rgba(200,240,170,.25)'; c.lineWidth = .05; c.beginPath(); c.moveTo(-1, 0); c.lineTo(.9, 0); c.stroke(); c.restore();
       }
-      const pals = [['#4e0514', '#b0112e', '#e23a5e'], ['#9a1c4e', '#e8579a', '#ffb6d3'], ['#a8445c', '#f29ab0', '#ffe3ea'], ['#a2640a', '#eeb02c', '#ffe58f'],
-        ['#9a8c84', '#efe4da', '#ffffff'], ['#a63e28', '#f2805a', '#ffc9aa'], ['#4e0514', '#b0112e', '#e23a5e'], ['#9a1c4e', '#e8579a', '#ffb6d3']];
-      const pts = []; for (let t = 0; t < 900 && pts.length < 28; t++){ const r = .075 + rnd() * .06, x = rnd() * 1.1 - .05, y = rnd() * 1.1 - .05;
-        if (pts.every(p => Math.hypot(p.x - x, p.y - y) > (p.r + r) * .74)) pts.push({x, y, r, pal:pals[Math.floor(rnd() * pals.length)], a:rnd() * TAU}); }
+      const kinds = ['crimson', 'crimson', 'crimson', 'crimson', 'crimson', 'ivory', 'ivory', 'ivory', 'ivory', 'lavender', 'lavender', 'lavender', 'pink'];
+      const pts = []; for (let t = 0; t < 2500 && pts.length < 22; t++){ const R = .125 + rnd() * .075, x = rnd() * 1.04 - .02, y = rnd() * 1.04 - .02;
+        if (pts.every(q => Math.hypot(q.x - x, q.y - y) > (q.R + R) * .7)) pts.push({x, y, R, pal:pals[kinds[Math.floor(rnd() * kinds.length)]], a:rnd() * TAU}); }
+      pts.sort((p, q) => p.y - q.y);
       for (const p of pts){
-        const sg = c.createRadialGradient(p.x + p.r * .06, p.y + p.r * .1, p.r * .6, p.x, p.y, p.r * 1.22); sg.addColorStop(0, 'rgba(0,0,0,.6)'); sg.addColorStop(1, 'rgba(0,0,0,0)');
-        c.fillStyle = sg; c.beginPath(); c.arc(p.x, p.y, p.r * 1.22, 0, TAU); c.fill();
-        const layers = 6;
-        for (let L = 0; L < layers; L++){
-          const lr = p.r * (1 - L * .155), n = L < 2 ? 6 : L < 4 ? 5 : 4;
-          for (let j = 0; j < n; j++){
-            const ang = p.a + L * 2.4 + j * TAU / n + (rnd() - .5) * .3, d = lr * (.5 - L * .02);
-            c.save(); c.translate(p.x + Math.cos(ang) * d, p.y + Math.sin(ang) * d); c.rotate(ang); c.scale(lr * .6, lr * .52);
-            const pg = c.createLinearGradient(-1, 0, 1, 0); pg.addColorStop(0, p.pal[0]); pg.addColorStop(.55, p.pal[1]); pg.addColorStop(1, p.pal[2]);
-            c.fillStyle = pg; c.beginPath(); c.arc(0, 0, 1, 0, TAU); c.fill();
-            c.strokeStyle = 'rgba(0,0,0,.28)'; c.lineWidth = .05; c.stroke(); c.restore();
-          }
+        c.save(); c.shadowColor = 'rgba(0,0,0,.8)'; c.shadowBlur = N * .05; c.shadowOffsetY = N * .014; c.fillStyle = '#000'; c.beginPath(); c.arc(p.x, p.y, p.R * .86, 0, TAU); c.fill(); c.restore();
+        for (let L = 0; L < 7; L++){
+          const R = p.R * (1 - L * .14) * (.96 + .08 * rnd()), n = L < 2 ? 4 : L < 5 ? 3 : 2;
+          for (let j = 0; j < n; j++) petal(c, p.x, p.y, R, p.a + L * 2.39996 + j * TAU / n + (rnd() - .5) * .4, TAU / n * (1.15 + .6 * rnd()), p.pal, .045);
         }
-        c.strokeStyle = rgbaA(h2rgb(p.pal[0]), .7); c.lineWidth = p.r * .03; c.beginPath();
-        for (let t = 0; t < 14; t += .2){ const rr = p.r * .02 * t, a = p.a + t * 1.1; t ? c.lineTo(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr) : c.moveTo(p.x, p.y); } c.stroke();
+        c.strokeStyle = rgbaA(h2rgb(p.pal.dark), .8); c.lineWidth = p.R * .02; c.beginPath();
+        for (let t = 0; t < 12; t += .25){ const rr = p.R * .02 * t, a = p.a + t * 1.2; t ? c.lineTo(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr) : c.moveTo(p.x, p.y); } c.stroke();
+        c.save(); c.beginPath(); c.arc(p.x, p.y, p.R * 1.02, 0, TAU); c.clip();      // one light for the whole bloom
+        const lg = c.createLinearGradient(p.x - p.R * .7, p.y - p.R * .8, p.x + p.R * .7, p.y + p.R * .8); lg.addColorStop(0, 'rgba(255,255,255,.2)'); lg.addColorStop(.5, 'rgba(255,255,255,0)'); lg.addColorStop(1, 'rgba(0,0,0,.28)');
+        c.fillStyle = lg; c.fillRect(p.x - p.R, p.y - p.R, p.R * 2, p.R * 2); c.restore();
       }
     });
+    addGrain(cv, 7);
   }},
-  canopy:{name:'Canopy', title:'Forest canopy, from above', paint(cv, N){
-    const G = 12, G2 = 17, pal = [[46, 98, 34], [62, 120, 38], [34, 78, 44], [84, 134, 46], [110, 150, 52], [28, 64, 40], [70, 110, 30], [150, 170, 60]];
-    paintUV(cv, N, (u, v) => {
-      const x2 = u * G2 + (tf(u, v, 34, 34, 2, 5) - .5) * .5, y2 = v * G2 + (tf(u, v, 34, 34, 2, 6) - .5) * .5, c2 = cellAt(x2, y2, G2, 11, .85);
-      const k2 = (.16 + .34 * (1 - Math.pow(clamp(c2.F1 / .7), 2))) * (.8 + .4 * tf(u, v, 60, 60, 2, 12)), p2 = pal[Math.floor(c2.id * 7.99)];
-      const x = u * G + (tf(u, v, 24, 24, 2, 3) - .5) * .5, y = v * G + (tf(u, v, 24, 24, 2, 4) - .5) * .5;
-      const ce = cellAt(x, y, G, 3, .85), w = .7 + .6 * ce.id, F1 = ce.F1 / w, lump = (tf(u, v, 36, 36, 3, 7) - .5) * .34;
-      const crown = smooth(.66 + lump, .52 + lump, F1), dir = ((x - ce.cx) * -.6 + (y - ce.cy) * -.7) / w;
-      const b = .44 + .62 * (1 - Math.pow(clamp(F1 / .62), 2)) + .3 * dir + (tf(u, v, 80, 80, 2, 9) - .5) * .95 - .42 * smooth(.3, .62, F1);
-      const col = pal[Math.floor(ce.id * 7.99)], k = clamp(b * 1.3, 0, 1.7), sh = .55 + .45 * smooth(.5, .95, F1);
-      return mixRGB([p2[0] * k2 * sh, p2[1] * k2 * sh, p2[2] * k2 * sh], [col[0] * k + 4, col[1] * k + 6, col[2] * k + 3], crown);
+  canopy:{big:1, name:'Canopy', title:'Forest canopy, from above', paint(cv, N){
+    const greens = [[38, 98, 30], [54, 120, 36], [70, 134, 40], [92, 148, 46], [30, 78, 38], [112, 156, 52], [60, 110, 44]], autumn = [[226, 180, 44], [236, 152, 36], [226, 124, 40], [204, 168, 56], [240, 202, 78]];
+    const firs = [[20, 62, 34], [28, 78, 40], [36, 92, 46], [16, 52, 34]], dot = (c, x, y, r) => { c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); };
+    paintCtx(cv, N, c => {
+      const rnd = mulberry(88), field = (x, y) => tf(x, y, 3, 3, 3, 33);
+      c.fillStyle = '#06110a'; c.fillRect(0, 0, 1, 1);
+      for (let i = 0; i < 1400; i++){ c.fillStyle = `rgba(${10 + rnd() * 20},${30 + rnd() * 40},${14 + rnd() * 20},.7)`; dot(c, rnd(), rnd(), .004 + rnd() * .012); }
+      const trees = []; for (let i = 0; i < 1000; i++){ const r = .014 + Math.pow(rnd(), 2.2) * .07, x = rnd() * 1.06 - .03, y = rnd() * 1.06 - .03, f = field(x, y), q = rnd();
+        trees.push({x, y, r, kind:q < .025 ? 'dead' : q < .4 ? 'fir' : 'leaf', autumn:(f > .64 && rnd() < .8) || rnd() < .025, z:r + rnd() * .025}); }
+      trees.sort((a, b) => a.z - b.z);
+      for (const t of trees){
+        c.fillStyle = 'rgba(0,0,0,.34)'; dot(c, t.x + t.r * .2, t.y + t.r * .28, t.r * 1.02);
+        if (t.kind === 'leaf'){
+          const pal = t.autumn ? autumn : greens, base = pal[Math.floor(rnd() * pal.length)], ph = rnd() * TAU, lob = 4 + Math.floor(rnd() * 4);
+          const edge = (th) => t.r * (.88 + .14 * Math.sin(th * lob + ph));
+          c.fillStyle = rgbs(base.map(v => v * .42)); c.beginPath();
+          for (let k = 0; k < 28; k++){ const th = k / 28 * TAU, rr = edge(th) * (1 + .05 * (rnd() - .5)); k ? c.lineTo(t.x + Math.cos(th) * rr, t.y + Math.sin(th) * rr) : c.moveTo(t.x + Math.cos(th) * rr, t.y + Math.sin(th) * rr); }
+          c.closePath(); c.fill();
+          const n = 40 + Math.round(t.r * t.r * 70000);
+          for (let i = 0; i < n; i++){ const a = rnd() * TAU, d = Math.sqrt(rnd()), px = t.x + Math.cos(a) * d * edge(a) * .96, py = t.y + Math.sin(a) * d * edge(a) * .96;
+            const lit = clamp(.5 - ((px - t.x) * .6 + (py - t.y) * .7) / t.r * .5 + (1 - d) * .15), k = .4 + .95 * lit + (rnd() - .5) * .5, sz = t.r * (.045 + .05 * rnd());
+            c.fillStyle = rgbaA(base.map(v => v * k), .9); dot(c, px, py, sz); }
+        } else if (t.kind === 'fir'){
+          const col = firs[Math.floor(rnd() * firs.length)], n = 30 + Math.round(t.r * 420), a0 = rnd() * TAU;
+          c.fillStyle = rgbs(col.map(v => v * .8)); dot(c, t.x, t.y, t.r * .45);
+          for (let i = 0; i < n; i++){ const a = a0 + i * TAU / n + (rnd() - .5) * .14, l = t.r * (.74 + rnd() * .4), w = t.r * .13, ca = Math.cos(a), sa = Math.sin(a), lit = Math.max(0, -(ca * .6 + sa * .7));
+            c.fillStyle = rgbs(col.map(v => v * (.85 + .5 * lit + .25 * rnd()))); c.beginPath(); c.moveTo(t.x - sa * w, t.y + ca * w); c.lineTo(t.x + ca * l, t.y + sa * l); c.lineTo(t.x + sa * w, t.y - ca * w); c.closePath(); c.fill();
+            c.strokeStyle = rgbaA(mixRGB(col, [160, 206, 120], .4 + .4 * lit), .35 + .4 * lit); c.lineWidth = t.r * .028; c.beginPath(); c.moveTo(t.x + ca * l * .25, t.y + sa * l * .25); c.lineTo(t.x + ca * l, t.y + sa * l); c.stroke(); }
+        } else {
+          const n = 16 + Math.round(t.r * 160), a0 = rnd() * TAU, r2 = mulberry(Math.floor(t.x * 997 + t.y * 31));
+          for (const pass of [0, 1]){ c.strokeStyle = pass ? 'rgba(206,206,196,.85)' : 'rgba(0,0,0,.3)'; c.lineWidth = t.r * (pass ? .04 : .065); c.beginPath();
+            const ox = pass ? 0 : t.r * .05, oy = pass ? 0 : t.r * .08;
+            for (let i = 0; i < n; i++){ const a = a0 + i * TAU / n + (r2() - .5) * .3, l = t.r * (.8 + r2() * .8), ca = Math.cos(a), sa = Math.sin(a), mx = t.x + ca * l * .55 + ox, my = t.y + sa * l * .55 + oy;
+              c.moveTo(t.x + ox, t.y + oy); c.lineTo(t.x + ca * l + ox, t.y + sa * l + oy);
+              for (const sg of [-1, 1]){ const b = a + sg * .6; c.moveTo(mx, my); c.lineTo(mx + Math.cos(b) * l * .35, my + Math.sin(b) * l * .35); } }
+            c.stroke(); }
+        }
+      }
     });
+    addMottle(cv, .9); addGrain(cv, 7);
   }},
   sky:{name:'Blue sky', title:'Clouds on a blue sky', paint(cv, N){
     paintClouds(cv, N, {salt:31, lo:.46, hi:.66, light:[-.5, -.85], sky:[[0, [30, 92, 196]], [1, [132, 188, 240]]],
@@ -1502,16 +1554,31 @@ const PRESET_IMAGES = {
       return ramp(st, clamp(.66 - .1 * (sx * .8 + sy * .55) + (hash2(i, j) - .5) * .05));
     });
   }},
-  granite:{name:'Granite', title:'Polished granite', paint(cv, N){
-    const cls = [[232, 228, 218], [200, 142, 126], [136, 136, 142], [26, 26, 30]];
+  granite:{name:'Granite', full:640, title:'Polished red granite', paint(cv, N){
+    const salmon = [[182, 90, 74], [170, 80, 66], [196, 108, 88], [156, 70, 58]];
     paintUV(cv, N, (u, v, i, j) => {
-      const a = cellAt(u * 44, v * 44, 44, 2, .85), r = a.id, k = r < .3 ? 0 : r < .56 ? 1 : r < .8 ? 2 : 3;
-      let c = cls[k].map(x => x * (.88 + .22 * hash2(Math.floor(a.id * 9973), 3)));
-      const b = cellAt(u * 120, v * 120, 120, 9, .9);
-      if (b.id > .86) c = mixRGB(c, [14, 14, 18], .7); else if (b.id < .06) c = mixRGB(c, [250, 248, 240], .6);
-      c = mixRGB(c, [60, 56, 56], (1 - smooth(0, .14, a.F2 - a.F1)) * .3);
-      const sheen = Math.pow(.5 + .5 * Math.sin(TAU * (u + v) + tf(u, v, 2, 2, 3, 17) * 4), 6) * .34 + (hash2(i, j) - .5) * .04;
-      return mixRGB(c, WHITE, clamp(sheen));
+      const wx = (tf(u, v, 12, 12, 2, 8) - .5) * .8, wy = (tf(u, v, 12, 12, 2, 18) - .5) * .8, x = u * 15 + wx, y = v * 15 + wy, cr = cellAt(x, y, 15, 7, .9);
+      const rad = .5 + .3 * hash2(Math.floor(cr.id * 977), 1), inside = cr.id < .74 ? smooth(rad, rad - .1, cr.F1 + (tf(u, v, 48, 48, 2, 3) - .5) * .14) : 0, sp = hash2(i, j);
+      let c = null;
+      if (inside < .999){     // the fine grey grain between the big crystals
+        const m = cellAt(u * 100, v * 100, 100, 5, .9), cl = tf(u, v, 5, 5, 3, 31), q = m.id * .7 + (cl - .5) * .5 + .15;
+        c = q < .3 ? [62, 70, 84] : q < .6 ? [100, 112, 128] : q < .82 ? [134, 142, 154] : [178, 178, 182];
+        c = mixRGB(c, [108, 118, 132], .3);
+        if (sp > .975) c = mixRGB(c, [226, 224, 224], .45); else if (sp < .025) c = mixRGB(c, [26, 28, 36], .5);
+        c = c.map(z => z * (.9 + .2 * tf(u, v, 110, 110, 2, 12)));
+        const mq = cellAt(u * 40, v * 40, 40, 9, .9);
+        if (mq.id > .8 && mq.F1 < .36) c = mixRGB(c, [224, 220, 218], smooth(.36, .16, mq.F1) * .7);
+        else if (mq.id < .12 && mq.F1 < .3) c = mixRGB(c, [24, 26, 32], smooth(.3, .12, mq.F1) * .8);
+      }
+      if (inside > 0){        // a big pink-red feldspar crystal
+        const a = cr.id * 18.85, st = Math.sin(((x - cr.cx) * Math.cos(a) + (y - cr.cy) * Math.sin(a)) * 50 + tf(u, v, 30, 30, 2, 5) * 5);
+        let k = salmon[Math.floor(cr.id * 6.6) % 4].map(z => z * (.88 + .24 * tf(u, v, 90, 90, 2, 12) + .03 * st));
+        k = mixRGB(k, [220, 146, 126], smooth(.55, .85, tf(u, v, 30, 30, 2, 2)) * .4);
+        k = mixRGB([84, 66, 68], k, .55 + .45 * smooth(.0, .08, rad - cr.F1));
+        c = c ? mixRGB(c, k, inside) : k;
+      }
+      const sh = .94 + .12 * tf(u, v, 2, 2, 2, 17) + (sp - .5) * .05;
+      return [c[0] * sh, c[1] * sh, c[2] * sh];
     });
   }},
   gold:{name:'Gold', title:'Smooth gold', paint(cv, N){
@@ -1537,58 +1604,56 @@ const PRESET_IMAGES = {
       return mixRGB(c, [255, 240, 214], clamp(gl + (hash2(i, j) - .5) * .02));
     });
   }},
-  jewels:{big:1, name:'Jewels', title:'Cut jewels', paint(cv, N){
+  jewels:{big:1, name:'Jewels', title:'A heap of cut gemstones', paint(cv, N){
     const ring = (n, f) => Array.from({length:n}, (_, i) => f(i / n * TAU));
     const sub = (P, k) => { const o = []; P.forEach((p, i) => { const q = P[(i + 1) % P.length]; for (let m = 0; m < k; m++) o.push([p[0] + (q[0] - p[0]) * m / k, p[1] + (q[1] - p[1]) * m / k]); }); return o; };
     const sgn = Math.sign, cuts = {
       round:{pts:ring(16, t => [Math.cos(t), Math.sin(t)])},
-      oval:{pts:ring(16, t => [Math.cos(t), .7 * Math.sin(t)])},
+      oval:{pts:ring(16, t => [Math.cos(t), .72 * Math.sin(t)])},
       cushion:{pts:ring(16, t => [sgn(Math.cos(t)) * Math.pow(Math.abs(Math.cos(t)), .62) * .93, sgn(Math.sin(t)) * Math.pow(Math.abs(Math.sin(t)), .62) * .93])},
       princess:{pts:sub([[-.7, -.7], [.7, -.7], [.7, .7], [-.7, .7]], 2)},
       trillion:{pts:sub([[0, -1], [.87, .5], [-.87, .5]], 3)},
       pear:{pts:ring(20, t => { const y = -Math.cos(t), w = .14 + .56 * smooth(-1, .9, y); return [Math.sin(t) * w * 1.25, y * .95]; })},
-      marquise:{pts:[...Array.from({length:10}, (_, i) => { const s = -1 + i * .2; return [.5 * Math.pow(1 - Math.pow(Math.abs(s), 1.7), 1), s]; }), ...Array.from({length:10}, (_, i) => { const s = 1 - i * .2; return [-.5 * Math.pow(1 - Math.pow(Math.abs(s), 1.7), 1), s]; })]},
+      marquise:{pts:[...Array.from({length:10}, (_, i) => { const s = -1 + i * .2; return [.5 * (1 - Math.pow(Math.abs(s), 1.7)), s]; }), ...Array.from({length:10}, (_, i) => { const s = 1 - i * .2; return [-.5 * (1 - Math.pow(Math.abs(s), 1.7)), s]; })]},
       heart:{pts:ring(24, t => [16 * Math.pow(Math.sin(t), 3) / 17, -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 17 + .08])},
       emerald:{step:1, pts:[[-.4, -.95], [.4, -.95], [.72, -.62], [.72, .62], [.4, .95], [-.4, .95], [-.72, .62], [-.72, -.62]]},
       baguette:{step:1, pts:[[-.24, -.96], [.24, -.96], [.32, -.88], [.32, .88], [.24, .96], [-.24, .96], [-.32, .88], [-.32, -.88]]},
     };
     for (const k in cuts){ const P = cuts[k].pts, cx = P.reduce((s, p) => s + p[0], 0) / P.length, cy = P.reduce((s, p) => s + p[1], 0) / P.length; cuts[k].pts = P.map(p => [p[0] - cx, p[1] - cy]); }
-    const cols = {ruby:[206, 22, 54], sapphire:[30, 74, 204], emerald:[18, 156, 86], amethyst:[146, 74, 210], topaz:[255, 172, 42], aqua:[74, 208, 228], diamond:[232, 240, 255],
-      rose:[240, 112, 170], peridot:[152, 208, 52], garnet:[152, 24, 42], citrine:[250, 202, 44], tanzanite:[92, 72, 214]};
-    const shade = (col, b) => b < .5 ? mixRGB(col.map(x => x * .16), col, b * 2) : mixRGB(col, mixRGB(col, WHITE, .86), (b - .5) * 2);
+    const cols = [[132, 50, 196], [132, 50, 196], [176, 16, 44], [128, 16, 34], [128, 16, 34], [24, 62, 190], [24, 62, 190], [14, 140, 76], [136, 192, 44], [236, 160, 36], [232, 188, 36], [66, 46, 38], [84, 62, 200], [44, 150, 190], [214, 228, 238], [214, 100, 150]];
+    const shade = (col, b) => b > 1 ? mixRGB(col, WHITE, .9) : b < .5 ? mixRGB(col.map(x => x * .05), col, Math.pow(b * 2, 1.15)) : mixRGB(col, mixRGB(col, WHITE, .55), Math.pow((b - .5) * 2, 1.7));
     paintCtx(cv, N, c => {
-      const rnd = mulberry(7), bg = c.createRadialGradient(.5, .45, 0, .5, .5, .8);
-      bg.addColorStop(0, '#1b1c3a'); bg.addColorStop(1, '#06060f'); c.fillStyle = bg; c.fillRect(0, 0, 1, 1);
-      const radii = [.15, .135, .12, .11, .105, .1, .095, .09, .085, .08, .075, .07, .066, .062, .058, .054, .05, .047, .044, .04, .037, .034, .031, .028, .026, .024, .022, .02, .018, .016];
-      const ckeys = Object.keys(cuts), gkeys = Object.keys(cols), placed = [];
-      radii.forEach((r, n) => { for (let t = 0; t < 500; t++){ const x = .02 + rnd() * .96, y = .02 + rnd() * .96;
-        if (placed.every(p => Math.hypot(p.x - x, p.y - y) > (p.r + r) * 1.06 + .004)){ placed.push({x, y, r, cut:cuts[ckeys[n % ckeys.length]], col:cols[gkeys[(n * 5 + 3) % gkeys.length]], a:rnd() * TAU}); break; } } });
-      for (const g of placed){
-        const gl = c.createRadialGradient(g.x, g.y, g.r * .3, g.x, g.y, g.r * 1.9); gl.addColorStop(0, rgbaA(g.col, .26)); gl.addColorStop(1, rgbaA(g.col, 0));
-        c.fillStyle = gl; c.beginPath(); c.arc(g.x, g.y, g.r * 1.9, 0, TAU); c.fill();
-        c.save(); c.translate(g.x, g.y); c.scale(g.r, g.r);
-        c.save(); c.translate(.1, .16); c.rotate(g.a); c.fillStyle = 'rgba(0,0,0,.55)'; c.beginPath(); g.cut.pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.fill(); c.restore();
-        c.rotate(g.a);
-        const P = g.cut.pts, n = P.length, rings = g.cut.step ? [1, .8, .62, .44] : [1, .58], R = rings.map(s => P.map(p => [p[0] * s, p[1] * s])), Lth = -2.3 - g.a;
-        const poly = (pts, col) => { c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath(); c.fillStyle = c.strokeStyle = rgbs(col); c.lineWidth = .014; c.fill(); c.stroke(); };
+      const rnd = mulberry(7); c.fillStyle = '#0b0710'; c.fillRect(0, 0, 1, 1);
+      const ckeys = Object.keys(cuts), gems = [];
+      for (let i = 0; i < 380; i++){
+        const r = .034 + .062 * Math.pow(rnd(), 1.5), chip = rnd() < .14, cut = cuts[ckeys[Math.floor(rnd() * ckeys.length)]], nn = 5 + Math.floor(rnd() * 4);
+        const pts = chip ? Array.from({length:nn}, (_, k) => { const t = k / nn * TAU, rr = .72 + .32 * rnd(); return [Math.cos(t) * rr, Math.sin(t) * rr]; }) : cut.pts;
+        gems.push({x:rnd() * 1.08 - .04, y:rnd() * 1.08 - .04, r, pts, step:!chip && !!cut.step, col:cols[Math.floor(rnd() * cols.length)].map(x => x * (.85 + .3 * rnd())), a:rnd() * TAU, sq:.7 + .3 * rnd()});
+      }
+      for (const g of gems){
+        c.save(); c.translate(g.x, g.y); c.rotate(g.a); c.scale(g.r, g.r * g.sq);
+        const P = g.pts, n = P.length, big = g.r > .055, rings = g.step ? [1, .8, .62, .44] : big ? [1, .78, .56] : [1, .56], R = rings.map(s => P.map(p => [p[0] * s, p[1] * s])), Lth = -2.3 - g.a;
+        c.shadowColor = 'rgba(0,0,0,.7)'; c.shadowBlur = N * .014; c.shadowOffsetX = N * .003; c.shadowOffsetY = N * .007; c.fillStyle = rgbs(g.col.map(x => x * .2));
+        c.beginPath(); P.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath(); c.fill(); c.shadowColor = 'transparent';
+        const poly = (pts, col) => { c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath(); c.fillStyle = c.strokeStyle = rgbs(col); c.lineWidth = .02; c.fill(); c.stroke(); };
         for (let ri = 0; ri < rings.length - 1; ri++) for (let i = 0; i < n; i++){
           const i2 = (i + 1) % n, a = R[ri][i], b = R[ri][i2], b2 = R[ri + 1][i2], a2 = R[ri + 1][i];
-          const th = Math.atan2((a[1] + b[1]) / 2, (a[0] + b[0]) / 2), base = .5 + .5 * Math.cos(th - Lth) * .9 + (ri % 2 ? -.1 : .06);
-          const fb = () => rnd() > .93 ? 1 : clamp(base + (rnd() - .5) * .55);
-          if (!g.cut.step && ri === 0){ poly([a, b, b2], shade(g.col, fb())); poly([a, b2, a2], shade(g.col, fb())); }
+          const th = Math.atan2((a[1] + b[1]) / 2, (a[0] + b[0]) / 2), base = .5 + .5 * Math.cos(th - Lth) * .95 + (ri % 2 ? -.12 : .05);
+          const fb = () => rnd() > .93 ? 1.1 : clamp(base + (rnd() - .5) * .8);
+          if (!g.step && ri < rings.length - 1){ const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; poly([a, m, b2, a2], shade(g.col, fb())); poly([m, b, b2], shade(g.col, fb())); }
           else poly([a, b, b2, a2], shade(g.col, fb()));
         }
         const T = R[rings.length - 1];
-        if (g.cut.step){ const tg = c.createLinearGradient(-.4, -.5, .4, .5); tg.addColorStop(0, rgbs(shade(g.col, .85))); tg.addColorStop(.5, rgbs(shade(g.col, .4))); tg.addColorStop(1, rgbs(shade(g.col, .7)));
+        if (g.step){ const tg = c.createLinearGradient(-.4, -.5, .4, .5); tg.addColorStop(0, rgbs(shade(g.col, .9))); tg.addColorStop(.45, rgbs(shade(g.col, .3))); tg.addColorStop(1, rgbs(shade(g.col, .75)));
           c.beginPath(); T.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath(); c.fillStyle = tg; c.fill(); }
-        else for (let i = 0; i < n; i++) poly([[0, 0], T[i], T[(i + 1) % n]], shade(g.col, clamp(.42 + .5 * rnd() + (i % 2 ? .08 : -.05))));
-        c.beginPath(); P.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath(); c.strokeStyle = 'rgba(0,0,0,.4)'; c.lineWidth = .03; c.stroke();
-        c.strokeStyle = rgbaA(shade(g.col, .95), .5); c.lineWidth = .014; c.stroke();
+        else for (let i = 0; i < n; i++) poly([[0, 0], T[i], T[(i + 1) % n]], shade(g.col, rnd() > .94 ? 1.1 : .08 + rnd() * .72));
+        c.beginPath(); P.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath(); c.strokeStyle = 'rgba(255,255,255,.22)'; c.lineWidth = .03; c.stroke();
+        const hg = c.createRadialGradient(-.3, -.35, 0, -.3, -.35, .5); hg.addColorStop(0, 'rgba(255,255,255,.36)'); hg.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = hg; c.beginPath(); P.forEach((p, i) => i ? c.lineTo(p[0] * .7, p[1] * .7) : c.moveTo(p[0] * .7, p[1] * .7)); c.fill();
         c.restore();
-        if (g.r > .045){ const s = g.r * .26; c.save(); c.translate(g.x - g.r * .28, g.y - g.r * .34); c.fillStyle = 'rgba(255,255,255,.9)'; c.beginPath();
-          c.moveTo(0, -s); c.quadraticCurveTo(0, 0, s, 0); c.quadraticCurveTo(0, 0, 0, s); c.quadraticCurveTo(0, 0, -s, 0); c.quadraticCurveTo(0, 0, 0, -s); c.fill(); c.restore(); }
       }
+      const vg = c.createRadialGradient(.5, .5, .35, .5, .5, .85); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.35)'); c.fillStyle = vg; c.fillRect(0, 0, 1, 1);
     });
+    addGrain(cv, 6);
   }},
   circuit:{big:1, name:'Circuit', title:'Circuit board', paint(cv, N){
     paintCtx(cv, N, (c, N) => {
@@ -1644,7 +1709,7 @@ function presetThumb(key){
 const isPresetImg = id => typeof id === 'string' && id.startsWith('pre-') && !!PRESET_IMAGES[id.slice(4)];
 function ensurePresetImage(key){
   const id = 'pre-' + key; if (IMAGES.has(id)) return IMAGES.get(id);
-  const cv = document.createElement('canvas'); PRESET_IMAGES[key].paint(cv, PRESET_IMAGES[key].big ? 1024 : PRESET_FULL);
+  const cv = document.createElement('canvas'); PRESET_IMAGES[key].paint(cv, PRESET_IMAGES[key].full || (PRESET_IMAGES[key].big ? 1024 : PRESET_FULL));
   const th = presetThumb(key), px = th.getContext('2d').getImageData(0, 0, th.width, th.height).data; let r = 0, g = 0, b = 0;
   for (let i = 0; i < px.length; i += 4){ r += px[i]; g += px[i + 1]; b += px[i + 2]; }
   const n = px.length / 4, e = {src:cv, url:th.toDataURL('image/png'), name:PRESET_IMAGES[key].name, avg:rgb2h(r / n, g / n, b / n), preset:true};
@@ -3267,10 +3332,13 @@ function refreshSlot(k){
   row.querySelector('small').textContent = `${fillDesc(f)} · ${s.note}`;
 }
 function toggleSlot(k){
-  const host = $('slots');
+  const host = $('slots'), row0 = host.querySelector(`[data-slot="${k}"]`), top0 = row0.getBoundingClientRect().top;
   host.querySelectorAll('.slot').forEach(r => { const on = r.dataset.slot === k && openSlot !== k; r.classList.toggle('open', on); r.querySelector('.slot-h').setAttribute('aria-expanded', on); const ed = r.querySelector('.slot-ed'); ed.hidden = !on; if (!on) ed.innerHTML = ''; });
   openSlot = openSlot === k ? null : k;
   if (openSlot) buildEditor(k);
+  // The editor that was open above this row has just collapsed, which would slide the row (and Export below it) up the panel. Hold the row where it was.
+  const dy = row0.getBoundingClientRect().top - top0, pn = document.querySelector('.panel');
+  if (dy) (pn.scrollHeight > pn.clientHeight + 1 && getComputedStyle(pn).overflowY !== 'visible' ? pn : document.scrollingElement).scrollTop += dy;
 }
 function buildEditor(k){
   const row = $('slots').querySelector(`[data-slot="${k}"]`), ed = row.querySelector('.slot-ed'), f = getFill(k);
